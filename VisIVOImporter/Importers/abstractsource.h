@@ -1,0 +1,72 @@
+/***************************************************************************
+ *   Copyright (C) 2008 by Gabriella Caniglia, Marco Comparato *
+ *  gabriella.caniglia@oact.inaf.it *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+#ifndef ABSTRACTSOURCE_H
+#define ABSTRACTSOURCE_H
+
+#include <string>
+#include <vector>
+
+
+
+class AbstractSource
+{
+   static const  int MAX_INT;
+
+  public:
+    AbstractSource();
+
+    void setPointsFileName(const char* fileName, const char* binaryName, 
+			   const char* tableOrVolume, double size[], 
+			   double comput[], const char* file, const char* endian, 
+			   const char* type, long unsigned int points, 
+			   const char* login, const char* binaryHeader, 
+			   float missing, float text, std::string datasetdList,
+			   std::vector<std::string> hyperslab);
+
+    void setPointsFileName(const char *fileName,const char *binaryName);
+//     void releaseResources();
+
+    virtual int readHeader() = 0;
+    virtual int readData() = 0;
+
+  protected:
+   static const unsigned int MAX_LOAD;
+   float MISSING_VALUE; //! a negative value used in case of missing data
+   float TEXT_VALUE; //! a negative value used in case of ascii text
+   std::string m_pointsFileName;
+    std::string m_pointsBinaryName;
+    unsigned long long int m_nRows;
+    int m_nCols;
+
+    std::vector<std::string> m_fieldNames;  //!column List
+    std::string m_volumeOrTable;
+    std::string m_type;
+    std::string m_endian;
+    std::string m_login;
+    std::string m_binaryHeader;
+    std::string m_datasetList;
+    double m_cellSize[3], m_cellComp[3];
+    int maxInt(){return MAX_INT;};
+    std::vector<std::string>  m_hyperslab;
+
+};
+
+#endif

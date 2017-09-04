@@ -1,0 +1,7 @@
+JobType        = "NORMAL";
+Executable     = "VisIVO_testGLite.sh";
+StdOutput      = "VisIVO_testGLite.out";
+StdError       = "VisIVO_testGLite.err";
+InputSandbox   = {"VisIVO_testGLite.sh","cycle.par"};
+OutputSandbox  = {"VisIVO_testGLite.out","VisIVO_testGLite.err"};
+Requirements   = other.GlueCEUniqueID == "inaf-ce-01.ct.pi2s2.it:8443/cream-lsf-short";

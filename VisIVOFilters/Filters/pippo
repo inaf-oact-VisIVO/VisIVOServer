@@ -1,0 +1,190 @@
+20d19
+< #include <cstdlib>
+23,25c22,25
+< #include<sstream>
+< #include<string>
+< 
+---
+> #include <sstream>
+> #include <string>
+> #include <cstdlib>
+> #include <cstring>
+46,47d45
+< #include "vsmoduleop.h"
+< 
+48a47,48
+> #include "vsmoduleop.h"
+> #include "vssigmacontoursop.h"
+73,77d72
+< 		if(i+1>=argc)
+< 		{
+< 			std::cerr<<"Invalid options"<<std::endl;
+< 			exit(1);
+< 		}	
+131c126
+<     std::clog<<"VisIVOFilters version 1.0.0.5  July 10th 2009 "<<std::endl<<std::endl;
+---
+>     std::clog<<"VisIVOFilters version 1.0.0.3 April 29th 2009 "<<std::endl<<std::endl;
+133c128
+<     std::cerr <<"valid operations: randomizer selcolumns merge append selfield mathop decimator extraction visualop showtable statistic pointdistribute pointproperty coarsevolume extractsubvolume interpolate moduleop"<<std::endl;
+---
+>     std::cerr <<"valid operations: randomizer selcolumns merge append selfield mathop decimator extraction visualop showtable statistic pointdistribute pointproperty coarsevolume extractsubvolume interpolate module sigmacontours"<<std::endl;
+157a153,154
+> if(sstreamOp.str()=="sigmacontours") idOp=19;
+> 
+351c348
+<   VSDecimatorTableOp op;
+---
+>   VSDecimatorOp op;
+353c350
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+377c374
+< VSDecimatorTableOp op;
+---
+> VSDecimatorOp op;
+392c389
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+409c406
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+446c443
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+520c517
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+557c554
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+594c591
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+631c628
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+670c667
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+707c704
+<   return 1;
+---
+>   return EXIT_SUCCESS;
+715d711
+< /*** END Merge Tables OP **/
+718,729c714,751
+< iter =appParameters.find("help");
+< if( iter != appParameters.end())
+< {
+<   VSModuleOp op;
+<   op.printHelp();
+<   return 1;
+< }
+< iter =appParameters.find("file");
+< if( iter == appParameters.end())
+< {
+<     std::cerr <<"No input file table is provided"<<std::endl;
+<     return 1;
+---
+> 	iter =appParameters.find("help");
+>   if( iter != appParameters.end()){
+>   	VSModuleOp op;
+>   	op.printHelp();
+>   	return EXIT_SUCCESS;
+>   }
+>   
+>   /*
+>   iter =appParameters.find("pippo");
+>   if( iter != appParameters.end()){
+>   	VSModuleOp op;
+>   	op.PippoPippo();
+>   	return EXIT_SUCCESS;
+>   }
+>   */
+>   std::cout<<"Instanciate VSModuleOp"<<std::endl;  
+>     
+> 	VSModuleOp op;
+> 	op.setParameters(appParameters);
+> 	iter= appParameters.find("file");
+> 	if(iter==appParameters.end()){
+> 		std::cerr<<"No input file table is provided!"<<std::endl;
+> 		return 1;
+> 	}//close if
+> 	std::stringstream sFilename(iter->second);
+> 	appParameters.erase(iter);
+> 	sFilename>>filename;
+> 	if(filename.find(".bin") == std::string::npos) filename.append(".bin");
+> 	VSTable table(filename);
+> 	if(!table.tableExist()){
+> 		std::cerr<<"No valid input file table is provided"<<std::endl;
+> 		return 1;
+> 	}
+> 	
+> 	op.addInput(&table);
+> 	op.execute();
+> 
+> break;
+731,745c753,783
+< std::stringstream sFilename(iter->second);
+< appParameters.erase(iter);
+< sFilename>>filename;
+< if(filename.find(".bin") == std::string::npos)
+< 	    filename.append(".bin");
+< VSTable table(filename);
+< if(!table.tableExist())
+<   {
+<     std::cerr <<"No valid input file table is provided"<<std::endl;
+<     return 1;
+<    }
+< VSModuleOp op;
+< op.setParameters(appParameters);
+< op.addInput(&table);
+< op.execute();
+---
+> 
+> case 19:
+> {
+> 	iter =appParameters.find("help");
+>   if( iter != appParameters.end()){
+>   	VSSigmaContoursOp op;
+>   	op.printHelp();
+>   	return EXIT_SUCCESS;
+>   }
+>   
+>   std::cout<<"Instanciate VSSigmaContoursOp"<<std::endl;  
+>     
+> 	VSSigmaContoursOp op;
+> 	op.setParameters(appParameters);
+> 	iter= appParameters.find("file");
+> 	if(iter==appParameters.end()){
+> 		std::cerr<<"No input file table is provided!"<<std::endl;
+> 		return 1;
+> 	}//close if
+> 	std::stringstream sFilename(iter->second);
+> 	appParameters.erase(iter);
+> 	sFilename>>filename;
+> 	if(filename.find(".bin") == std::string::npos) filename.append(".bin");
+> 	VSTable table(filename);
+> 	if(!table.tableExist()){
+> 		std::cerr<<"No valid input file table is provided"<<std::endl;
+> 		return 1;
+> 	}
+> 	
+> 	op.addInput(&table);
+> 	op.execute();
+748a787
+> /*** END SIGMA CONTOURS OP **/
+756c795
+<     std::cerr <<"An operation code is expected: randomizer selcolumns merge append selfield mathop decimator extraction visualop showtable statistic pointdistribute pointproperty coarsevolume extractsubvolume interpolate moduleop"<<std::endl;
+---
+>     std::cerr <<"An operation code is expected: randomizer selcolumns merge append selfield mathop decimator extraction visualop showtable statistic pointdistribute pointproperty coarsevolume extractsubvolume interpolate module sigmacontours"<<std::endl;

@@ -1,0 +1,24 @@
+VisIVOViewer
+
+VisIVO Viewer
+1) Define the Variable corresponding to the VisIVOViewer setting option (SetAtt)
+(ex. #define VV_SET_AXES 1008) in visivo.h. NOTE: the last option number for flags 
+is < 1499. Option variables are 1000 - 2000 range
+
+2) check if the operation need of parameters and add it to VisIVOViewer structure
+
+3) Define the funcion in visivoset.cpp or add the option in VV_SetAtt. 
+In case of simple option (e.g --showbox) NO action must be operated if the option 
+does not have a value to be reported in the structure VisIVOViewer (in visivoviewer.h)
+
+4) Set the args in visivoview.cpp: set flags (ex. --showaxes) and parameters 
+if any (--colortable temperature)
+
+5) Let env->setatt[VV_SET_INTERNAL-VV_PARAM]=1 when data (if there is one all must be 
+internal!) comes from internal array
+
+6) External data columns must be put to 0  env->setatt[VV_SET_$$$ -VV_PARAM]=0 in 
+VV_View (at the beginning) on visivoview.cpp file.
+
+7) All intermediate files should start with ".VS_" and saved name in extFile vector 
+in visivoset.cpp

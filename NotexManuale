@@ -1,0 +1,6 @@
+ Note x il manuale:
+
+VV_SetVect  non si puo dare,non ha effetto senza VV_SetXYZ
+
+Quando anche solo un array è interno TUTTI devono essere interni: se faccio VV_SetXYZ 
+tutti i campi (CLORSCALAR VFIELD FILED ecc.) sono IGNORATI

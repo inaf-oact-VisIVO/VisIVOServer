@@ -1,0 +1,140 @@
+VisIVOFilters
+
+Developers notes
+Use svn to downlaod the VsIVOServer project.
+
+svn co svn://itvo.oact.inaf.it/itvo/srv/svn/repositories/visivoserver 
+ $userpath/visivoserver
+
+1) all classes must be an operation, and must be derived from VSTableOP class. Classe MUST not contain the using namespace statment. To use function on a namespace, this must be specified with "::" operator (Example: std::cout<<" String";)  
+
+2) the name of header file and program file must contain "vs" as initial and "op" as last two letters. Example: vsandomizerop.cpp vsandomizerop.h
+
+3) The class name must be the same of the filenames but with uppercase "VS" and "Op" last two characters. The other inital letters must be in uppercase.
+
+Examples:
+
+class VSRandomizerOp : public VSTableOp  (vsandomizerop.cpp vsandomizerop.h)
+
+class VSExtractSubSampleOp : puclic VSTableOp (vsextractsubsampleop.cpp vsextractsubsampleop.h)
+
+4) the VSExampleOP class contain an example of class. It uses an example.bin table of 10 columns and 1000 rows included in the distribution.
+
+5) all classes must include public printhelp and execute methods. 
+Other methods must be private or protected
+
+6) all names of variables must be self descriptive (where possible) and contain (where possible) only letters: the first letter must be in lowercase. For composite names the other inital letters must be in uppercase. Example: numberOfElements, totRows, newValue 
+
+7) all member variabiles must be private (or protected) and must begin with "m_" prefix. Example m_numberOfColumns, m_numberOfRows
+
+8) The distribution contain a Cmake files and no specific libraries are need to compile it. All the new classes filename MUST listed in the CmakeLists.txt file.  
+User that want to use KDevelop3 must give in a "build " directory (i.e. userpath/visivoserver_build/VisIVOFiletrs_build/) the following command: ccmake -G KDevelop3 pathOfVisIVOFilters (path of the CMakeLists.txt file ie: userpath/visivoserver/VisIVOFilters/)  
+Give "c" to configure cmake, , edit CMAKE_BUILD_TYPE end write "Debug". Put VSBIGENDIAN ON if you want to compile in BigeEndian system.
+
+Give "c" again and "g".
+
+On the build directory the VisIVOFilters.kdeleop project will be created that can be opened with kdevelop.
+
+9) The command line is read in the imstruction 
+for (int i=1;i<argc;i++) commandParametersSStream<< argv[i]<<" ";
+of the main.cpp program.
+in case of test/development  you can comment the above statment and uncomment one of the following instruction 
+//commandParametersSStream<<"--op randomizer --file tab1.bin --perc 10.0 --iseed 2 --out tabb.bin"<<" ";
+
+or create a new one as follow:
+
+commandParametersSStream<<"--op nameofoperation [options]"<<" ";
+
+10) the tables MUST be access ONLY with methods included in VSTable class
+
+LIST OF METHODS OF VSTable CLASS
+
+VSTable::VSTable()
+
+constructor that inizialitize empty all member values
+
+VSTable::VSTable(std::string locator, std::string name /*= ""*/, std::string description /*= ""*/) 
+
+constructor that read the table header and inizialitize with table values the member values
+
+bool VSTable::setEndiannes(std::string endiannes)
+
+set the endianism of a table
+
+bool VSTable::setType(std::string type)
+
+set double or float the table binary values
+
+bool VSTable::addCol(std::string name)
+
+add a column to a table: automatically update the number of columns in the table
+
+void VSTable::setCellSize(float xCellSize, float yCellSize, float zCellSize)
+
+set the cellsize if the table is a volume (ex. 1x1x1 cubic cell)
+ 
+ void VSTable::setCellNumber(unsigned int xCellNumber, unsigned int yCellNumber, unsigned int zCellNumber)
+
+set the cell numbe if the table is a volume (ex 64x64x64)
+
+bool VSTable::readHeader()
+
+read the table header
+
+void VSTable::printSelf()
+
+print on clog the data of header
+
+std::string VSTable::getColName(unsigned int i)
+
+return the name of the column number i (starting from 0)
+
+int VSTable::getColId(std::string name)
+
+return the number of the column with name (starting from 0)
+
+bool VSTable::createTable()  
+
+create an empty table using the set of all the elements of the table
+
+bool VSTable::createTable(float **fArray)  
+
+create a table contained in fArray using the set of all the elements of the table. fArray must be already allocated and MUST contain the numebr of Rows and Columns set in the table.
+
+bool VSTable::writeTable()
+
+write an empty table and the header of a table
+
+bool VSTable::writeTable(float **fArray)
+
+write  table with fArray and the header of a table. fArray must be already allocated and MUST contain the numebr of Rows and Columns set in the table.
+
+bool VSTable::writeHeader()
+
+write the header of a table
+
+int VSTable::getColumn(unsigned int *colList, unsigned int nOfCol, unsigned long long int fromRow, unsigned long long int toRow, float **fArray)
+
+Read data from the binary table and return it on fArray
+colList is the list array of columns numbers that you want to read. The length of colList must be of nOfCol elements. 0 Is the first column. fromRow toRow is the range of rows that you want to read. Cannot be requested more than MAX_NUMBER_ROW_REQUEST=250000000 of elements.
+The method return the number of elements in each column j of fArray[j][i] (i= fromRow-toRow). fArray must be already allocated.
+
+int VSTable::getColumnList(unsigned int *colList,unsigned int nOfCol, unsigned long long int *list, int nOfEle, float **fArray)
+
+Read data from the binary table and return it on fArray
+colList is the list array of columns numbers that you want to read. The length of colList must be of nOfCol elements. 0 Is the first column. list is an array of nOfEle elements that you want to read from the table.
+The method return the  elements listed in list array in each column j of fArray[j][i] (i= 0-nOfEle (as listed iln list array)). fArray must be already allocated.
+
+int VSTable::putColumn(unsigned int *colList, unsigned int nOfCol, unsigned long long int fromRow, unsigned long long int toRow, float **fArray)
+
+Write data from the binary table as included in fArray
+colList is the list array of columns numbers that you want to write. The length of colList must be of nOfCol elements. 0 Is the first column. fromRow toRow is the range of rows that you want to write. Cannot be written more than MAX_NUMBER_ROW_REQUEST=250000000 of elements.
+
+The method write the  elements in each column j of fArray[j][i] (i= fromRow-toRow). fArray must be already allocated and MUST contain the values to be written.
+
+int VSTable::putColumnList(unsigned int *colList, unsigned int nOfCol, unsigned long long int *list, int nOfEle, float **fArray)
+
+Write data from the binary table as included in fArray
+colList is the list array of columns numbers that you want to write. The length of colList must be of nOfCol elements. 0 Is the first column. list is an array of nOfEle elements that you want to write to the table.
+The method write the  elements listed in list array and contained in each column j of fArray[j][i] (i= 0-nOfEle (as listed iln list array)). fArray must be already allocated and MUST contain the values to be written.
+

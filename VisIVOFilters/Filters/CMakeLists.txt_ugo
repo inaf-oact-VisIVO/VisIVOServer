@@ -1,0 +1,93 @@
+PROJECT (VisIVOFilters)
+# Well technicall you also need:
+# http://cmake.org/Bug/bug.php?op=show&bugid=3582
+cmake_minimum_required(VERSION 2.4)
+
+#-----------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------
+SET (EXECUTABLE_OUTPUT_PATH ${VisIVOFilters_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
+SET (LIBRARY_OUTPUT_PATH ${VisIVOFilters_BINARY_DIR}/bin CACHE PATH "Single output directory for building all libraries.")
+MARK_AS_ADVANCED(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)
+
+
+#-----------------------------------------------------------------------------
+OPTION (VSBIGENDIAN "You should select on if your sistem is big endian" OFF)
+
+CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/VisIVOFiltersConfigure.h.in ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Configure.h @ONLYIMMEDIATE)
+SET(CMAKE_CXX_FLAGS "-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+
+
+SET(SRCS_VisIVOFilters
+
+  main.cpp
+  vsvisualop.cpp
+  vstableop.cpp
+  vsstatisticop.cpp
+  vstable.cpp
+  vssphereop.cpp
+  vsselectfieldop.cpp
+  vsselectcolumnsop.cpp
+  vsrandomizertableop.cpp
+  vsprinttableop.cpp
+  vsobject.cpp
+  vsmergeop.cpp
+  vsmathop.cpp
+   vsdecimatorop.cpp
+  vsappend.cpp
+  vsshowtableop.cpp
+  parametersparser.cpp
+  fpoptimizer.cpp
+  fparser.cpp
+vspointdistributeop.cpp
+vscoarsevolumeop.cpp
+vsextractsubvolumeop.cpp
+vsexampleop.cpp
+vspointpropertyop.cpp
+vsinterpolateop.cpp
+visivoutils.cpp
+vsmoduleop.cpp
+vssigmacontoursop.cpp
+vspolarop.cpp
+vsgrid2pointdistr.cpp
+vsswapop.cpp
+vsextractlistrowsop.cpp
+vsaddidop.cpp
+vsahfhalolistop.cpp
+vsahfhalogalaxyextop.cpp
+vschangecolnameop.cpp
+vssplittableop.cpp
+vswrvotableop.cpp
+vscutop.cpp
+vsvollimit.cpp
+    )
+
+
+SET(SRCS_ahf
+vsvbt2ahf.cpp
+)
+SET(DIRS AHFstep AHFstep/libahf AHFstep/libgravity AHFstep/libgrids AHFstep/libio AHFstep/libio_serial AHFstep/libmhd AHFstep/libparticles AHFstep/libsfc AHFstep/libutility )
+ADD_SUBDIRECTORY( AHFstep) 
+FOREACH(DIR_VAL ${DIRS})
+	INCLUDE(./${DIR_VAL}/CMakeLists.txt)
+	FOREACH(VAL ${PRJ_SRC})
+		SET(SOURCESAhf ${SOURCESAhf} ./${DIR_VAL}/${VAL})
+		INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/${DIR_VAL})
+	ENDFOREACH(VAL)
+ENDFOREACH(DIR_VAL)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+
+
+SET(SRCS_VisIVOFilters
+${SOURCESAhf}
+    ${SRCS_VisIVOFilters} ${SRCS_ahf}
+)
+#link_directories (${SOURCES})
+SET_SOURCE_FILES_PROPERTIES(${SRCS_ahf} PROPERTIES COMPILE_FLAGS "-DHAVE_STDINT_H -DHAVE_STDBOOL_H -DNONC99=0 -DNEWSTARTRUN -DSTANDARD -DAHFstep -DAHF")
+SET_SOURCE_FILES_PROPERTIES(${SOURCESAhf} PROPERTIES COMPILE_FLAGS "-std=c99  -O2  -DHAVE_STDINT_H -DHAVE_STDBOOL_H -DNONC99=0 -DNEWSTARTRUN -DWITH_AMIGA_input -DSTANDARD -DAHFstep -DAHF")
+
+#SET(GUI_EXECUTABLE )
+
+ADD_EXECUTABLE(VisIVOFilters ${GUI_EXECUTABLE} ${SRCS_VisIVOFilters})
+#INSTALL_TARGETS(/bin VisIVOFilters)

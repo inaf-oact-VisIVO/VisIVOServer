@@ -1,0 +1,7 @@
+JobType        = "NORMAL";
+Executable     = "start.sh";
+StdOutput      = "test.out";
+StdError       = "test.err";
+InputSandbox   = {"Makefile", "myprogram.c", "start.sh"};
+OutputSandbox  = {"test.err", "test.out"};
+Requirements   = other.GlueCEUniqueID == "inaf-ce-01.ct.pi2s2.it:8443/cream-lsf-short";

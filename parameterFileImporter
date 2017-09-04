@@ -1,0 +1,92 @@
+# Use This file to build the Importer parameter File.
+# All the Importers with all the options are here reported
+# Uncomment the options you need and write the corrected values.
+
+#-----------------------
+# Data Input format Options
+
+#fformat=ascii
+#out=filename_out.bin
+#file=InputAsciiFile
+
+#fformat=csv
+#out=filename_out.bin
+#file=InputCSVFile
+
+#fformat=fitstable
+#out=filename_out.bin
+#file=InputFitsFile
+
+#fformat=rawgrids
+#file=RowGridDescFile.desc
+
+#fformat=rawpoints
+#file=RowPointsDescFile.desc
+
+#fformat=binary
+#binaryheader=MyTableHeader.bin.head
+#out=filename_out.bin
+#file=InputBinaryFile.bin
+
+#fformat=fly
+#bigendian=true
+#double=true
+#npoints=1000000
+#out=filename_out.bin
+#file=InputFLYFile
+
+#fformat=gadget
+#bigendian=true
+#out=filename_out.bin
+#file=InputGadgetFile
+
+#fformat=xml
+#out=filename_out.bin
+#file=InputXMLFile.xml
+
+#fformat=votable
+#fformat=votablefast
+#out=filename_out.bin
+#file=InputVOTable.xml
+
+#fformat=hdf5
+#datasetlist=dataset1
+#datasetlist=dataset2
+#datasetlist=dataset3
+#hyperslab=dataset1 50,50,50 10,10,200
+#hyperslab=dataset2 150,50,50 10,10,200
+#hyperslab=dataset3 50,20,50 10,10,200
+#out=filename_out.bin
+#file=InputVOTable.xml
+
+#-----------------------
+# Remote Data Input format Options
+
+#userpwd=myusername:mypassword
+#file=http://remotehost.domain/directory/InputDataFile
+#file=ftp://remotehost.domain/directory/InputDataFile
+#file=sftp://remotehost.domain/directory/InputDataFile
+
+
+
+#-----------------------
+# Generic Options
+
+#missingvalue=0.0
+#textvalue=0.0
+
+#lfnout=lfn://grid/cometa/ube/VSImage
+#VO=cometa
+#se=inaf-se-01.ct.pi2s2.it
+
+#-----------------------
+# Volume  format Options
+
+#volume=true
+#compx=16
+#compy=16
+#compz=16
+#sizex=1.0
+#sizey=1.0
+#sizez=1.0
+

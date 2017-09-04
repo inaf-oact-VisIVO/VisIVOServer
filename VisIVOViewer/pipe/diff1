@@ -1,0 +1,199 @@
+Solo in .: diff1
+diff ./isosurfacepipe.cpp /home/ube/svn/visivoserver/VisIVOViewer/pipe/isosurfacepipe.cpp
+109c109
+<     return -1;
+---
+>     exit(1);
+diff ./isosurfacepipe.cpp~ /home/ube/svn/visivoserver/VisIVOViewer/pipe/isosurfacepipe.cpp~
+190,191c190,191
+<      if(m_visOpt.oneColor=="blue") P->SetColor(0, 0 ,1);  
+<      if(m_visOpt.oneColor=="cyan") P->SetColor(0, 1 ,1);  
+---
+>      if(m_visOpt.oneColor=="blu") P->SetColor(0, 0 ,1);  
+>      if(m_visOpt.oneColor=="cyane") P->SetColor(0, 1 ,1);  
+diff ./pointspipe.cpp /home/ube/svn/visivoserver/VisIVOViewer/pipe/pointspipe.cpp
+149c149
+<        return -1;
+---
+>        exit(1);
+607d606
+<   if(b[1]<=b[0]) b[1]=b[0]+0.0001;
+diff ./pointspipe.cpp~ /home/ube/svn/visivoserver/VisIVOViewer/pipe/pointspipe.cpp~
+251,252c251,252
+<      	if(m_visOpt.oneColor=="blue") m_visOpt.nColorTable=26;  
+<      	if(m_visOpt.oneColor=="cyan") m_visOpt.nColorTable=20;  
+---
+>      	if(m_visOpt.oneColor=="blu") m_visOpt.nColorTable=26;  
+>      	if(m_visOpt.oneColor=="cyane") m_visOpt.nColorTable=20;  
+607d606
+<   if(b[1]<=b[0]) b[1]=b[0]+0.0001;
+diff ./pointssmoothpipe.cpp /home/ube/svn/visivoserver/VisIVOViewer/pipe/pointssmoothpipe.cpp
+120c120
+<        return -1;
+---
+>        exit(1);
+diff ./pointssmoothpipe.cpp~ /home/ube/svn/visivoserver/VisIVOViewer/pipe/pointssmoothpipe.cpp~
+257,258c257,258
+<      if(m_visOpt.backColor=="blue") m_pRenderer->SetBackground (0, 0 ,1);  
+<      if(m_visOpt.backColor=="cyan") m_pRenderer->SetBackground (0, 1 ,1);  
+---
+>      if(m_visOpt.backColor=="blu") m_pRenderer->SetBackground (0, 0 ,1);  
+>      if(m_visOpt.backColor=="cyane") m_pRenderer->SetBackground (0, 1 ,1);  
+diff ./slicerpipe.cpp /home/ube/svn/visivoserver/VisIVOViewer/pipe/slicerpipe.cpp
+102c102
+<     return -1;
+---
+>     exit(1);
+361d360
+<     if(b[1]<=b[0]) b[1]=b[0]+0.0001;
+diff ./slicerpipe.cpp~ /home/ube/svn/visivoserver/VisIVOViewer/pipe/slicerpipe.cpp~
+201c201,206
+<    } else if (m_visOpt.slicePlaneNormal!="none" || m_visOpt.slicePlanePoint!="none") {  // not ortogonal plane
+---
+>    } else if (m_visOpt.slicePlaneNormal!="none" || m_visOpt.slicePlanePoint!="none") 
+>    {  // not ortogonal plane
+> 	if(m_visOpt.slicePlaneNormalValue[0] == m_visOpt.slicePlanePointValue[0] &&
+> 	   m_visOpt.slicePlaneNormalValue[1] == m_visOpt.slicePlanePointValue[1] &&
+> 	   m_visOpt.slicePlaneNormalValue[2] == m_visOpt.slicePlanePointValue[2])
+> 	   m_visOpt.slicePlaneNormalValue[0] += 0.01;
+361d365
+<     if(b[1]<=b[0]) b[1]=b[0]+0.0001;
+388c392
+<   m_visOpt.colorScalar=m_visOpt.sliceField;
+---
+>   m_visOpt.colorScalar="Scalar Colors";
+diff ./splotchpipecamera.cpp /home/ube/svn/visivoserver/VisIVOViewer/pipe/splotchpipecamera.cpp
+156c156
+<        			return;
+---
+>        			exit(1);
+diff ./splotchpipecamera.cpp~ /home/ube/svn/visivoserver/VisIVOViewer/pipe/splotchpipecamera.cpp~
+22,23d21
+< #include <cstdlib>
+< #include <cstring>
+Sottodirectory in comune: ./.svn e /home/ube/svn/visivoserver/VisIVOViewer/pipe/.svn
+diff ./vectorpipe.cpp /home/ube/svn/visivoserver/VisIVOViewer/pipe/vectorpipe.cpp
+153c153
+<        		return -1;
+---
+>        		exit(1);
+268,272c268,269
+< if(m_visOpt.vectorScalingFactor<0.0)
+<   m_Glyph3D->ScalingOff();
+< else
+<     m_Glyph3D->SetScaleFactor(m_visOpt.vectorScalingFactor); //riduce la dimensione delle frecce/ 0
+< 
+---
+> m_Glyph3D->SetScaleFactor(m_visOpt.vectorScalingFactor); //riduce la dimensione delle frecce/ 0
+> if(m_visOpt.vectorScalingFactor<0.0) m_Glyph3D->ScalingOff();
+298c295
+<    m_actor->SetMapper(m_PolyDataMapper);
+---
+>      m_actor->SetMapper(m_PolyDataMapper);
+431,432c428
+<   if(b[1]<=b[0]) b[1]=b[0]+0.0001;
+<  
+---
+>   
+diff ./vectorpipe.cpp~ /home/ube/svn/visivoserver/VisIVOViewer/pipe/vectorpipe.cpp~
+268,272c268,269
+< if(m_visOpt.vectorScalingFactor<0.0)
+<   m_Glyph3D->ScalingOff();
+< else
+<     m_Glyph3D->SetScaleFactor(m_visOpt.vectorScalingFactor); //riduce la dimensione delle frecce/ 0
+< 
+---
+> m_Glyph3D->SetScaleFactor(m_visOpt.vectorScalingFactor); //riduce la dimensione delle frecce/ 0
+> if(m_visOpt.vectorScalingFactor<0.0) m_Glyph3D->ScalingOff();
+296,297c293,294
+<      P->SetColor(1, 0 ,1);  //default is white
+< 
+---
+> //     P->SetColor(1, 0 ,1);  //default is white
+>  P->SetColor(1, 1 ,1);
+431,432c428
+<   if(b[1]<=b[0]) b[1]=b[0]+0.0001;
+<  
+---
+>   
+diff ./volumepipe.cpp /home/ube/svn/visivoserver/VisIVOViewer/pipe/volumepipe.cpp
+127c127
+<     return -1;
+---
+>     exit(1);
+309d308
+<   if(b[1]<=b[0]) b[1]=b[0]+0.0001;
+diff ./volumepipe.cpp~ /home/ube/svn/visivoserver/VisIVOViewer/pipe/volumepipe.cpp~
+218,219c218,219
+<      if(m_visOpt.backColor=="blue") m_pRenderer->SetBackground (0, 0 ,1);  
+<      if(m_visOpt.backColor=="cyan") m_pRenderer->SetBackground (0, 1 ,1);  
+---
+>      if(m_visOpt.backColor=="blu") m_pRenderer->SetBackground (0, 0 ,1);  
+>      if(m_visOpt.backColor=="cyane") m_pRenderer->SetBackground (0, 1 ,1);  
+309d308
+<   if(b[1]<=b[0]) b[1]=b[0]+0.0001;
+336c335
+<   m_visOpt.colorScalar=m_visOpt.vRenderingField;
+---
+>   m_visOpt.colorScalar="Scalar Colors";
+diff ./vtkimagepipe.cpp /home/ube/svn/visivoserver/VisIVOViewer/pipe/vtkimagepipe.cpp
+159c159
+<        return -1;
+---
+>        exit(1);
+diff ./vtkimagepipe.cpp~ /home/ube/svn/visivoserver/VisIVOViewer/pipe/vtkimagepipe.cpp~
+138c138
+<     	  double cN1[3];
+---
+>     	  double cN1[3], cN2[3], cN3[3];
+144,145c144,145
+< 	    norm=norm+(m_visOpt.tableData[vyIndex][i]*m_visOpt.tableData[vyIndex][i]);
+< 	    norm=norm+(m_visOpt.tableData[vzIndex][i]*m_visOpt.tableData[vzIndex][i]);
+---
+> 	    norm=+m_visOpt.tableData[vyIndex][i]*m_visOpt.tableData[vyIndex][i];
+> 	    norm=+m_visOpt.tableData[vzIndex][i]*m_visOpt.tableData[vzIndex][i];
+147,151c147,162
+<       cN1[0]=m_visOpt.tableData[vxIndex][i]/norm;
+<       cN1[1]=m_visOpt.tableData[vyIndex][i]/norm;
+<       cN1[2]=m_visOpt.tableData[vzIndex][i]/norm;
+<      //add the data to the normals array
+<  	   normalsArray->SetTuple(i, cN1) ;
+---
+>             cN1[0]=m_visOpt.tableData[vxIndex][i]/norm;
+>             cN1[1]=0;
+>             cN1[2]=0;
+>             cN2[1]=m_visOpt.tableData[vyIndex][i]/norm;
+>             cN2[0]=0;
+>             cN2[2]=0;
+>             cN2[2]=m_visOpt.tableData[vzIndex][i]/norm;
+>             cN2[0]=0;
+>             cN2[1]=0;
+> 
+> 
+>   //add the data to the normals array
+>  	   normalsArray->SetTuple(0, cN1) ;
+>   	   normalsArray->SetTuple(1, cN2) ;
+>   	   normalsArray->SetTuple(2, cN3) ;
+> 
+152a164
+> 
+214c226
+<        // int ngridX=128, ngridY=128, ngridZ=128;
+---
+>        //int ngridX=128, ngridY=128, ngridZ=128;
+216c228,229
+<        // float splatterRadius in % 
+---
+>        // then convert to the % of bounds[1]-bounds[0]: R1*100/(bounds[1]-bounds[0])
+>        //float splatterRadius in % 
+222c235
+< 	     int indexDelta=1;
+---
+> 	int indexDelta=1;
+230,232c243,244
+<   //   popSplatter->SetAccumulationModeToSum();
+<        popSplatter->SetEccentricity(m_visOpt.vtkEcc);
+<   //   popSplatter->SetScaleFactor(m_visOpt.vtkScale);
+---
+>        popSplatter->ScalarWarpingOn();
+>        popSplatter->SetScaleFactor(m_visOpt.vtkScale);

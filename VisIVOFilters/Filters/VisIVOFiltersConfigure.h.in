@@ -1,0 +1,11 @@
+/*=========================================================================
+This source has no copyright.  It is intended to be copied by users
+wishing to create their own VTK classes locally.
+=========================================================================*/
+#ifndef __@PROJECT@Configure_h
+#define __@PROJECT@Configure_h
+
+#cmakedefine VSBIGENDIAN
+
+
+#endif // __@PROJECT@Configure_h

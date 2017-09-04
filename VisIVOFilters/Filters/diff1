@@ -1,0 +1,1034 @@
+Sottodirectory in comune: ./AHFstep e /home/ube/svn/visivoserver/VisIVOFilters/AHFstep
+diff ./CMakeLists.txt /home/ube/svn/visivoserver/VisIVOFilters/CMakeLists.txt
+1c1,4
+< SET(PRJ_SRC
+---
+> PROJECT (VisIVOFilters)
+> # Well technicall you also need:
+> # http://cmake.org/Bug/bug.php?op=show&bugid=3582
+> cmake_minimum_required(VERSION 2.4)
+2a6,22
+> #-----------------------------------------------------------------------------
+> 
+> 
+> #-----------------------------------------------------------------------------
+> SET (EXECUTABLE_OUTPUT_PATH ${VisIVOFilters_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
+> SET (LIBRARY_OUTPUT_PATH ${VisIVOFilters_BINARY_DIR}/bin CACHE PATH "Single output directory for building all libraries.")
+> MARK_AS_ADVANCED(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)
+> 
+> #SET (${CMAKE_CXX_COMPILER} /usr/bin/g++)
+> #-----------------------------------------------------------------------------
+> OPTION (VSBIGENDIAN "You should select on if your sistem is big endian" OFF)
+> 
+> CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/VisIVOFiltersConfigure.h.in ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Configure.h @ONLYIMMEDIATE)
+> 
+> SET(SRCS_VisIVOFilters
+> 
+>   main.cpp
+27c47
+< 
+---
+> visivoutils.cpp
+42a63
+>     )
+43a65,66
+> SET(SRCS_ahf
+> vsvbt2ahf.cpp
+44a68,88
+> SET(DIRS AHFstep AHFstep/libahf AHFstep/libgravity AHFstep/libgrids AHFstep/libio AHFstep/libio_serial AHFstep/libmhd AHFstep/libparticles AHFstep/libsfc AHFstep/libutility)
+> ADD_SUBDIRECTORY( AHFstep) 
+> FOREACH(DIR_VAL ${DIRS})
+> 	INCLUDE(./${DIR_VAL}/CMakeLists.txt)
+> 	FOREACH(VAL ${PRJ_SRC})
+> 		SET(SOURCESAhf ${SOURCESAhf} ./${DIR_VAL}/${VAL})
+> 		INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/${DIR_VAL})
+> 	ENDFOREACH(VAL)
+> ENDFOREACH(DIR_VAL)
+> INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+> 
+> 
+> SET(SRCS_VisIVOFilters
+> ${SOURCESAhf}
+>     ${SRCS_VisIVOFilters} ${SRCS_ahf}
+> )
+> #link_directories (${SOURCES})
+> SET_SOURCE_FILES_PROPERTIES(${SRCS_ahf} PROPERTIES COMPILE_FLAGS "-DHAVE_STDINT_H -DHAVE_STDBOOL_H -DNONC99=0 -DNEWSTARTRUN -DSTANDARD -DAHFstep -DAHF")
+> SET_SOURCE_FILES_PROPERTIES(${SOURCESAhf} PROPERTIES COMPILE_FLAGS "-std=c99  -O2  -DHAVE_STDINT_H -DHAVE_STDBOOL_H -DNONC99=0 -DNEWSTARTRUN -DWITH_AMIGA_input -DSTANDARD -DAHFstep -DAHF")
+> 
+> #SET(GUI_EXECUTABLE )
+45a90,91
+> ADD_EXECUTABLE(VisIVOFilters ${GUI_EXECUTABLE} ${SRCS_VisIVOFilters})
+> INSTALL_TARGETS(/bin VisIVOFilters)
+diff ./CMakeLists.txt~ /home/ube/svn/visivoserver/VisIVOFilters/CMakeLists.txt~
+1c1,4
+< SET(PRJ_SRC
+---
+> PROJECT (VisIVOFilters)
+> # Well technicall you also need:
+> # http://cmake.org/Bug/bug.php?op=show&bugid=3582
+> cmake_minimum_required(VERSION 2.4)
+2a6,22
+> #-----------------------------------------------------------------------------
+> 
+> 
+> #-----------------------------------------------------------------------------
+> SET (EXECUTABLE_OUTPUT_PATH ${VisIVOFilters_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
+> SET (LIBRARY_OUTPUT_PATH ${VisIVOFilters_BINARY_DIR}/bin CACHE PATH "Single output directory for building all libraries.")
+> MARK_AS_ADVANCED(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)
+> 
+> SET (${CMAKE_CXX_COMPILER} /usr/bin/g++)
+> #-----------------------------------------------------------------------------
+> OPTION (VSBIGENDIAN "You should select on if your sistem is big endian" OFF)
+> 
+> CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/VisIVOFiltersConfigure.h.in ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Configure.h @ONLYIMMEDIATE)
+> 
+> SET(SRCS_VisIVOFilters
+> 
+>   main.cpp
+42a63
+>     )
+43a65,66
+> SET(SRCS_ahf
+> vsvbt2ahf.cpp
+44a68,88
+> SET(DIRS AHFstep AHFstep/libahf AHFstep/libgravity AHFstep/libgrids AHFstep/libio AHFstep/libio_serial AHFstep/libmhd AHFstep/libparticles AHFstep/libsfc AHFstep/libutility)
+> ADD_SUBDIRECTORY( AHFstep) 
+> FOREACH(DIR_VAL ${DIRS})
+> 	INCLUDE(./${DIR_VAL}/CMakeLists.txt)
+> 	FOREACH(VAL ${PRJ_SRC})
+> 		SET(SOURCESAhf ${SOURCESAhf} ./${DIR_VAL}/${VAL})
+> 		INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/${DIR_VAL})
+> 	ENDFOREACH(VAL)
+> ENDFOREACH(DIR_VAL)
+> INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+> 
+> 
+> SET(SRCS_VisIVOFilters
+> ${SOURCESAhf}
+>     ${SRCS_VisIVOFilters} ${SRCS_ahf}
+> )
+> #link_directories (${SOURCES})
+> SET_SOURCE_FILES_PROPERTIES(${SRCS_ahf} PROPERTIES COMPILE_FLAGS "-DHAVE_STDINT_H -DHAVE_STDBOOL_H -DNONC99=0 -DNEWSTARTRUN -DSTANDARD -DAHFstep -DAHF")
+> SET_SOURCE_FILES_PROPERTIES(${SOURCESAhf} PROPERTIES COMPILE_FLAGS "-std=c99  -O2  -DHAVE_STDINT_H -DHAVE_STDBOOL_H -DNONC99=0 -DNEWSTARTRUN -DWITH_AMIGA_input -DSTANDARD -DAHFstep -DAHF")
+> 
+> #SET(GUI_EXECUTABLE )
+45a90,91
+> ADD_EXECUTABLE(VisIVOFilters ${GUI_EXECUTABLE} ${SRCS_VisIVOFilters})
+> INSTALL_TARGETS(/bin VisIVOFilters)
+Solo in .: diff1
+Sottodirectory in comune: ./.kdev4 e /home/ube/svn/visivoserver/VisIVOFilters/.kdev4
+Sottodirectory in comune: ./mybuild e /home/ube/svn/visivoserver/VisIVOFilters/mybuild
+Sottodirectory in comune: ./.svn e /home/ube/svn/visivoserver/VisIVOFilters/.svn
+Solo in /home/ube/svn/visivoserver/VisIVOFilters/: visivo.h
+Solo in /home/ube/svn/visivoserver/VisIVOFilters/: visivoutils.cpp
+Solo in /home/ube/svn/visivoserver/VisIVOFilters/: visivoutils.h
+diff ./vsappend.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsappend.cpp
+89c89
+< 	if(isParameterPresent("filelist"))
+---
+> 	if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+91,92d90
+< 	  if(getParameterAsString("filelist").empty() || getParameterAsString("filelist")=="unknown" )
+< 	  {
+95,98d92
+< 	  } else
+< 	  {
+< 		filename=getParameterAsString("filelist");
+< 	  }
+101,106d94
+< 	  if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+< 	  {
+< 		std::cerr<<"vsappendop: No file with table list is given"<<std::endl;
+< 		return false;
+< 	  } else
+< 	  {
+108d95
+< 	  }
+109a97
+> 
+diff ./vsappend.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsappend.cpp~
+20,21d19
+< #include <cstdlib>
+< #include <cstring>
+89c87
+< 	if(isParameterPresent("filelist")
+---
+> 	if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+91,92d88
+< 	  if(getParameterAsString("filelist").empty() || getParameterAsString("filelist")=="unknown" )
+< 	  {
+95,98d90
+< 	  } else
+< 	  {
+< 		filename=getParameterAsString("filelist");
+< 	  }
+101,106d92
+< 	  if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+< 	  {
+< 		std::cerr<<"vsappendop: No file with table list is given"<<std::endl;
+< 		return false;
+< 	  } else
+< 	  {
+108d93
+< 	  }
+109a95
+> 
+diff ./vscoarsevolumeop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vscoarsevolumeop.cpp
+446c446
+<    long long unsigned globalRows=m_nOfRow;
+---
+> 
+538d537
+< 	if(startCounter>=globalRows)totEle=0;
+diff ./vscoarsevolumeop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vscoarsevolumeop.cpp~
+21d20
+< #include <cstdio>
+diff ./vsdecimatorop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsdecimatorop.cpp
+363c363
+< 		return false;
+---
+> 		exit(1);
+diff ./vsdecimatorop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsdecimatorop.cpp~
+69,73d68
+< unsigned long long int tempLL=getMaxNumberInt();
+< if(((unsigned long long int)m_nOfRow*m_nOfCol)>tempLL) 
+< 	m_nOfRow=(int)tempLL/m_nOfCol;
+< 
+< 
+diff ./vsextractsubvolumeop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsextractsubvolumeop.cpp
+295c295
+< 	std::cout<<"vsextractsubvolumeop: allocation failed"<<std::endl;
+---
+> 	std::cout<<"vscoarsevolumeop: allocation failed"<<std::endl;
+350d349
+<    long long unsigned globalRows=m_nOfRow;
+358c357
+< 	std::cout<<"vsextractsubvolumeop: allocation failed"<<std::endl;
+---
+> 	std::cout<<"vscoarsevolumeop: allocation failed"<<std::endl;
+385c384
+< 		std::cerr<<"vsextractsubvolumeop: Internal error or wrong table data"<<std::endl;
+---
+> 		std::cerr<<"vscoarsevolume: Internal error or wrong table data"<<std::endl;
+423d421
+< 	if(startCounter>=globalRows)totEle=0;
+diff ./vsextractsubvolumeop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsextractsubvolumeop.cpp~
+21d20
+< #include <cstdio>
+295c294
+< 	std::cout<<"vsextractsubvolumeop: allocation failed"<<std::endl;
+---
+> 	std::cout<<"vscoarsevolumeop: allocation failed"<<std::endl;
+357c356
+< 	std::cout<<"vsextractsubvolumeop: allocation failed"<<std::endl;
+---
+> 	std::cout<<"vscoarsevolumeop: allocation failed"<<std::endl;
+384c383
+< 		std::cerr<<"vsextractsubvolumeop: Internal error or wrong table data"<<std::endl;
+---
+> 		std::cerr<<"vscoarsevolume: Internal error or wrong table data"<<std::endl;
+422d420
+< 	if(startCounter>=m_nOfRow)totEle=0;
+diff ./vsinterpolateop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsinterpolateop.cpp
+80c80
+< 	std::cout<<"Usage: VisIVOFilters --op interpolate [--field columns_name]  [--numbin numberbin] [--periodic] [--interval from to] [--index column_name] [--out filename_out] [--help] --infiles file_start.bin file_end.bin"<<std::endl;
+---
+> 	std::cout<<"Usage: VisIVOFilters --op interpolate [--list columns_name]  [--numbin numberbin] [--periodic] [--interval from to] [--index column_name] [--out filename_out] [--help] --infiles file_start.bin file_end.bin"<<std::endl;
+82c82
+< 	std::cout<<"Example: VisIVOFilters --op interpolate --field X Y Z --numbin 20 --periodic --out mysequence  --infiles start.bin end.bin "<<std::endl<<std::endl;
+---
+> 	std::cout<<"Example: VisIVOFilters --op interpolate --list X Y Z --numbin 20 --periodic --out mysequence  --infiles start.bin end.bin "<<std::endl<<std::endl;
+85c85
+< 	std::cout<<"--field a valid list of  columns name that must be exist on both the input tables. Default: all columns are considered"<<std::endl;
+---
+> 	std::cout<<"--list a valid list of  columns name that must be exist on both the input tables. Default: all columns are considered"<<std::endl;
+290c290
+< if(isParameterPresent("field"))
+---
+> if(!isParameterPresent("list"))
+292,294d291
+<   
+<   if(!isParameterPresent("field"))
+<   {
+308,329c305
+<   } else
+<   {
+<     ssListparameters.str(getParameterAsString("field"));
+<     colNumberSet.clear();
+<     while (!ssListparameters.eof())
+<     {
+< 	std::string paramField;
+< 	ssListparameters>>paramField;
+< 	if(table1.getColId(paramField)>=0)
+< 		colNumberSet.insert(table1.getColId(paramField));
+< 	if(table1.getColId(paramField)!=table2.getColId(paramField))
+< 	{
+< 		std::cerr<<"Error: Tables does not contain the same columns or the tables are not in the same order."<<std::endl;
+<  		colNumberSet.clear();
+< 		return false;
+< 	}
+< 	
+<     }
+< }
+<   
+<   
+< } else  //obsolete
+---
+> } else
+331,346c307,309
+<   if(!isParameterPresent("list"))
+<   {
+< 	int tmpi=table1.getNumberOfColumns();
+< 	for(unsigned int i=0;i<table1.getNumberOfColumns();i++)
+< 	{
+< 		if(table1.getColName(i)!=table2.getColName(i))
+< 		{
+< 			std::cerr<<"Error: Tables does not contain the same columns or the tables are not in the same order."<<std::endl;
+<  			colNumberSet.clear();
+< 			return false;
+< 		}		
+< 		colNumberSet.insert(i);
+< 		ssListparameters<<table1.getColName(i)<<" ";
+< 	}
+< 
+<   } else
+---
+>   ssListparameters.str(getParameterAsString("list"));
+>   colNumberSet.clear();
+>   while (!ssListparameters.eof())
+348,351d310
+<     ssListparameters.str(getParameterAsString("list"));
+<     colNumberSet.clear();
+<     while (!ssListparameters.eof())
+<     {
+363,365c322
+<     }
+< }
+< 
+---
+>   }
+diff ./vsinterpolateop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsinterpolateop.cpp~
+20,21d19
+< #include <cstdlib>
+< #include <cstring>
+290c288
+< if(isParameterPresent("field"))
+---
+> if(!isParameterPresent("list"))
+292,294d289
+<   
+<   if(!isParameterPresent("field"))
+<   {
+308,329c303
+<   } else
+<   {
+<     ssListparameters.str(getParameterAsString("field"));
+<     colNumberSet.clear();
+<     while (!ssListparameters.eof())
+<     {
+< 	std::string paramField;
+< 	ssListparameters>>paramField;
+< 	if(table1.getColId(paramField)>=0)
+< 		colNumberSet.insert(table1.getColId(paramField));
+< 	if(table1.getColId(paramField)!=table2.getColId(paramField))
+< 	{
+< 		std::cerr<<"Error: Tables does not contain the same columns or the tables are not in the same order."<<std::endl;
+<  		colNumberSet.clear();
+< 		return false;
+< 	}
+< 	
+<     }
+< }
+<   
+<   
+< } else  //obsolete
+---
+> } else
+331,346c305,307
+<   if(!isParameterPresent("list"))
+<   {
+< 	int tmpi=table1.getNumberOfColumns();
+< 	for(unsigned int i=0;i<table1.getNumberOfColumns();i++)
+< 	{
+< 		if(table1.getColName(i)!=table2.getColName(i))
+< 		{
+< 			std::cerr<<"Error: Tables does not contain the same columns or the tables are not in the same order."<<std::endl;
+<  			colNumberSet.clear();
+< 			return false;
+< 		}		
+< 		colNumberSet.insert(i);
+< 		ssListparameters<<table1.getColName(i)<<" ";
+< 	}
+< 
+<   } else
+---
+>   ssListparameters.str(getParameterAsString("list"));
+>   colNumberSet.clear();
+>   while (!ssListparameters.eof())
+348,351d308
+<     ssListparameters.str(getParameterAsString("list"));
+<     colNumberSet.clear();
+<     while (!ssListparameters.eof())
+<     {
+363,365c320
+<     }
+< }
+< 
+---
+>   }
+diff ./vsmathop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsmathop.cpp
+271,272d270
+< 				else if(m_mathExpression.compare(found+lenString,1,"^") ==0)
+< 					afterChar=true;
+467c465
+< 		return false;
+---
+> 		exit(1);
+diff ./vsmathop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsmathop.cpp~
+68,71d67
+< unsigned long long int tempLL=getMaxNumberInt();
+< if(((unsigned long long int)m_nOfRow*m_nOfCol)>tempLL) 
+< 	m_nOfRow=(int)tempLL/m_nOfCol;
+< 
+271,272d266
+< 				else if(m_mathExpression.compare(found+lenString,1,"^") ==0)
+< 					afterChar=true;
+diff ./vsmergeop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsmergeop.cpp
+49c49
+< 	std::cout<<"Usage: VisIVOFilters --op merge  [--size HUGE/SMALLEST] [--pad value]  [--out filename_out.bin] [--help] [--filelist] table_param.txt"<<std::endl;
+---
+> 	std::cout<<"Usage: VisIVOFilters --op merge  [--size HUGE/SMALLEST] [--pad value]  [--out filename_out.bin] [--help] [--file] table_param.txt"<<std::endl;
+51c51
+< 	std::cout<<"Example: VisIVOFilters --op merge --out out_table_file.bin --filelist table_param.txt"<<std::endl<<std::endl;
+---
+> 	std::cout<<"Example: VisIVOFilters --op merge --out out_table_file.bin --file table_param.txt"<<std::endl<<std::endl;
+57c57
+< 	std::cout<<"--filelist list of tables and valid column name to be merged. Wildcard * meabs all columns."<<std::endl;
+---
+> 	std::cout<<"--file list of tables and valid column name to be merged. Wildcard * meabs all columns."<<std::endl;
+84,85c84,85
+< 
+< 	if(isParameterPresent("filelist"))
+---
+> 	
+> 	if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+87,88d86
+< 	  if(getParameterAsString("filelist").empty() || getParameterAsString("filelist")=="unknown" )
+< 	  {
+91,95d88
+< 	  } else
+< 	  {
+< 		filename=getParameterAsString("filelist");
+< 	  }
+< 	
+98,103d90
+< 	  if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+< 	  {
+< 		std::cerr<<"vsmergeop: No file with table list is given"<<std::endl;
+< 		return false;
+< 	  } else
+< 	  {
+105,106c92
+< 	  }
+< 	}  
+---
+> 	}
+diff ./vsmergeop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsmergeop.cpp~
+20,21d19
+< #include <cstdlib>
+< #include <cstring>
+84,85c82,83
+< 
+< 	if(isParameterPresent("filelist"))
+---
+> 	
+> 	if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+87,88d84
+< 	  if(getParameterAsString("filelist").empty() || getParameterAsString("filelist")=="unknown" )
+< 	  {
+91,95d86
+< 	  } else
+< 	  {
+< 		filename=getParameterAsString("filelist");
+< 	  }
+< 	
+98,103d88
+< 	  if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+< 	  {
+< 		std::cerr<<"vsmergeop: No file with table list is given"<<std::endl;
+< 		return false;
+< 	  } else
+< 	  {
+105,106c90
+< 	  }
+< 	}  
+---
+> 	}
+diff ./vspointpropertyop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vspointpropertyop.cpp
+283c283
+< if(!isParameterPresent("append")) append=false;
+---
+> if(getParameterAsString("append")=="") append=false;
+diff ./vspointpropertyop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vspointpropertyop.cpp~
+26,28d25
+< #ifdef WIN32
+< 	#include <time.h>
+< #endif
+439,440c436,437
+< /*       		if(fabs((pos1-i1))>0.5)
+< 			i1++;*/
+---
+>        		if(fabs((pos1-i1))>0.5)
+> 			i1++;
+442,443c439,440
+< /*       		if(fabs((pos2-i2))>0.5)
+< 			i2++;*/
+---
+>        		if(fabs((pos2-i2))>0.5)
+> 			i2++;
+445,446c442,443
+< /*       		if(fabs((pos3-i3))>0.5)
+< 			i3++;*/
+---
+>        		if(fabs((pos3-i3))>0.5)
+> 			i3++;
+508c505
+< 		     if(ind[n]<0  || ind[n]>nCell-1)
+---
+> 		     if(ind[n]<0  || ind[n]>nCell)
+diff ./vsrandomizertableop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsrandomizertableop.cpp
+138c138
+< std::cout<<"Usage: VisIVOFilters --op randomizer --perc percentage [--field parameters] [--iseed iseed] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+---
+> std::cout<<"Usage: VisIVOFilters --op randomizer --perc percentage [--list parameters] [--iseed iseed] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+144c144
+< std::cout<<"--field Valid columns names of the input table. Default: all columns are included"<<std::endl;
+---
+> std::cout<<"--list Valid columns names of the input table. Default: all columns are included"<<std::endl;
+204c204
+< if(isParameterPresent("field"))
+---
+> if(getParameterAsString("list").empty() || getParameterAsString("list")=="unknown" )
+206,226c206,208
+<   if(getParameterAsString("field").empty() || getParameterAsString("field")=="unknown" )
+<   {
+<     for(unsigned int i = 0; i <m_tables[0]->getNumberOfColumns(); ++i)
+< 	colNumberSet.insert(i);
+<   } else
+<   {
+< 	std::stringstream ssListparameters;
+< 	ssListparameters.str(getParameterAsString("field"));
+< 	std::string paramField="";
+< 	std::string paramFieldGlobal;
+< 	while (!ssListparameters.eof())
+< 	{
+< 		ssListparameters>>paramField;
+< 		if(m_tables[0] -> getColId(paramField)>=0)
+< 			colNumberSet.insert(m_tables[0] -> getColId(paramField));
+< 
+< 	}
+<   }
+< 
+< 
+< } else  //obsolete --list
+---
+>  for(unsigned int i = 0; i <m_tables[0]->getNumberOfColumns(); ++i)
+>   colNumberSet.insert(i);
+> } else
+228,234d209
+< 
+<   if(getParameterAsString("list").empty() || getParameterAsString("list")=="unknown" )
+<   {
+<     for(unsigned int i = 0; i <m_tables[0]->getNumberOfColumns(); ++i)
+< 	colNumberSet.insert(i);
+<   } else
+<   {
+246,247d220
+<   }
+< 
+364c337
+< 		return false;
+---
+> 		exit(1);
+diff ./vsrandomizertableop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsrandomizertableop.cpp~
+63,66d62
+< unsigned long long int tempLL=getMaxNumberInt();
+< if(((unsigned long long int)m_nOfRow*m_nOfCol)>tempLL) 
+< 	m_nOfRow=(int)tempLL/m_nOfCol;
+< 
+138c134
+< std::cout<<"Usage: VisIVOFilters --op randomizer --perc percentage [--field parameters] [--iseed iseed] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+---
+> std::cout<<"Usage: VisIVOFilters --op randomizer --perc percentage [--list parameters] [--iseed iseed] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+144c140
+< std::cout<<"--field Valid columns names of the input table. Default: all columns are included"<<std::endl;
+---
+> std::cout<<"--list Valid columns names of the input table. Default: all columns are included"<<std::endl;
+204c200
+< if(isParameterPresent("field"))
+---
+> if(getParameterAsString("list").empty() || getParameterAsString("list")=="unknown" )
+206,226c202,204
+<   if(getParameterAsString("field").empty() || getParameterAsString("field")=="unknown" )
+<   {
+<     for(unsigned int i = 0; i <m_tables[0]->getNumberOfColumns(); ++i)
+< 	colNumberSet.insert(i);
+<   } else
+<   {
+< 	std::stringstream ssListparameters;
+< 	ssListparameters.str(getParameterAsString("field"));
+< 	std::string paramField="";
+< 	std::string paramFieldGlobal;
+< 	while (!ssListparameters.eof())
+< 	{
+< 		ssListparameters>>paramField;
+< 		if(m_tables[0] -> getColId(paramField)>=0)
+< 			colNumberSet.insert(m_tables[0] -> getColId(paramField));
+< 
+< 	}
+<   }
+< 
+< 
+< } else  //obsolete --list
+---
+>  for(unsigned int i = 0; i <m_tables[0]->getNumberOfColumns(); ++i)
+>   colNumberSet.insert(i);
+> } else
+228,234d205
+< 
+<   if(getParameterAsString("list").empty() || getParameterAsString("list")=="unknown" )
+<   {
+<     for(unsigned int i = 0; i <m_tables[0]->getNumberOfColumns(); ++i)
+< 	colNumberSet.insert(i);
+<   } else
+<   {
+246,247d216
+<   }
+< 
+diff ./vsselectcolumnsop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsselectcolumnsop.cpp
+28,29c28,29
+< 	std::cout<<"Create e new table using (or exluding) one or more fields of a data table. The default case produces output table including only listed fields."<<std::endl<<std::endl;
+< 	std::cout<<"Usage: VisIVOFilters --op selcolumns --field parameters  [--delete][--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+---
+> 	std::cout<<"Create e new table using  on one or more fields of a data table"<<std::endl<<std::endl;
+> 	std::cout<<"Usage: VisIVOFilters --op selcolumns --list parameters [--extract] [--delete][--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+31c31
+< 	std::cout<<"Example: VisIVOFilters --op selcolumns --field X Y --out filename_out.bin --file inputFile.bin"<<std::endl;
+---
+> 	std::cout<<"Example: VisIVOFilters --op selcolumns --list X Y --extract --out filename_out.bin --file inputFile.bin"<<std::endl;
+34,35c34,36
+< 	std::cout<<"--field Valid columns names of the input table."<<std::endl;
+< 	std::cout<<"--delete  Produce output table excluding only field listed in the --field option."<<std::endl;
+---
+> 	std::cout<<"--list Valid columns names of the input table."<<std::endl;
+> 	std::cout<<"--extract Default option. Produce output table including only fields listed in the --list option."<<std::endl;
+> 	std::cout<<"--delete  Produce output table excluding only field listed in the --list option. This option has the priority on the extract option."<<std::endl;
+47c48
+< 	if(isParameterPresent("field"))
+---
+> 	if(getParameterAsString("list").empty() || getParameterAsString("list")=="unknown" )
+49,50d49
+< 	  if(getParameterAsString("field").empty() || getParameterAsString("field")=="unknown" )
+< 	  {
+53,60d51
+< 	  }
+< 	}else
+< 	{
+< 	  if(getParameterAsString("list").empty() || getParameterAsString("list")=="unknown" )
+< 	  {
+< 		std::cerr<<"vsselectcolumnsop: No list of fileds is given"<<std::endl;
+< 		return false;
+< 	  }
+70,75c61
+< 	
+< 	if(isParameterPresent("field"))
+< 	  ssListparameters.str(getParameterAsString("field"));
+< 	else
+< 	  ssListparameters.str(getParameterAsString("list"));
+< 	  
+---
+> 	ssListparameters.str(getParameterAsString("list"));
+80c66
+< 	if(!isParameterPresent("delete")) 
+---
+> 	if(getParameterAsString("delete").empty()) 
+diff ./vsselectcolumnsop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsselectcolumnsop.cpp~
+1,2d0
+< #include <cstdlib>
+< #include <cstring>
+29c27
+< 	std::cout<<"Usage: VisIVOFilters --op selcolumns --field parameters [--extract] [--delete][--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+---
+> 	std::cout<<"Usage: VisIVOFilters --op selcolumns --list parameters [--extract] [--delete][--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+31c29
+< 	std::cout<<"Example: VisIVOFilters --op selcolumns --field X Y --extract --out filename_out.bin --file inputFile.bin"<<std::endl;
+---
+> 	std::cout<<"Example: VisIVOFilters --op selcolumns --list X Y --extract --out filename_out.bin --file inputFile.bin"<<std::endl;
+34,36c32,34
+< 	std::cout<<"--field Valid columns names of the input table."<<std::endl;
+< 	std::cout<<"--extract Default option. Produce output table including only fields listed in the --field option."<<std::endl;
+< 	std::cout<<"--delete  Produce output table excluding only field listed in the --field option. This option has the priority on the extract option."<<std::endl;
+---
+> 	std::cout<<"--list Valid columns names of the input table."<<std::endl;
+> 	std::cout<<"--extract Default option. Produce output table including only fields listed in the --list option."<<std::endl;
+> 	std::cout<<"--delete  Produce output table excluding only field listed in the --list option. This option has the priority on the extract option."<<std::endl;
+48c46
+< 	if(isParameterPresent("field"))
+---
+> 	if(getParameterAsString("list").empty() || getParameterAsString("list")=="unknown" )
+50,51d47
+< 	  if(getParameterAsString("field").empty() || getParameterAsString("field")=="unknown" )
+< 	  {
+54,61d49
+< 	  }
+< 	}else
+< 	{
+< 	  if(getParameterAsString("list").empty() || getParameterAsString("list")=="unknown" )
+< 	  {
+< 		std::cerr<<"vsselectcolumnsop: No list of fileds is given"<<std::endl;
+< 		return false;
+< 	  }
+71,76c59
+< 	
+< 	if(isParameterPresent("field"))
+< 	  ssListparameters.str(getParameterAsString("field"));
+< 	else
+< 	  ssListparameters.str(getParameterAsString("list"));
+< 	  
+---
+> 	ssListparameters.str(getParameterAsString("list"));
+81c64
+< 	if(!isParameterPresent("delete")) 
+---
+> 	if(getParameterAsString("delete").empty()) 
+diff ./vsstatisticop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsstatisticop.cpp
+169,173d168
+< 	bool Api=false;
+< 	if(isParameterPresent("Api")) Api=true;
+< 	if(Api || !isParameterPresent("histogram"))
+< 	  addParameter("histogram","unknown");
+<   
+185c180
+< 	if(!isParameterPresent("histogram"))
+---
+> 	if(getParameterAsString("histogram").empty())
+189,190c184
+< 		numberOfBin=getParameterAsInt("histogram");
+< 		if(numberOfBin<=0 )
+---
+> 		if(getParameterAsString("histogram")=="unknown" || getParameterAsString("histogram")=="true" )
+196a191,192
+> 		 else
+> 			numberOfBin=getParameterAsInt("histogram");
+213c209
+< 	if(isParameterPresent("field"))
+---
+> 	if(!isParameterPresent("list"))
+215,216d210
+< 	  if(!isParameterPresent("field"))
+< 	  {
+219,235c213
+< 	  }else{
+< 		ssListparameters.str(getParameterAsString("field"));
+< 		while (!ssListparameters.eof())
+< 		{
+< 			std::string paramField;
+< 			ssListparameters>>paramField;
+< 			if(m_tables[0] -> getColId(paramField)>=0)
+< 				colNumberSet.insert(m_tables[0] -> getColId(paramField));
+< 		}
+< 	  }
+< 	}else //obsolete
+< 	{
+< 	  if(!isParameterPresent("list"))
+< 	  {
+< 		for(unsigned int i=0;i<m_tables[0]->getNumberOfColumns();i++)
+< 			colNumberSet.insert(i);
+< 	  }else{
+---
+> 	}else{
+244d221
+< 	  }
+245a223
+> 
+526d503
+< 	if(!Api)
+diff ./vsstatisticop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsstatisticop.cpp~
+169,173d168
+< 	bool Api=false;
+< 	if(isParameterPresent("Api")) Api=true;
+< 	if(Api || !isParameterPresent("histogram"))
+< 	  addParameter("histogram","unknown");
+<   
+214c209
+< 	if(isParameterPresent("field"))
+---
+> 	if(!isParameterPresent("list"))
+216,217d210
+< 	  if(!isParameterPresent("field"))
+< 	  {
+220,236c213
+< 	  }else{
+< 		ssListparameters.str(getParameterAsString("field"));
+< 		while (!ssListparameters.eof())
+< 		{
+< 			std::string paramField;
+< 			ssListparameters>>paramField;
+< 			if(m_tables[0] -> getColId(paramField)>=0)
+< 				colNumberSet.insert(m_tables[0] -> getColId(paramField));
+< 		}
+< 	  }
+< 	}else //obsolete
+< 	{
+< 	  if(!isParameterPresent("list"))
+< 	  {
+< 		for(unsigned int i=0;i<m_tables[0]->getNumberOfColumns();i++)
+< 			colNumberSet.insert(i);
+< 	  }else{
+---
+> 	}else{
+245d221
+< 	  }
+246a223
+> 
+447a425,427
+> //			std::clog<<"m_maxValue="<<m_maxValue[counterCols]<<" j="<<j<<" m_fArray[0][j]="<<m_fArray[0][j]<<std::endl;
+> 
+> 
+511,514c491
+< 				if(binInterval==0) 
+< 				    histoIndex=0;
+< 				else
+< 				  histoIndex=(int) ((m_fArray[0][j]-offset)/binInterval);
+---
+> 				histoIndex=(int) ((m_fArray[0][j]-offset)/binInterval);
+527d503
+< 	if(!Api)
+diff ./vstable.cpp /home/ube/svn/visivoserver/VisIVOFilters/vstable.cpp
+209c209
+< 	return false; 
+---
+> 	exit(1); 
+476,549d475
+< //-------------------
+< int VSTable::getColumn(int colNumber,float *Col, int fromRow, int toRow)
+< //-------------------
+< {
+<   if(fromRow<=-1) fromRow=0;
+<   if(toRow==-1) toRow=(int) m_nRows-1;
+<   if(toRow<0)
+<   {
+<     std::cerr<<"Invalid toRow parameter:"<<toRow<<std::endl;
+<     return -4;
+<   } 
+<   if((toRow-fromRow+1) > MAX_NUMBER_ROW_REQUEST*4)
+<   {
+<     std::cerr<<"Cannot be requested more than "<< MAX_NUMBER_ROW_REQUEST*4 <<" row lines"<<std::endl;
+<     return -3;
+<   }
+<   std::ifstream fileInput(m_locator.c_str(), std::ios::in | std::ios::binary);
+<   if(!fileInput)
+<   {
+<     std::cerr<<"Cannot open binary file"<< m_locator <<std::endl;
+<     return -2;
+<   }
+< 
+<   std::ios::off_type indexOffset;
+<   unsigned long long int totNumberToSkip;
+<   int nSkip;
+<   int nLoad;
+< 
+<     if(colNumber > m_nCols-1)
+<     {
+<       std::cerr << "Invalid Column Id: "<< colNumber<<std::endl;
+<       return -4;
+<     }
+<     if(toRow > (int)( m_nRows-1))
+<     {
+<       std::cerr << "Warning: Invalid request of toRow:" << toRow <<" lowered to "<<m_nRows -1<< std::endl;
+<       toRow=(int) (m_nRows-1);
+<     }
+<     nLoad = (int) (toRow-fromRow+1);
+<     if(nLoad < 0)
+<     {
+<       std::cerr << "Error: Invalid range fromRow: " << fromRow <<" toRow: " << toRow << std::endl;
+<       return -3;
+<     }
+< 
+<     totNumberToSkip = colNumber*m_nRows+fromRow;
+< 
+<     while(totNumberToSkip!=0)
+<     {
+<       nSkip=MAX_NUMBER_TO_SKIP;
+<       if(nSkip > totNumberToSkip) nSkip=(int) totNumberToSkip;
+<       indexOffset=(std::ios::off_type) nSkip*sizeof(float);
+<       fileInput.seekg(indexOffset,std::ios::cur);
+<       totNumberToSkip=totNumberToSkip-nSkip;
+<     }
+<     fileInput.read((char *) Col,nLoad*sizeof(float));
+<   
+<     fileInput.close();
+< #ifdef VSBIGENDIAN
+<   std::string endianism="big";
+< #else	
+<   std::string endianism="little";
+< #endif
+< 
+<   if((endianism=="big" && m_endiannes=="little") || (endianism=="little" && m_endiannes=="big"))
+<   {
+< 	std::cerr<<"Warning: endianism swap executed on table "<<m_locator<<std::endl;
+<     	for(int k=0;k<nLoad;k++)
+< 	 Col[k]=floatSwap((char *)(&Col[k]));
+<   }	 
+< 
+<   return nLoad;
+< }
+< 
+551d476
+< //--------------------
+diff ./vstable.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vstable.cpp~
+192a193
+>   std::clog<<headerFileName<<std::endl;
+476,549d476
+< //-------------------
+< int VSTable::getColumn(int colNumber,float *Col, int fromRow, int toRow)
+< //-------------------
+< {
+<   if(fromRow<=-1) fromRow=0;
+<   if(toRow==-1) toRow=(int) m_nRows-1;
+<   if(toRow<0)
+<   {
+<     std::cerr<<"Invalid toRow parameter:"<<toRow<<std::endl;
+<     return -4;
+<   } 
+<   if((toRow-fromRow+1) > MAX_NUMBER_ROW_REQUEST*4)
+<   {
+<     std::cerr<<"Cannot be requested more than "<< MAX_NUMBER_ROW_REQUEST*4 <<" row lines"<<std::endl;
+<     return -3;
+<   }
+<   std::ifstream fileInput(m_locator.c_str(), std::ios::in | std::ios::binary);
+<   if(!fileInput)
+<   {
+<     std::cerr<<"Cannot open binary file"<< m_locator <<std::endl;
+<     return -2;
+<   }
+< 
+<   std::ios::off_type indexOffset;
+<   unsigned long long int totNumberToSkip;
+<   int nSkip;
+<   int nLoad;
+< 
+<     if(colNumber > m_nCols-1)
+<     {
+<       std::cerr << "Invalid Column Id: "<< colNumber<<std::endl;
+<       return -4;
+<     }
+<     if(toRow > (int)( m_nRows-1))
+<     {
+<       std::cerr << "Warning: Invalid request of toRow:" << toRow <<" lowered to "<<m_nRows -1<< std::endl;
+<       toRow=(int) (m_nRows-1);
+<     }
+<     nLoad = (int) (toRow-fromRow+1);
+<     if(nLoad < 0)
+<     {
+<       std::cerr << "Error: Invalid range fromRow: " << fromRow <<" toRow: " << toRow << std::endl;
+<       return -3;
+<     }
+< 
+<     totNumberToSkip = colNumber*m_nRows+fromRow;
+< 
+<     while(totNumberToSkip!=0)
+<     {
+<       nSkip=MAX_NUMBER_TO_SKIP;
+<       if(nSkip > totNumberToSkip) nSkip=(int) totNumberToSkip;
+<       indexOffset=(std::ios::off_type) nSkip*sizeof(float);
+<       fileInput.seekg(indexOffset,std::ios::cur);
+<       totNumberToSkip=totNumberToSkip-nSkip;
+<     }
+<     fileInput.read((char *) Col,nLoad*sizeof(float));
+<   
+<     fileInput.close();
+< #ifdef VSBIGENDIAN
+<   std::string endianism="big";
+< #else	
+<   std::string endianism="little";
+< #endif
+< 
+<   if((endianism=="big" && m_endiannes=="little") || (endianism=="little" && m_endiannes=="big"))
+<   {
+< 	std::cerr<<"Warning: endianism swap executed on table "<<m_locator<<std::endl;
+<     	for(int k=0;k<nLoad;k++)
+< 	 Col[k]=floatSwap((char *)(&Col[k]));
+<   }	 
+< 
+<   return nLoad;
+< }
+< 
+551d477
+< //--------------------
+diff ./vstable.h /home/ube/svn/visivoserver/VisIVOFilters/vstable.h
+51a52
+>   bool readHeader(); //! fuction that read  the header table (filling the above values)
+90d90
+<   int getColumn(int colNumber,float *Col, int fromRow=-1, int toRow=-1); //! get only one column. colNumerb is the columns ID. Col is an allocated pointer Col[toRow-fromRow+1]: the method fill Col with the column ID (first column is 0: in the range  0 - m_nCols -1) and with the postion specified in fromRow toRow-1. fromRow starts from 0. Default value -1 will read all column
+100d99
+<   bool readHeader(); //! fuction that read  the header table (filling the above values)
+diff ./vstable.h~ /home/ube/svn/visivoserver/VisIVOFilters/vstable.h~
+51a52
+>   bool readHeader(); //! fuction that read  the header table (filling the above values)
+75c76
+<   bool setType(std::string type);//! set the table (float or double)
+---
+>   bool setType(std::string type);
+90d90
+<   int getColumn(int colNumber,float *Col, int fromRow=-, int toRow=-1); //! get only one column. colNumerb is the columns ID. Col is an allocated pointer Col[toRow-fromRow+1]: the method fill Col with the column ID (first column is 0: in the range  0 - m_nCols -1) and with the postion specified in fromRow toRow-1. fromRow starts from 0. Default value -1 will read all column
+100d99
+<   bool readHeader(); //! fuction that read  the header table (filling the above values)
+diff ./vstableop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vstableop.cpp~
+21,22d20
+< #include <cstdlib>
+< #include <cstring>
+diff ./vsvisualop.cpp /home/ube/svn/visivoserver/VisIVOFilters/vsvisualop.cpp
+143c143
+< 	std::cout<<"Usage: VisIVOFilters --op visual  [--size number_of_elemnts] [--out filename_out.bin]  [--help] [--filelist] tab_selection_file.txt"<<std::endl;
+---
+> 	std::cout<<"Usage: VisIVOFilters --op visual  [--size number_of_elemnts] [--out filename_out.bin]  [--help] [--file] tab_selection_file.txt"<<std::endl;
+145c145
+< 	std::cout<<"Example: VisIVOFilters --op visual --out filename_out.bin --filelist tab_selection_file.txt"<<std::endl;
+---
+> 	std::cout<<"Example: VisIVOFilters --op visual --out filename_out.bin --file tab_selection_file.txt"<<std::endl;
+150c150
+< 	std::cout<<"--filelist  Input text file with a list of tables and columns."<<std::endl;
+---
+> 	std::cout<<"--file  Input text file with a list of tables and columns."<<std::endl;
+176,177c176,177
+< 
+< 	if(isParameterPresent("filelist"))
+---
+> 	
+> 	if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+179,180d178
+< 	  if(getParameterAsString("filelist").empty() || getParameterAsString("filelist")=="unknown" )
+< 	  {
+183,187c181
+< 	  } else
+< 	  {
+< 		filename=getParameterAsString("filelist");
+< 	  }
+< 	}else //obsolete
+---
+> 	} else
+189,194d182
+< 	  if(getParameterAsString("file").empty() || getParameterAsString("file")=="unknown" )
+< 	  {
+< 		std::cerr<<"VSVisualOp: no file with table list is given"<<std::endl;
+< 		return false;
+< 	  } else
+< 	  {
+196d183
+< 	  }
+197a185
+> 
+diff ./vsvisualop.cpp~ /home/ube/svn/visivoserver/VisIVOFilters/vsvisualop.cpp~
+67d66
+< 

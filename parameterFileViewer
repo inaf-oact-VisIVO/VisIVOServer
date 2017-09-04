@@ -1,0 +1,107 @@
+############## VisIVO SECTION
+######## Sect 1 General
+volume=no			
+vector=no			
+splotch=no			
+input=bovolo.bin
+out=outFilename
+showbox=yes
+showaxes=no
+imagesize=medium
+#cycle=cicleFilename
+#cycleoffset=0
+#cycle_skip_from=0
+#cycle_skip_to=0
+######## Sect 2 Points and vectors
+x=X
+y=Y
+z=Z
+vx=VX
+vy=VY
+vz=VZ
+#scale=yes
+#mode=smooth
+#scenario=1
+#opacityTF=5 3 2.5
+####### 
+########### Sect 3 Volume
+#vrendering=yes
+#isosurface=no
+slice=yes
+#shadow=no
+#vrenderingfield=density
+slicefield=density
+sliceplane=x
+#sliceposition=1
+#sliceplanenormal= 1 1 1
+#sliceplanepoint= 10 10 10
+#isosurfacefield=density
+#isosurfacevalue=20
+#wireframe=no
+#isosmooth=none
+#vtkimage=yes
+#vtkimsize= 128 128 128
+#vtkgausexp= -1
+#vtkspacingfact= 1
+#vtkscale=1
+#vtkecc= 1
+################# Sect 5 Camera
+#camazim=45
+#camelev=45
+zoom=1.0
+campos= 35 35 100
+camfp= 35 35 35
+camroll=0
+nodefault=yes 			
+#largeimage=no
+#stereo=CristalEyes
+#stereo=Anaglyph
+#anaglyphsat=0.65
+#anaglyphmask= 4 3
+stereo=RedBlue
+################# Sect 4 Colour
+color=yes
+colorscalar=density
+colortable=mytab.pal
+#colorrangefrom=0
+#colorrangeto=1
+onecolor=white
+backcolor=black
+showlut=yes
+#opacity=0.666
+#logscale=no
+###########  Sect 5 Glyphs
+#glyphs=sphere
+#scaleglyphs=no
+#radius=1.0
+#radiusscalar=ColumnName
+#height=1.0
+#heightscalar=ColumnName
+#vectorline=yes
+#vectorscalefactor=1.0
+#vectorscale=1
+########## Sect 6 gLite
+#lfnout=lfn://grid/cometa/ube/VSImage
+#VO=cometa
+#se=inaf-se-01.ct.pi2s2.it
+##############  SPLOTCH SECTION: new parameters
+# color_is_vector=true leggo colori da vx,vy,vz, false leggo da colortable o da "palette" di Splotch
+#color_is_vector=false
+# only on ptype in VisIVO: only palette0 is allowed. Va in precedenza sulla lut di visivo!
+#palette0=klaus.pal
+#geometry_file se è dato le posizioni camera (3) lookat (3) e sky(3) sono lette da file (9 valori)
+#geometry_file=my_geometryFile
+#geometry_start=0
+#geometry_inc=0
+#genera stereo attivo con Splotch: valori in gradi?
+#EyeSeparation=3
+# a che serve ptypes?
+#ptypes=1
+# usati nel reader
+#r_col=nome
+#I_col=nome
+#C1_col=nome
+#C2_col=nome
+#C3_col=nome
+##############  SPLOTCH SECTION
+# Visualization properties for gas

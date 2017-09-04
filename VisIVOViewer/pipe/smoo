@@ -1,0 +1,69 @@
+    struct stat stFileInfo;
+    vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
+    vtkSmartPointer<vtkPiecewiseFunction> opacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
+    vtkSmartPointer<vtkColorTransferFunction> colorTransferFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
+    vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> volumeMapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
+    vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
+    vtkSmartPointer<vtkContourFilter> surface = vtkSmartPointer<vtkContourFilter>::New();
+    vtkSmartPointer<vtkGaussianSplatter>splatter = vtkSmartPointer<vtkGaussianSplatter>::New();
+
+    if (stat(OutputFilenameImage.c_str(),&stFileInfo))
+    {   // The vtkImage file cannot be loaded from file so we create it and write to file
+        double bounds[6];
+        int ngridX=256, ngridY=256, ngridZ=256;
+        // construct a Splatting pipeline
+        double dx=bounds[1]-bounds[0];
+        double dy=bounds[3]-bounds[2];
+        double dz=bounds[5]-bounds[4];
+        double maxDelta=0.;
+        int indexDelta=1;
+        if(maxDelta<=dx){maxDelta=dx; indexDelta=ngridX;}
+        if(maxDelta<=dy){maxDelta=dy; indexDelta=ngridY;}
+        if(maxDelta<=dz){maxDelta=dz; indexDelta=ngridZ;}
+        float splatterRadius=0.015;
+        splatter->SetInput(pPolyData);
+        splatter->SetSampleDimensions(ngridX,ngridY,ngridZ);
+        splatter->SetRadius(splatterRadius);
+        splatter->ScalarWarpingOff();
+        splatter->SetExponentFactor(-20.0);
+        vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New();
+        writer->SetInput(splatter->GetOutput());
+        writer->SetFileName(OutputFilenameImage.c_str());
+        writer->Write();
+        volumeMapper->SetInput(splatter->GetOutput());
+        vtkSmartPointer<vtkXMLImageDataWriter> writer2 = vtkSmartPointer<vtkXMLImageDataWriter>::New();
+        writer2->SetInput(splatter->GetOutput());
+        writer2->SetFileName(OutputFilenameImage.c_str());
+        writer2->Write();
+    }
+    else { // The vtkImage file can be loaded from file
+        vtkSmartPointer<vtkXMLImageDataReader> imageReader =    vtkSmartPointer<vtkXMLImageDataReader>::New();
+        imageReader->SetFileName(OutputFilenameImage.c_str());
+        imageReader->Update();
+        volumeMapper->SetInput(imageReader->GetOutput());
+        surface->SetInput(imageReader->GetOutput());
+    }
+    volumeMapper->SetImageSampleDistance(0.5);
+    volume->SetMapper(volumeMapper);
+    // A smart Color map ...8  points...
+    colorTransferFunction->AddRGBPoint(0,0,0,0);
+    colorTransferFunction->AddRGBPoint(0.396415,1,0,0);
+    colorTransferFunction->AddRGBPoint(0.531872,1,0,0);
+    colorTransferFunction->AddRGBPoint(0.697211,0.901961,0,0);
+    colorTransferFunction->AddRGBPoint(0.76494,0.901961,0.831891,0);
+    colorTransferFunction->AddRGBPoint(0.824701,0.901961,0.831891,0);
+    colorTransferFunction->AddRGBPoint(0.888446,0.901961,0.901961,0);
+    colorTransferFunction->AddRGBPoint(1,1,1,1);
+    double step=1.0/256;
+    double opValue=0;
+    for (double i=0; i<=1; i+=step)
+    {
+        opValue=(tanh(5*i-3)+1)/2.5;
+        opacityTransferFunction->AddPoint(i,opValue);
+    }
+    volumeProperty->SetScalarOpacity(opacityTransferFunction);
+    volumeProperty->ShadeOff();
+    volumeProperty->SetInterpolationTypeToLinear();
+    volumeProperty->SetColor(colorTransferFunction);
+    volume->SetProperty(volumeProperty);
+    // END:  some  Volume rendering staff ... just to improve visualization...

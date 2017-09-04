@@ -1,0 +1,211 @@
+######################################################
+#  VisIVO Server 1.2 - Howto build and test on GLite #
+#  Date:  2011-04-21                	             #
+######################################################
+
+In order to compile VisIVO Server and VisIVO library you should have:
+
+---------------------------------------------------------------------------------------
+-- Utilities
+
+gcc/g++ compilers
+cmake (2.4.8 or later)
+subversion
+
+
+-- Libraries
+
+static libcurl
+cfitsio
+hdf5
+VTK 5.6 with MESA Libraries 7.2
+---------------------------------------------------------------------------------------
+
+
+
+# Installation steps (on RHEL, Scientific Linux and CentOS distributions)
+
+
+-- Utilities
+
+1) gcc/g++ (installed by default)
+     yum install gcc gcc-c++
+
+2) cmake
+     yum install cmake
+
+3) subversion
+     yum install subversion
+
+
+-- Libraries
+
+1) static libcurl
+        wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/curl-7.19.4.tar.gz
+        tar zxf curl-7.19.4.tar.gz
+        cd curl-7.19.4
+
+        choose an installation path (e.g. /opt/curl-7.19.4)
+
+        ./configure --disable-shared --enable-static --without-ssl --without-libssh2 --without-libidn --prefix=/opt/curl-7.19.4
+
+        make 
+        make install
+
+
+2) cfitsio
+     yum install cfitsio cfitsio-devel
+
+3) hdf5
+     yum install hdf5 hdf5-devel
+
+4) VTK 5.6 with MESA Libraries 7.2
+
+   a) Install libXt-devel libXext-devel
+        yum install libXt-devel libXext-devel
+
+   b) Build Mesa libraries 7.2
+        choose a building path (e.g. VisIVORoot)
+        cd VisIVORoot
+          wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/MesaLib-7.2.tar.gz
+          tar zxf MesaLib-7.2.tar.gz
+          cd Mesa-7.2
+            make linux-x86-64 if you have a 64 bit OS
+            or
+            make linux-x86-32 if you have a 32 bit OS
+            make install
+
+   c) Configure the dynamic linker run time bindings
+        if you have a 64 bits OS
+          echo "/usr/local/lib64" > /etc/ld.so.conf.d/mesa-x86_64.conf
+        if you have a 32 bits OS
+          echo "/usr/local/lib" > /etc/ld.so.conf.d/mesa-i386.conf
+        ldconfig (as root)
+
+   d) Build VTK 5.6
+        cd <your building path>
+        wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/vtk-5.6.0.tar.gz
+        tar zxf vtk-5.6.0.tar.gz
+          Comment the lines 1484 and 1485 on VTK/Rendering/vtkXOpenGLRenderWindow.cxx
+          getting rid in the quickly of an annoying bug in VTK as follows:
+            //vtkErrorMacro(<< "bad X server connection. DISPLAY="
+             // << vtksys::SystemTools::GetEnv("DISPLAY") << "\n");
+        cd VTK
+        mkdir build
+        cd build
+        ccmake ../
+          press 'c' on the cmake interface
+          press 'c'
+          press 't' to toggle advanced mode (ON)
+            set BUILD_SHARED_LIBS to OFF
+            set VTK_OPENGL_HAS_OSMESA to ON
+          press 'c'
+          press 'c'
+
+          make sure that the following values are properly set:
+            (change "lib" with "lib64" if you use  have a 64 bit OS)
+            OPENGL_INCLUDE_DIR               /usr/local/include                                                           
+            OPENGL_gl_LIBRARY                /usr/local/lib/libGL.so                                                    
+            OPENGL_glu_LIBRARY               /usr/local/lib/libGLU.so                                                    
+            OPENGL_xmesa_INCLUDE_DIR         /usr/local/include/GL                                                           
+            OSMESA_INCLUDE_DIR               /usr/local/include/GL                                                           
+            OSMESA_LIBRARY                   /usr/local/lib/libOSMesa.so
+
+          set
+            CMAKE_BUILD_TYPE                 Release
+            VTK_USE_OFFSCREEN                ON
+
+          choose a path for vtk installation (e.g.):
+            CMAKE_INSTALL_PREFIX             /opt/vtk-5.6.0
+
+          press 'c'
+          press 'g'
+
+        make
+        make install
+
+
+-- VisIVOServer
+
+  svn co https://visivoserver.svn.sourceforge.net/svnroot/visivoserver/branches/1.2 visivoserver
+
+  open with a text editor the visivoserver/CMakeList.txt file
+    check for VTK installation directory and modify the following line
+      SET(VTK_DIR /opt/vtk56/lib/vtk-5.6)
+
+   be sure that:
+
+      if(LIGHT)
+      INCLUDE_DIRECTORIES(/usr/include/cfitsio)
+      INCLUDE_DIRECTORIES(/opt/curl-7.19.4/include)
+      LINK_DIRECTORIES(/opt/curl-7.19.4/lib)
+      LINK_LIBRARIES(rt)
+      else(LIGHT)
+
+    make sure that the following values are properly set
+
+      INCLUDE_DIRECTORIES(/usr/include)
+      LINK_DIRECTORIES(/usr/lib64)
+
+    change the following on VisIVOImporter/Importers/hdf5source.cpp in case of 
+    compilation errors on this file and recompile
+     
+Be sure that for lines: 77-78, 164-165 and 286-287 are
+  
+        //    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str());
+            hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str(),H5P_DEFAULT);
+
+        //    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str());
+            hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str(),H5P_DEFAULT);
+
+        //    sourceObj[k] = H5Dopen(m_sourceId,m_vDatasetList[k].c_str());   
+            sourceObj[k] = H5Dopen(m_sourceId,m_vDatasetList[k].c_str(),H5P_DEFAULT);
+  
+  cd visivoserver
+  mkdir build
+  cd build
+  ccmake ../
+    press 'c'
+
+    set VSAPILIB ON to create library or OFF to create VisIVO Server executables
+      (VisIVOImporter VisIVOFilters VisIVOViewer VisIVOUtils)
+
+    set LIGHT ON
+
+    set GLITE ON
+
+    press 'c'
+    press 'g'
+
+  make
+  make install
+
+#########################################
+#  Test the installation		#
+#########################################
+
+TEST 1:
+
+The directory testGLite contain a table mrvbt16.ascii, and produces nine images from it.
+
+The user must customize the following steps.
+
+Step 1: Register the table in the catalogue 
+
+lcg-cr --vo cometa -l lfn://grid/cometa/ube/mrvbt16.ascii file://$PWD/mrvbt16.ascii -d inaf-se-01.ct.pi2s2.it
+
+Step 2: Submit the job 
+
+glite-wms-job-submit -d ube -o job_id VisIVO.jdl 
+
+The script VisIVO_testGLite.sh will produce the images in the catalogue
+
+
+TEST 2:
+
+Test the VisIVO Library.
+An user demo program myprogram.c read the file in the catalogue lfn://grid/cometa/ube/mrvbt16.ascii: import it, create a new field in the table and create sequence of images in the catalogue lfn:///grid/cometa/ube/VVmrvbt16_0000000.png  - lfn:///grid/cometa/ube/VVmrvbt16_0000010.png
+
+The user must customize and submit the VisIVOAPI.jdl. The job compiles and links myprogram.c,  creates the executable and runs it. 
+
+This directory contain an example Makefile the user can use to compile its progrmas.

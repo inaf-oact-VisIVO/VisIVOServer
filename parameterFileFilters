@@ -1,0 +1,373 @@
+# Use This file to build the Filter parameter File.
+# All the filters with all the options are here reported
+# Uncomment the options you need and write the corrected values.
+
+#-----------------------
+# General Option
+#memsizelimit=30.0
+#lfnout=lfn://grid/cometa/ube/VSImage
+#VO=cometa
+#se=inaf-se-01.ct.pi2s2.it
+
+#-----------------------
+# addId  Filter
+#
+#op=addId 
+#outcol=colName 
+#start=1 
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+# AHFstep Filter
+#
+#op=AHFstep 
+#input=AmigaParameterFile
+#help=true
+
+#---------------------
+# ahfhalogalaxyext Filter
+#
+#op=ahfhalogalaxyext 
+#field= col1 col2 col3 
+#multilist=in_mutlist_File 
+#threshold=1.0
+#out=out_multilist_file
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+# ahfhalolist Filter
+#
+#op=ahfhalolist 
+#field=col_name
+#multilist=in_mutlist_File 
+#out=out_multilist_file
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+# append Filter
+#
+#op=append   
+#out=filename_out.bin
+#help=true 
+#file=table_list.txt
+
+#---------------------
+# cartesian2polar Filter
+#
+#op=cartesian2polar 
+#field=X Y Z
+#append=true
+#outcol=rho theta phi
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#   changecolname Filter
+#
+#op=changecolname   
+#field=colOldName1 colIOldName2
+#newnames=colNewName1 colNewName2
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  coarsevolume Filter
+#
+#op=coarsevolume
+#perc=10.0
+#newres=16 16 16
+#field=Col1 Col2 
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  cut Filter 
+#
+#op=cut   
+#field=Col1 Col2 
+#limits=limitsfile.txt 
+#threshold=0.
+#operator=AND
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+# decimator  Filter
+#
+#op=decimator   
+#skip=9
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  extractlist Filter
+#
+#op=extractlist   
+#multilist=filename_list
+#binaryint=true
+#asciilist=true
+#numberlists=2
+#listelements 1000
+#onelist=true
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  extraction Filter
+#
+#op=extraction   
+#geometry=geometry_file
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  extractsubvolume Filter
+#
+#op=extractsubvolume  
+#startingcell=10 10 10
+#resolution=16 16 16
+#field=Col1 Col2
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  grid2point Filter
+#
+#op=grid2point   
+#points=X Y Z
+#field=columnName
+#density=true
+#append=true
+#outcol= outColumnName
+#tsc=true
+#ngp=true
+#volume=inputVolmeData.bin
+#gridOrigin=0 0 0
+#gridSpacing=1 1 1
+#box=100
+#periodic=true
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  interpolate Filter
+#
+#op=interpolate   
+#list=X Y Z
+#numbin=10
+#periodic=true
+#interval=0.0 1.0
+#out=filename_out.bin
+#help=true 
+#infiles=file_start.bin file_end.bin
+
+#---------------------
+#  mathop Filter
+#
+#op=mathop  
+#expression=mathExpressionFile.txt
+#compute=(Col1*Col2)/Col3
+#append=true
+#outcol=ColRes
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  merge Filter
+#
+#op=merge 
+#size=HUGE
+#pad=0.0
+#out=filename_out.bin
+#help=true 
+#file=table_param.txt
+
+#---------------------
+#  module Filter
+#
+#op=module   
+#field=Vx Vy Vz
+#append=true
+#outcol=Module
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  pointdistribute Filter
+#
+#op=pointdistribute   
+#resolution=32 32 32
+#points=X Y Z
+#field=Mass
+#nodensity=true
+#avg=true
+#tsc=true
+#ngp=true
+#gridOrigin=0 0 0
+#box=100
+#gridSpacing=100 100 100
+#periodic=true
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  pointproperty Filter
+#
+#op=pointproperty   
+#resolution=32 32 32
+#points=X Y Z
+#field=Mass
+#append=true
+#outcol=ColName
+#periodic=true
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+# randomizer  Filter
+#
+#op=randomizer   
+#perc=10
+#list=X Y Z
+#iseed=0
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  selcolumns Filter
+#
+#op=selcolumns   
+#list=X Y Z
+#extract=true
+#delete=true
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  selfield Filter
+#
+#op=selfield   
+#limits=limitsfile.txt 
+#operator=AND
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+# showtable  Filter
+#
+#op=showtable   
+#field=Col1 Col2 Col3
+#numrows=100
+#rangerows=10 110
+#width=10
+#precision=5
+#out=filename_out.txt
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+# showvol  Filter
+#
+#op=showvol   
+#field=Col1 Col2 Col3
+#limits=limitsfile.txt 
+#operator=AND
+#numcells=100
+#out=filename_out.txt
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  sigmacontours Filter
+#
+#op=sigmacontours   
+#nsigma=3
+#field=F1 F2 F3
+#allcolumns=true
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  statistic Filter
+#
+#op=statistic   
+#list=X Y Z
+#histogram=true
+#histogram=1000
+#range=0 100
+#out=result.txt
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  splittable Filter
+#
+#op=splittable   
+#field=Col1 Col2 Col3
+#volumesplit=1
+#numoftables=100
+#maxsizetable=10
+#hugesplit=true
+#out=prefix_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  swap Filter
+#
+#op=swap   
+#override=true
+#out=filename_out.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+# vbt2ahf  Filter
+#
+#op=vbt2ahf   
+#field=X Y Z Vx Vy Vz
+#par=ahfParameterFile.txt 
+#out=filename_out
+#help=true 
+#file=inputFile.bin
+
+#---------------------
+#  visualop Filter
+#
+#op=visualop   
+#size=1000000
+#out=filename_out.bin
+#help=true 
+#file=tab_selection_file.txt
+
+#---------------------
+#  wrvotable Filter
+#
+# 
+#op =wrvotable  
+#field=Col1 Col2 Col3
+#force=true
+#out= filename_out.xml
+#help=true 
+#file=inputFile.bin
+#********************************
+

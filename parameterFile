@@ -1,0 +1,65 @@
+############## VisIVO SECTION
+######## Sect 1 General
+#volume=no			
+#vector=no			
+splotch=yes			
+input=p2.bin
+out=VVImage
+showbox=yes
+showaxes=no
+#imagesize=medium
+#cycle=cicleFilename
+#cycleoffset=0
+#cycle_skip_from=0
+#cycle_skip_to=0
+######## Sect 2 Points and vectors
+x=X
+y=Y
+z=Z
+vx=Vx
+vy=Vy
+vz=Vz
+#scale=yes
+#mode=smooth
+#scenario=1
+#opacityTF=5 3 2.5
+####### 
+########### Sect 3 Volume
+################# Sect 5 Camera
+camazim=45
+camelev=45
+zoom=1.0
+nodefault=yes 			
+#largeimage=no
+#stereo=CristalEyes
+#stereo=Anaglyph
+#anaglyphsat=0.65
+#anaglyphmask= 4 3
+#stereo=RedBlue
+################# Sect 4 Colour
+color=yes
+#colorscalar=density
+#colortable=mytab.pal
+#colorrangefrom=0
+#colorrangeto=1
+#onecolor=white
+#backcolor=black
+#showlut=yes
+#opacity=0.666
+#logscale=no
+###########  Sect 5 Glyphs
+#glyphs=sphere
+#scaleglyphs=no
+#radius=1.0
+#radiusscalar=ColumnName
+#height=1.0
+#heightscalar=ColumnName
+#vectorline=yes
+#vectorscalefactor=1.0
+#vectorscale=1
+########## Sect 6 gLite
+lfnout=lfn://grid/cometa/ube/VSImage
+VO=cometa
+se=inaf-se-01.ct.pi2s2.it
+##############  SPLOTCH SECTION
+## See the user manual for the list of parameters

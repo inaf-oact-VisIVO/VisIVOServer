@@ -1,0 +1,540 @@
+############################
+# VisIVO Server 1.2        #
+# Date:   2011             #
+############################
+
+In order to compile VisIVO Server and VisIVO Library you should have:
+
+---------------------------------------------------------------------------------------
+svn
+gcc 4.1
+cmake 2.4.8 or  2.6
+---------------------------------------------------------------------------------------
+NOTE: 
+
+VisIVO can be installe din a LIGHT version. The light version does not have the xml document Importer and 
+canno access remote documents with sftp protocol.
+
+1) STEP 1
+
+
+svn:
+
+Installation with installer or rpm distribution: (Common Linux OS):
+
+yum install subversion
+aptitude install  subversion             
+.... 
+
+1) STEP 2
+
+
+CMAKE  installation:
+
+Installation with installer or rpm distribution: (Common Linux OS):
+
+yum install cmake-curses-gui
+aptitude install cmake-curses-gui             
+.... 
+
+Aternative way:
+
+install the  libncurses developing package then
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/cmake-2.6.3.tar.gz
+tar -xvzf cmake-2.6.3.tar.gz
+cd cmake-2.6.3
+./configure
+make
+make install
+
+
+
+
+STEP 3
+
+libcurl 
+
+FOR LIGHT VERSION
+
+Installation with installer or rpm distribution: (Common Linux OS):
+
+yum install libcurl-devel
+aptitude install libcurl3-dev
+.....
+
+Aternative way:
+
+install curl-7.19.4
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/curl-7.19.4.tar.gz
+tar -xvzf curl-7.19.4.tar.gz
+cd curl-7.19.4
+
+compile and install 
+
+choose an installation path (e.g. /opt/curl7_19_4)
+
+./configure  --disable-shared --enable-static  --prefix=/opt/curl7_19_4
+make 
+make install
+
+
+     
+FOR FULL VERSION
+
+(on Ubuntu please install  libcrypto++-dev: aptitude install libcrypto++-dev  )
+
+1)build a static libcurl with a support for ssh & ssl 
+
+b)openssl-0.9.8
+
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/openssl-0.9.8j.tar.gz
+tar -xvzf openssl-0.9.8j.tar.gz
+cd openssl-0.9.8j
+
+choose an installation path (e.g. /opt/openssl)
+
+./config --prefix=/opt/openssl0_9_8 no-shared
+make 
+make install
+
+a)libssh2-1.0
+
+compile and install  libssh2-1.0
+
+
+install libssl-dev libcrypto++-dev  libwww-ssl-dev
+
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/libssh2-1.0.tar.gz
+tar -xvzf libssh2-1.0.tar.gz
+cd libssh2-1.0
+
+choose an installation path (e.g. /opt/libssh2_1)
+./configure --with-openssl=/opt/openssl0_9_8/ --disable-shared --enable-static --prefix=/opt/libssh2_1 
+make 
+make install
+
+
+b)curl-7.19.4
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/curl-7.19.4.tar.gz
+tar -xvzf curl-7.19.4.tar.gz
+cd curl-7.19.4
+
+compile and install 
+
+choose an installation path (e.g. /opt/curl7_19_4)
+
+./configure  --disable-shared --enable-static --with-libssh2=/opt/libssh2_1/ --prefix=/opt/curl7_19_4
+make 
+make install
+
+
+STEP 4
+
+Xerces-c
+
+FOR LIGHT VERSION
+
+skip this step
+
+FOR FULL VERSION
+
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/xerces-c-src_2_8_0.tar.gz
+tar -xvzf  xerces-c-src_2_8_0.tar.gz
+cd xerces-c-src_2_8_0 
+export XERCESCROOT=$PWD
+cd src/xercesc/
+
+choose an installation path (e.g. /opt/xerces2_8_0)
+
+if you have a 64 bits Operating System:
+./runConfigure -plinux -cgcc -xg++ -s -P /opt/xerces2_8_0 -b64 
+
+otherwise
+./runConfigure -plinux -cgcc -xg++ -s -P /opt/xerces2_8_0 
+
+make
+make install
+
+STEP 5
+cfitsio
+
+Installation with installer or rpm distribution: (Common Linux OS):
+yum install cfitsio cfitsio-devel 
+aptitude install libcfitsio3-dev
+...
+
+Alternative way:
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/cfitsio3100.tar.gz
+tar -xvzf cfitsio3100.tar.gz
+cd cfitsio
+
+choose an installation path (e.g. /opt/cfitsio3_1_0)
+./configure --disable-shared --enable-static --prefix=/opt/cfitsio3_1_0
+make
+make install
+
+STEP 6
+
+hdf5
+
+FOR LIGHT VERSION
+
+Installation with installer or rpm distribution: (common Linux OS). Suggested.
+yum install hdf5 hdf5-devel
+aptitude install libhdf5-serial-dev
+...
+
+Alternative way (Please look for KNOWN BUGS).
+
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/hdf5-1.8.5-patch1.tar.gz
+tar -xzvf hdf5-1.8.5-patch1.tar.gz
+mkdir hdf5-1.8.5-patch1_build
+cd hdf5-1.8.5-patch1_build
+
+../hdf5-1.8.5-patch1/configure --prefix=/opt/hdf5-1.8.5-patch1 --disable-shared --enable-cxx 
+
+make
+make check
+make install
+
+FOR FULL VERSION
+
+Installation with installer or rpm distribution: (common Linux OS). 
+NOT suggested (Please look for KNOWN BUGS).
+
+yum install hdf5 hdf5-devel
+aptitude install libhdf5-serial-dev
+...
+
+1)zlib
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/zlib-1.2.5.tar.gz
+tar -xvzf zlib-1.2.5.tar.gz
+cd zlib-1.2.5
+./configure --prefix=/opt/zlib;
+make test
+make install
+
+
+2)szip
+mkdir /opt/Szip
+cd /opt/Szip
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/sz112b_src.tar.gz
+tar -xzvf sz112b_src.tar.gz
+make
+
+
+3)hdf5
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/hdf5-1.8.5-patch1.tar.gz
+tar -xzvf hdf5-1.8.5-patch1.tar.gz
+mkdir hdf5-1.8.5-patch1_build
+cd hdf5-1.8.5-patch1_build
+
+../hdf5-1.8.5-patch1/configure --prefix=/opt/hdf5-1.8.5-patch1 --disable-shared --enable-cxx --with-zlib=/opt/zlib/include,/opt/zlib/lib --with-szlib=/opt/Szip
+
+make
+make check
+make install
+
+STEP 7
+
+vtk5
+
+FOR LIGHT and FULL VERSIONS
+
+The vtk5 can installed using Mesa library. In this case the VisIVO Server will not use the 
+Server X and windows are not opened when images are produced. This is the recommended procedure.
+However if the user want use the Server X when image are produced can follow  a more simple installation. 
+Note that some errors could occurs during the prodution of images.
+
+INSTALLATION USING MESA LIBRARY (Recommended)
+skip this step if you want use the Server X
+
+1)
+
+On CentOS system:
+
+if you have a 64 bits OS
+yum install  libXt-devel libXext-devel.x86_64
+
+if you have a 32 bits OS
+yum install  libXt-devel libXext-devel
+
+Ubuntu:
+aptitude install libx11-devel 
+aptitude install libxt-dev
+aptitude install libxext-dev
+
+
+2) 
+Build mesa libraries 7.2
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/MesaLib-7.2.tar.gz
+tar -xvzf MesaLib-7.2.tar.gz
+cd Mesa-7.2
+
+make linux-x86-64 if you have a 64 bit OS
+or
+make linux-x86-32 if you have a 32 bit OS
+ 
+make install
+
+
+3)
+Configure configure the dynamic linker run time bindings:
+in CentOS: 
+
+echo "/usr/local/lib64" > /etc/ld.so.conf.d/mesa-x86_64.conf
+if you have a 64 bits OS
+
+echo "/usr/local/lib" > /etc/ld.so.conf.d/mesa-i386.conf
+if you have a 32 bits OS
+
+then run as root ldconfig
+
+4) Build vtk5.6
+
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/vtk-5.6.0.tar.gz
+tar -xvzf vtk-5.6.0.tar.gz
+
+Please comment the lines 1484 and 1485 on
+VTK/Rendering/vtkXOpenGLRenderWindow.cxx
+getting rid in the quickly  of an annoying bug in VTK
+
+      //vtkErrorMacro(<< "bad X server connection. DISPLAY="
+       // << vtksys::SystemTools::GetEnv("DISPLAY") << "\n");
+
+
+
+cd VTK
+mkdir build
+cd build
+ccmake ../
+
+press 'c' on the cmake interface
+press 'c'
+press 't' to toggle the advanced conf. settings
+
+
+set BUILD SHARED LIBS to OFF
+Enable VTK_OPENGL_HAS_OSMESA
+
+press 'c'
+press 'c'
+
+ 
+Make sure that yhe  following values are properly set:  
+
+If you compiled your version of Mesa Libraries:
+assuming that MESADIR is the parent Directory where you made the build of Mesa-7.2 libraries:
+You have to change "lib" with "lib64" if you use  have a 64 bit OS 
+
+ OPENGL_INCLUDE_DIR               /usr/local/include                                                           
+ OPENGL_gl_LIBRARY                /usr/local/lib/libGL.so                                                    
+ OPENGL_glu_LIBRARY               /usr/local/lib/libGLU.so                                                    
+ OPENGL_xmesa_INCLUDE_DIR         /usr/local/include/GL                                                           
+ OSMESA_INCLUDE_DIR               /usr/local/include/GL                                                           
+ OSMESA_LIBRARY                   /usr/local/lib/libOSMesa.so
+
+set 
+CMAKE_BUILD_TYPE                 Release
+VTK_USE_OFFSCREEN                ON
+
+choose a path for vtk installation (e.g.):
+CMAKE_INSTALL_PREFIX             /opt/vtk56
+
+
+
+press 'c'
+press 'g'
+
+make 
+make install
+
+INSTALLATION WITHOUT MESA LIBRARY 
+Skip this step if you have installed vtk5.6 with Mesa
+
+wget ftp://astrct.oact.inaf.it/pub/VisIVO/sw/vtk-5.6.0.tar.gz
+tar -xvzf vtk-5.6.0.tar.gz
+cd VTK
+mkdir build
+cd build
+ccmake ../
+press 'c' on the cmake interface
+
+set 
+CMAKE_BUILD_TYPE                 Release
+
+choose a path for vtk installation (e.g.):
+CMAKE_INSTALL_PREFIX             /opt/vtk56
+
+
+press 'c'
+press 'g'
+
+make 
+make install
+
+ 
+
+
+STEP 8
+INSTALLING VisIVO Server
+
+svn co https://visivoserver.svn.sourceforge.net/svnroot/visivoserver/branches/1.2 visivoserver
+
+******************************************************************
+FOR LIGHT VERSION
+******************************************************************
+
+In this howto we are building a static VisIVO and we have choosen some customized path 
+so we have to customize  out CMakeLists.txt file to reflect these changes
+in particular we add some INCLUDE:DIRECTORIES and some LINK_DIRECTORIES
+
+If you have used the alternative way  for the installations, 
+the paths in this document you have to change accordingly the following lines in the CMakeLists.txt file on
+visivoserver directory.
+
+CMakeList.txt file: 
+
+In the section  
+
+if(LIGHT)
+#nothing to do
+else(LIGHT)
+
+you can add the following:
+
+INCLUDE_DIRECTORIES(/opt/cfitsio3_1_0/include)
+INCLUDE_DIRECTORIES(/opt/curl7_19_4/include)
+INCLUDE_DIRECTORIES(/opt/hdf5-1.8.5-patch1/include)
+
+LINK_DIRECTORIES(/opt/cfitsio3_1_0/lib)
+LINK_DIRECTORIES(/opt/curl7_19_4/lib)
+LINK_DIRECTORIES(/opt/libssh2_1/lib)
+LINK_DIRECTORIES(/opt/hdf5-1.8.5-patch1/lib)
+
+Please check for VTK installation directory  and modify the following
+
+SET(VTK_DIR /opt/vtk56/lib/vtk-5.6)
+
+
+cd visivoserver/
+mkdir build
+cd build
+ccmake ../
+
+press 'c'
+
+IMPORTANT NOTE:
+
+set VSAPILIB ON to create library or OFF to create VisIVO Server executables (VisIVOImporter VisIVOFilters VisIVOViewer VisIVOUtils) 
+To compile with MAC OSx set MAC ON to prevent some crash on the VisIVOApi library. 
+
+
+Set LIGHT ON for LIGHT VERSION
+
+Set AHF ON if you want include the AHF filters.
+
+
+press 'c'
+press 'g'
+
+make 
+make install
+
+
+******************************************************************
+FOR FULL VERSION
+******************************************************************
+
+If you have changed the paths in this document you have to change accordingly the following 
+lines in the CMakeLists.txt file in the visivoserver directory: 
+
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/VisIVOImporter/CodeSynthesisXSD2.3/include)
+INCLUDE_DIRECTORIES(/opt/xerces2_8_0/include)
+INCLUDE_DIRECTORIES(/opt/cfitsio3_1_0/include)
+INCLUDE_DIRECTORIES(/opt/curl7_19_4/include)
+INCLUDE_DIRECTORIES(/opt/hdf5-1.8.5-patch1/include)
+
+LINK_DIRECTORIES(/opt/xerces2_8_0/lib)
+LINK_DIRECTORIES(/opt/cfitsio3_1_0/lib)
+LINK_DIRECTORIES(/opt/curl7_19_4/lib)
+LINK_DIRECTORIES(/opt/libssh2_1/lib)
+LINK_DIRECTORIES(/opt/hdf5-1.8.5-patch1/lib)
+LINK_LIBRARIES(xerces-c)
+LINK_LIBRARIES(xerces-depdom)
+
+Please check for VTK installation directory  and modify the following
+
+SET(VTK_DIR /opt/vtk56/lib/vtk-5.6)
+
+
+cd visivoserver/
+mkdir build
+cd build
+ccmake ../
+
+press 'c'
+
+set VSAPILIB ON to create library or OFF to create VisIVO Server executables (VisIVOImporter VisIVOFilters VisIVOViewer VisIVOUtils) 
+To compile with MAC OSx set MAC ON to prevent some crash on the VisIVOApi library. 
+
+Set LIGHT OFF 
+
+Set AHF ON if you want include the AHF filters.
+
+press 'c'
+press 'g'
+
+make 
+make install
+
+KNOWN BUG: Please change the following  on VisIVOImporter/Importers/hdf5source.cpp in case of 
+compilation errors on this file and recompile.
+
+    FOR LIGHT compilation with Alternatve way
+
+    1) Search for line: 77-78 164-165 and 283-284: comment the first line, uncomment the second line
+  
+//    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str());
+    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str(),H5P_DEFAULT);
+
+//    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str());
+    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str(),H5P_DEFAULT);
+
+//    sourceObj[k] = H5Dopen(m_sourceId,m_vDatasetList[k].c_str());   
+    sourceObj[k] = H5Dopen(m_sourceId,m_vDatasetList[k].c_str(),H5P_DEFAULT);   
+
+
+    Comment the first line and uncomment the second line in all three case.
+
+    FOR full compilation without yum aptitude rpm etc
+
+    Search for line: 8-81 168-169 and 286-287: comment the first line and uncomment the second line.
+
+//    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str(),H5P_DEFAULT);
+    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str());
+
+//    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str(),H5P_DEFAULT);
+    hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str());
+
+//    sourceObj[k] = H5Dopen(m_sourceId,m_vDatasetList[k].c_str(),H5P_DEFAULT);   
+    sourceObj[k] = H5Dopen(m_sourceId,m_vDatasetList[k].c_str());   
+
+
+******************************************************************
+TESTING THE LIBRARY
+******************************************************************
+The directory test contains an example user program, a Makefile (customize the file if it is necessary)
+and an ascii table. 
+It produces  views from the table. 
+
+execute:
+
+make
+./myprogram
+
+eleven images are created:
+
+VVmrvbt16_0000000.png
+.....
+VVmrvbt16_0000010.png

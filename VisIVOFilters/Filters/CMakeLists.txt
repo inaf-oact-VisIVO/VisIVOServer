@@ -1,0 +1,94 @@
+if(AHF)
+SET(PRJ_SRC
+
+  vsvisualop.cpp
+  vstableop.cpp
+  vsstatisticop.cpp
+  vstable.cpp
+  vssphereop.cpp
+  vsselectfieldop.cpp
+  vsselectcolumnsop.cpp
+  vsrandomizertableop.cpp
+  vsprinttableop.cpp
+  vsobject.cpp
+  vsmergeop.cpp
+  vsmathop.cpp
+   vsdecimatorop.cpp
+  vsappend.cpp
+  vsshowtableop.cpp
+  parametersparser.cpp
+  fpoptimizer.cpp
+  fparser.cpp
+vspointdistributeop.cpp
+vscoarsevolumeop.cpp
+vsextractsubvolumeop.cpp
+vsexampleop.cpp
+vspointpropertyop.cpp
+vsinterpolateop.cpp
+
+vsmoduleop.cpp
+vssigmacontoursop.cpp
+vspolarop.cpp
+vsgrid2pointdistr.cpp
+vsswapop.cpp
+vsextractlistrowsop.cpp
+vsaddidop.cpp
+vsahfhalolistop.cpp
+vsahfhalogalaxyextop.cpp
+vschangecolnameop.cpp
+vssplittableop.cpp
+vswrvotableop.cpp
+vscutop.cpp
+vsvollimit.cpp
+vsincludeop.cpp
+vsmrfocalpos.cpp
+vsmrcampos.cpp
+)
+else(AHF)
+SET(PRJ_SRC
+
+  vsvisualop.cpp
+  vstableop.cpp
+  vsstatisticop.cpp
+  vstable.cpp
+  vssphereop.cpp
+  vsselectfieldop.cpp
+  vsselectcolumnsop.cpp
+  vsrandomizertableop.cpp
+  vsprinttableop.cpp
+  vsobject.cpp
+  vsmergeop.cpp
+  vsmathop.cpp
+   vsdecimatorop.cpp
+  vsappend.cpp
+  vsshowtableop.cpp
+  parametersparser.cpp
+  fpoptimizer.cpp
+  fparser.cpp
+vspointdistributeop.cpp
+vscoarsevolumeop.cpp
+vsextractsubvolumeop.cpp
+vsexampleop.cpp
+vspointpropertyop.cpp
+vsinterpolateop.cpp
+
+vsmoduleop.cpp
+vssigmacontoursop.cpp
+vspolarop.cpp
+vsgrid2pointdistr.cpp
+vsswapop.cpp
+vsextractlistrowsop.cpp
+vsaddidop.cpp
+
+vschangecolnameop.cpp
+vssplittableop.cpp
+vswrvotableop.cpp
+vscutop.cpp
+vsvollimit.cpp
+vsincludeop.cpp
+
+vsmrcampos.cpp
+
+)
+
+endif(AHF)
