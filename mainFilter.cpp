@@ -27,10 +27,19 @@
 #include <map>
 #include "parametersparser.h"
 #include "startFilter.h"
+#ifdef VSMPI
+#pragma message "MPI-PARALLEL compilation"
+#include "mpi.h"
+#else
+#pragma message "SERIAL compilation"
+#endif
 
 int main(int argc, char *argv[])
 {
-
+#ifdef VSMPI
+    std::cout<<"VSMPI"<<std::endl;
+#endif
+int size=1,rank=0;
 std::string paramFilename;
 
 std::stringstream commandParametersSStream;
@@ -38,6 +47,16 @@ std::map<std::string, std::string> appParameters;
 std::map<std::string, std::string>::iterator iter;
 
 bool paramFileGiven=false;
+
+#ifdef VSMPI
+
+MPI_Init (&argc, &argv);
+MPI_Comm_size (MPI_COMM_WORLD, &size);
+MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+
+#endif
+
+
 if(argc==2)  // The parameter File is given!
 {
 	paramFileGiven=true;
@@ -93,25 +112,41 @@ if(paramFileGiven) //fill  appParameters with parameter file content
   else
 	for (int i=1;i<argc;i++) commandParametersSStream<< argv[i]<<" ";
 
-// TEST ZONE 
-//commandParametersSStream<<"--op extractlist --multilist ugo_oneList --asciilist --onelist --out bodyInField_newone.bin --file VSout_fl_8Ml_0.300.bin"<<" "; 
-//commandParametersSStream<<"--op changecolname --field X Y  --newnames A B C --file VSout_fl_8Ml_0.300.bin"<<" "; 
-//commandParametersSStream<<"--op mathop --expression math_halo_volume.txt --append --outcol HaloVolume1 --file VS_out_fl_0.3000_halos.bin"<<" "; 
-//commandParametersSStream<<"--op mathop --compute <<(Rvir_10*Rvir_10*Rvir_10)/(1000000000)>> --append --outcol HaloVolume --file VS_out_fl_0.3000_halos.bin"<<" "; 
-//commandParametersSStream<<"--op showtable --out ugo.txt --file VS_out_fl_0.3000_halos.bin"<<" "; 
-//commandParametersSStream<<"--op pointdistribute --resolution 70  70 70  --points X Y Z --out VSgrid.bin --tsc --periodic --file VSout_fl_8Ml_0.300.bin"<<" "; 
-//commandParametersSStream<<"--op splittable --field X --numoftables 4 --volumesplit 1 --out VSGsplit  --file VSgrid.bin"<<" "; 
-
-//std::cerr << "TEST0: Command str -> " << commandParametersSStream.str() << std::endl;
-//std::cerr << "TEST1: " << iter2->first << " " << iter2->second << std::endl;
-//std::cerr << "TEST2: valOutFilename[i] = " << valOutFilename[i] << std::endl;
-// END TEST ZONE
-//
 
   ParametersParser myparser(commandParametersSStream.str());
   appParameters=myparser.getParameters();
 } //if paramFileGiven ... else
+int MpiSize=size;
+    iter=appParameters.find("mpisize");
+if(iter != appParameters.end())
+    MpiSize=atoi(iter->second.c_str());
+if(MpiSize>size) MpiSize=size;
+    
+// this part implements the multi processes with MPI. It is the map that contains the info for multiprocess
+// set size ==> size=1 means serial
+///////    
+#ifdef VSMPI
+	int *ranks;
+	ranks= new int[MpiSize];
+    for(int i=0;i<MpiSize;i++) ranks[i]=i;
+    
+    // create a new communicator
+    MPI_Group origGroup, newGroup;
+    MPI_Comm NEW_COMM;    
+    MPI_Comm_group(MPI_COMM_WORLD, &origGroup);
+    MPI_Group_incl(origGroup,MpiSize,ranks,&newGroup);
+    MPI_Comm_create(MPI_COMM_WORLD, newGroup, &NEW_COMM); 
+    startFilter startFilter(appParameters,NEW_COMM); //test of MPI
+  
+//////////
+    
+    
+//startFilter startFilter(appParameters); //default argument MPI_COMM_WORLD assumed in case of MPI
+//#ifdef VSMPI
+MPI_Barrier(MPI_COMM_WORLD);
+MPI_Finalize();
 
+#endif
 startFilter startFilter(appParameters);
 return EXIT_SUCCESS;
 }
