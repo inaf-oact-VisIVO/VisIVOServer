@@ -94,9 +94,11 @@ template<> class svec<int, 4>
 
 typedef svec<int,4> V4si;
 
+/*
 inline V4si shuffle(const V4si &a, const V4si &b, int sh)
-  { return V4si(reinterpret_cast<__m128i>(_mm_shuffle_ps
-    (reinterpret_cast<__m128>(a.v), reinterpret_cast<__m128>(b.v), sh))); }
+{ return V4si(reinterpret_cast<__m128i>( _mm_shuffle_ps
+                                        (reinterpret_cast<__m128>(a.v), reinterpret_cast<__m128>(b.v), sh))); }
+*/
 
 template<typename T> inline T vcast(const V4si &a)
   { return reinterpret_cast<const T &>(a); }

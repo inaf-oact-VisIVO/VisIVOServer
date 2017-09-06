@@ -28,6 +28,7 @@
 #include "vscreatepath.h"
 #include "vscreateslices.h"
 #include "vscreategenericslices.h"
+#include "vsloadhistory.h"
 
 
 int main(int argc, char *argv[])
@@ -52,9 +53,9 @@ iter =appParameters.find("op");
     iter =appParameters.find("help");
       if( iter == appParameters.end())
 	 std::cerr <<"No operation is requested"<<std::endl;
-    std::clog<<"VisIVOUtils Version 1.2 April 2011 "<<std::endl<<std::endl;
+    std::clog<<"VisIVOUtils Version 2.1.1 July 2th 2013 "<<std::endl<<std::endl;
     std::cerr <<"Syntax: VisIVOUtils --op utility  [PARAMETERS] [--help]"<<std::endl;
-    std::cerr <<"valid utilities: createpath, orthoslices, genericslices "<<std::endl;
+    std::cerr <<"valid utilities: createpath, orthoslices, genericslices, loadhistory "<<std::endl;
     return EXIT_SUCCESS;
    }
 std::stringstream sstreamOp(iter->second);
@@ -62,7 +63,8 @@ int idOp=-1;
 
 if(sstreamOp.str()=="createpath") idOp=1;
 if(sstreamOp.str()=="orthoslices") idOp=2;
-if(sstreamOp.str()=="genericslices") idOp=3;
+    if(sstreamOp.str()=="genericslices") idOp=3;
+    if(sstreamOp.str()=="loadhistory") idOp=4;
 
 switch(idOp)
 {
@@ -116,6 +118,21 @@ op.setParameters(appParameters);
 op.execute();
 break;
 }
+case 4:
+{
+        iter =appParameters.find("help");
+        if( iter != appParameters.end())
+        {
+            VSLoadHistoryUT op;
+            op.printHelp();
+            return 1;
+        }
+        
+        VSLoadHistoryUT op;
+        op.setParameters(appParameters);
+        op.execute();
+        break;
+}        
 /***END Create Slice OP **/
 /*** Default **/
 default:
@@ -123,7 +140,7 @@ default:
 
     std::cerr <<"No valid operation was given"<<std::endl;
     std::cerr <<"Syntax: VisIVOUtils --op utility  [PARAMETERS] [--help]"<<std::endl;
-    std::cerr <<"An operation code is expected: createpath, orthoslices, genericslices"<<std::endl;
+    std::cerr <<"An operation code is expected: createpath, orthoslices, genericslices, loadhistory"<<std::endl;
     return 1;
 
 

@@ -55,7 +55,8 @@ int main(int argc, char*argv[])
     args.push_back(argv[i]);
 /*  for (i=0;i<args.size();i++) 
   std::clog << " " << args[i];
-  std::clog <<" args.size()="<<args.size()<<std::endl;;*/
+  std::clog <<" args.size()="<<args.size()<<std::endl;
+ */
   if(pOptSett->parseOption(args)!=0)
   {
     std::cerr<<"Invalid arguments. Operation Aborted."<<std::endl;
@@ -66,10 +67,12 @@ int main(int argc, char*argv[])
   
   pOptSett->readData();
   pOptSett->images();
+    
+  pOptSett->writeHistory();
 
   if ( pOptSett!=0)
     delete pOptSett ;
   
   return 0;
 }
-    
+

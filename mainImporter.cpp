@@ -112,7 +112,7 @@ int main(int argc, char*argv[])
     {
       std::string arg=argv[i];
       std::string arg1=argv[i+1];
-      if((arg=="--fformat" || arg=="-fformat") && arg1=="fitstable" )
+      if((arg=="--fformat" || arg=="-fformat") && (arg1=="fitstable" ||arg1=="fitsimage" ))
       {
 	for (i=1;i<argc;i++) 
     	{
@@ -173,7 +173,11 @@ int main(int argc, char*argv[])
   } //if(!usingParameterFile)
 
 
-  pComLine->parseOption (args );
+  if(pComLine->parseOption (args ) !=0)
+  {
+      return -1;
+      
+  }
   pComLine->loadFile();
 
  
