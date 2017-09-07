@@ -18,56 +18,47 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PIPE_H
-#define PIPE_H
+#ifndef VolumePipe_H
+#define VolumePipe_H
 
-#include "vtkPolyDataMapper.h"
-
-
+#include "pipe.h"
 #include "optionssetter.h"
+#include "visivoutils.h"
 
-class vtkRenderer;
-class vtkRenderWindow;
-class vtkCamera;
-class vtkLookupTable;
-
-
-
-class Pipe
+   class vtkImageData;
+   class vtkVolumeRayCastMapper;
+   class vtkVolume;
+   class vtkColorTransferFunction;
+   class vtkImageMathematics;
+   class vtkPiecewiseFunction;
+   class vtkImageCast;
+   class vtkVolumeProperty;
+   class vtkVolumeRayCastCompositeFunction;
+        
+        
+   class VolumePipe: public Pipe
 {
-  static const double INVALID_CAM;
- 
+
   public:
-
-    //void saveImageAsPng(int num );
-    std::string saveImageAsPng(int num );
-
-    virtual  int createPipe();
-    virtual  void destroyAll(){};
-    virtual  bool readData();
-    virtual  int getCamera(SplotchCamera *splCamera);
+    VolumePipe( VisIVOServerOptions options);
+    ~VolumePipe();
    
-   
-    
   protected:
+   
+    int createPipe();
+    bool setLookupTable();
+    double m_range[2]; 
+   void destroyAll();
     
-    void setCamera (SplotchCamera *splCamera=NULL);
-    void constructVTK();
-     void destroyVTK();
-     void setBoundingBox ( vtkDataObject *data );
-     void colorBar ();
-     virtual  void setAxes(vtkDataSet *data,double *bounds);
-    
-    VisIVOServerOptions m_visOpt;
-    
-     vtkCamera          *m_camera;
-     
-    vtkRenderer       *m_pRenderer;
-    vtkRenderWindow   *m_pRenderWindow;
-    vtkLookupTable      *m_lut;
-    
-
+    vtkColorTransferFunction *m_colorTransferFunction;
+    vtkImageData *m_imageData;
+    vtkImageMathematics *m_math;
+    vtkImageMathematics *m_math2;
+    vtkImageCast *m_charData;
+    vtkPiecewiseFunction *m_opacityTransferFunction;
+    vtkVolumeProperty *m_volumeProperty;
+    vtkVolumeRayCastCompositeFunction * m_rayCastCompositFunction ;
+    vtkVolumeRayCastMapper *m_rayCastMapper ;
+    vtkVolume *m_volume ;
 };
-
 #endif
-

@@ -100,6 +100,7 @@ void VolumePipe::destroyAll()
 int VolumePipe::createPipe()
 //------------------------------------------
 {
+
   m_range[0]= 0;
   m_range[1] = 0;
    
@@ -114,7 +115,7 @@ int VolumePipe::createPipe()
      std::map<std::string, int>::iterator p;
      for(p=m_visOpt.columns.begin();p!=m_visOpt.columns.end();p++)
 	if(p->first==m_visOpt.vRenderingField) vIndex=p->second;
-     
+      
      for(int i=0; i<m_visOpt.nRows;i++)
        volumeField->  SetValue(i,m_visOpt.tableData[vIndex][i]);
   } else
@@ -183,14 +184,24 @@ int VolumePipe::createPipe()
 
 /*  m_opacityTransferFunction->AddPoint(20, 0.0);
   m_opacityTransferFunction->AddPoint(255 ,0.2);*/
-   m_opacityTransferFunction->RemoveAllPoints();
-   m_opacityTransferFunction->AddPoint(0, 0.0);
-   m_opacityTransferFunction->AddPoint(255 ,0.2);
-      
+  //cout << "RED rows:" << m_visOpt.extPalR.size() << "\n";
+
+    m_opacityTransferFunction->RemoveAllPoints();
+    if(m_visOpt.extPalR.size()>0)
+    {
+    for(int i=0;i<m_visOpt.extPalR.size();i++) {
+
+      m_opacityTransferFunction->AddPoint(m_visOpt.extPalId[i], m_visOpt.extPalA[i]);
+    }
+    } else
+    {
+        m_opacityTransferFunction->AddPoint(0, 0.0);
+        m_opacityTransferFunction->AddPoint(255 ,0.2);
+    }
  setLookupTable();
   
 //The property describes how the data will look
-  
+
   m_volumeProperty->SetColor (m_colorTransferFunction);
   m_volumeProperty->SetScalarOpacity (m_opacityTransferFunction);
   if(m_visOpt.vShadow)  m_volumeProperty->ShadeOn();
@@ -213,7 +224,7 @@ int VolumePipe::createPipe()
 
   m_pRenderer->SetBackground ( 0.0,0.0,0.0 );
      if(m_visOpt.backColor=="yellow") m_pRenderer->SetBackground (1, 1 ,0);  
-     if(m_visOpt.backColor=="red")m_pRenderer->SetBackground (1, 0 ,0);  
+     if(m_visOpt.backColor=="red") m_pRenderer->SetBackground (1, 0 ,0);  
      if(m_visOpt.backColor=="green") m_pRenderer->SetBackground (0, 1 ,0);  
      if(m_visOpt.backColor=="blue") m_pRenderer->SetBackground (0, 0 ,1);  
      if(m_visOpt.backColor=="cyan") m_pRenderer->SetBackground (0, 1 ,1);  
@@ -226,10 +237,10 @@ int VolumePipe::createPipe()
 	m_pRenderWindow->SetSize ( 1024,731 );
   else 
 	m_pRenderWindow->SetSize ( 792,566 );
-
       
   m_pRenderWindow->SetWindowName ("VisIVOServer View");
 
+/*
   if(m_visOpt.stereo)
   {  
       m_pRenderWindow->StereoRenderOn();
@@ -260,6 +271,7 @@ int VolumePipe::createPipe()
      }   
       m_pRenderWindow->StereoUpdate();
   }
+  */
 
                 //open view
                 //------------------------------------------------------------------
@@ -297,10 +309,12 @@ int VolumePipe::createPipe()
 bool VolumePipe::setLookupTable()
 //------------------------------------------
 {
+
+
   // Create transfer mapping scalar value to opacity
 
   
-//  m_lut->SetTableRange(m_range);
+  m_lut->SetTableRange(m_range);
    double b[2];
    b[0]=m_range[0];
    b[1]=m_range[1];
@@ -310,8 +324,18 @@ bool VolumePipe::setLookupTable()
 
   m_lut->SetTableRange(b[0],b[1]);
 
+  if(m_visOpt.uselogscale=="yes")
+    m_lut->SetScaleToLog10();
+  else
+    m_lut->SetScaleToLinear();
+ 
+   m_lut->Build();
+
   SelectLookTable(&m_visOpt, m_lut);
   
+
+
+
   int numOfColors = m_lut->GetNumberOfTableValues();
 
   double step = (m_range[1] - m_range[0]) / numOfColors;
@@ -328,7 +352,7 @@ bool VolumePipe::setLookupTable()
     double alpha;
 
     m_lut->GetColor(i,color);
-/*    std::clog<<color[0]<<" "<<color[1]<<" "<<color[2]<<" "<<std::endl;*/
+    //std::clog<<color[0]<<" "<<color[1]<<" "<<color[2]<<" "<<std::endl;
     m_colorTransferFunction->AddRGBPoint(i,color[0], color[1], color[2]);
   }
   

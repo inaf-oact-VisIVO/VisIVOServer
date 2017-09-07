@@ -35,29 +35,23 @@ class vtkLookupTable;
 
 class Pipe
 {
-  static const double INVALID_CAM;
  
   public:
 
-    //void saveImageAsPng(int num );
-    std::string saveImageAsPng(int num );
-
+    void saveImageAsPng(int num );
+      void destroyAll(){};
     virtual  int createPipe();
-    virtual  void destroyAll(){};
-    virtual  bool readData();
-    virtual  int getCamera(SplotchCamera *splCamera);
-   
+    void setAxes(vtkDataSet *data,double *bounds){};   
    
     
   protected:
     
-    void setCamera (SplotchCamera *splCamera=NULL);
+    void setCamera ();
     void constructVTK();
      void destroyVTK();
      void setBoundingBox ( vtkDataObject *data );
      void colorBar ();
-     virtual  void setAxes(vtkDataSet *data,double *bounds);
-    
+     
     VisIVOServerOptions m_visOpt;
     
      vtkCamera          *m_camera;

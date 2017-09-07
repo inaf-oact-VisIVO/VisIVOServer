@@ -362,7 +362,7 @@ int SplotchPipeCamera::vtkCameraData(SplotchCamera *splCamera)
                 //--------------------------------------------------------------------
  //  m_pRenderer->Render();
 
-      setCamera (splCamera);
+     setCamera (splCamera);
 //     QUI
 /*      setAxes ( );
                 //open view

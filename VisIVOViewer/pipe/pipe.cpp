@@ -40,6 +40,13 @@
 
 #include "vtkCubeAxesActor2D.h"
 #include "vtkDataSet.h"
+#include "vsstatisticop.h"
+#include "parametersparser.h"
+#include "vsstatisticop.h"
+#include "vsutils.h"
+#include "vstableop.h"
+
+
 
 const double Pipe::INVALID_CAM = -123456789.31;
 
@@ -103,11 +110,11 @@ void Pipe::destroyVTK()
 		m_lut->Delete() ;
 }
 //------------------------------------
-  void Pipe::saveImageAsPng(int num )
+std::string Pipe::saveImageAsPng(int num )
 //------------------------------------
 {
 	if(m_visOpt.numImage==4 && m_visOpt.azimuth==0 && m_visOpt.elevation==0 && m_visOpt.zoom==1 && !m_visOpt.cycle)
-		return;
+		return "";
     
 
 	else
@@ -186,11 +193,14 @@ void Pipe::destroyVTK()
   
 		if ( w!= 0 )
 			w->Delete();
+        
+        return fileName;
+
 
 	}
 
   	this->destroyVTK();
-	return ;
+	return "";
 
 }
 
@@ -202,12 +212,8 @@ void Pipe::setCamera (SplotchCamera *splCamera)
 	m_camera =m_pRenderer->GetActiveCamera();
 	
 
-	m_camera->SetClippingRange(0.01,1.0e+3);
-
-   
-    
-    
-    
+//	m_camera->SetClippingRange(m_visOpt.cliprange[0],m_visOpt.cliprange[1]);
+	
 	if(m_visOpt.setCameraPos)
 	  if(m_visOpt.cameraPos[0]!=INVALID_CAM && m_visOpt.cameraPos[1]!=INVALID_CAM && m_visOpt.cameraPos[2]!=INVALID_CAM)
 	      m_camera->SetPosition(m_visOpt.cameraPos[0],m_visOpt.cameraPos[1],m_visOpt.cameraPos[2]);
@@ -280,33 +286,42 @@ void Pipe::setCamera (SplotchCamera *splCamera)
 		m_camera->Elevation(m_visOpt.elevation);
 		m_camera->Zoom ( m_visOpt.zoom ); 
 
-	} 
-	
-/*	m_camera->SetClippingRange(0.01,1.0e+13);
-	
-	if(m_visOpt.setCameraPos)
-	  if(m_visOpt.cameraPos[0]!=INVALID_CAM && m_visOpt.cameraPos[1]!=INVALID_CAM && m_visOpt.cameraPos[2]!=INVALID_CAM)
-	      m_camera->SetPosition(m_visOpt.cameraPos[0],m_visOpt.cameraPos[1],m_visOpt.cameraPos[2]);
-	  else if(m_visOpt.cameraPosPrev[0]!=INVALID_CAM && m_visOpt.cameraPosPrev[1]!=INVALID_CAM &&
+	}
+//    double d[2];
+//    m_camera->GetClippingRange(d);
+//    std::clog<<d[0]<<" "<<d[1]<<std::endl;
+    
+       if(m_visOpt.clipset) m_camera->SetClippingRange(m_visOpt.cliprange[0],m_visOpt.cliprange[1]);
+/*    
+	if(m_visOpt.setCameraPos) {
+        if(m_visOpt.cameraPos[0]!=INVALID_CAM && m_visOpt.cameraPos[1]!=INVALID_CAM && m_visOpt.cameraPos[2]!=INVALID_CAM) {
+            m_camera->SetPosition(m_visOpt.cameraPos[0],m_visOpt.cameraPos[1],m_visOpt.cameraPos[2]);
+        }
+    } else if(m_visOpt.cameraPosPrev[0]!=INVALID_CAM && m_visOpt.cameraPosPrev[1]!=INVALID_CAM &&
 	          m_visOpt.cameraPosPrev[2]!=INVALID_CAM)
-	      m_camera->SetPosition(m_visOpt.cameraPosPrev[0],m_visOpt.cameraPosPrev[1],m_visOpt.cameraPosPrev[2]);
-	     
-	  
-	if(m_visOpt.setCameraFocalPoint)
-	  if(m_visOpt.cameraFocalPoint[0]!=INVALID_CAM && m_visOpt.cameraFocalPoint[1]!=INVALID_CAM && m_visOpt.cameraFocalPoint[2]!=INVALID_CAM)
-	    m_camera->SetFocalPoint(m_visOpt.cameraFocalPoint[0],m_visOpt.cameraFocalPoint[1],m_visOpt.cameraFocalPoint[2]);
-	  else if(m_visOpt.cameraFocalPointPrev[0]!=INVALID_CAM && m_visOpt.cameraFocalPointPrev[1]!=INVALID_CAM &&
+    {
+        m_camera->SetPosition(m_visOpt.cameraPosPrev[0],m_visOpt.cameraPosPrev[1],m_visOpt.cameraPosPrev[2]);
+	}
+    
+	if(m_visOpt.setCameraFocalPoint) {
+        if(m_visOpt.cameraFocalPoint[0]!=INVALID_CAM && m_visOpt.cameraFocalPoint[1]!=INVALID_CAM && m_visOpt.cameraFocalPoint[2]!=INVALID_CAM) {
+            m_camera->SetFocalPoint(m_visOpt.cameraFocalPoint[0],m_visOpt.cameraFocalPoint[1],m_visOpt.cameraFocalPoint[2]);
+        }
+    } else if(m_visOpt.cameraFocalPointPrev[0]!=INVALID_CAM && m_visOpt.cameraFocalPointPrev[1]!=INVALID_CAM &&
 	          m_visOpt.cameraFocalPointPrev[2]!=INVALID_CAM)
-	      m_camera->SetFocalPoint(m_visOpt.cameraFocalPointPrev[0],m_visOpt.cameraFocalPointPrev[1],m_visOpt.cameraFocalPointPrev[2]);
-
-	if(m_visOpt.setCameraRoll)
-	  if(m_visOpt.cameraRoll!=INVALID_CAM) 
-	      m_camera->SetRoll(m_visOpt.cameraRoll);
-	  else if(m_visOpt.cameraRollPrev[0]!=INVALID_CAM)
-	       m_camera->SetRoll(m_visOpt.cameraRollPrev[0]);
-
-*/	  
+    {
+        m_camera->SetFocalPoint(m_visOpt.cameraFocalPointPrev[0],m_visOpt.cameraFocalPointPrev[1],m_visOpt.cameraFocalPointPrev[2]);
+    }
+    
+	if(m_visOpt.setCameraRoll) {
+        if(m_visOpt.cameraRoll!=INVALID_CAM) {
+            m_camera->SetRoll(m_visOpt.cameraRoll);
+        }
+    } else if(m_visOpt.cameraRollPrev[0]!=INVALID_CAM) {
+        m_camera->SetRoll(m_visOpt.cameraRollPrev[0]);
+    }
 	  
+*/	  
 	double *gettmp;
 	
 	gettmp= m_camera->GetPosition();

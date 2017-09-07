@@ -616,8 +616,7 @@ void PointsPipe::setLookupTable ()
   
   SelectLookTable(&m_visOpt, m_lut);
 
-  m_pConeMapper->SetLookupTable(m_lut);
- 
+  m_pConeMapper->SetLookupTable(m_lut); 
   m_pConeMapper->SetScalarVisibility(1);
   m_pConeMapper->UseLookupTableScalarRangeOn();
 

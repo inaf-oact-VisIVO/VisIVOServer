@@ -286,7 +286,7 @@ if(m_visOpt.vectorScale==-1) m_Glyph3D->SetScaleMode(3);
    m_PolyDataMapper->SetInput((vtkPolyData *) m_Glyph3D->GetOutput());
   m_PolyDataMapper->SetNumberOfPieces(1);  
   m_PolyDataMapper->SetScalarRange(0 , 0.1);  
-   m_PolyDataMapper->SetColorMode(0);
+   m_PolyDataMapper->SetColorMode(1);
    m_PolyDataMapper->SetResolveCoincidentTopology(0);
    m_PolyDataMapper->SetScalarMode(0);
    m_PolyDataMapper->SetImmediateModeRendering(1);

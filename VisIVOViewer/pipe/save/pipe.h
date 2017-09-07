@@ -39,8 +39,7 @@ class Pipe
  
   public:
 
-    //void saveImageAsPng(int num );
-    std::string saveImageAsPng(int num );
+    void saveImageAsPng(int num );
 
     virtual  int createPipe();
     virtual  void destroyAll(){};
