@@ -77,7 +77,7 @@ void VSInterpolateOp::printHelp()
 {
 	std::cout<<"Interpolate two tables with a linear scale. The two table must have the same structure."<<std::endl<<std::endl;;
 
-	std::cout<<"Usage: VisIVOFilters --op interpolate [--field columns_name]  [--numbin numberbin] [--periodic] [--interval from to] [--index column_name] [--out filename_out] [--help] --infiles file_start.bin file_end.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op interpolate [--field columns_name]  [--numbin numberbin] [--periodic] [--interval from to] [--index column_name] [--out filename_out] [--history] [--historyfile filename.xml] [--help] --infiles file_start.bin file_end.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op interpolate --field X Y Z --numbin 20 --periodic --out mysequence  --infiles start.bin end.bin "<<std::endl<<std::endl;
 
@@ -90,6 +90,9 @@ void VSInterpolateOp::printHelp()
 	std::cout<<"--index is the column that contains points id for the interpolation. If this option is not given, the points order is  implicit in the table."<<std::endl;
 	std::cout<<"--start is the suffix starting number used in --out option"<<std::endl;
 	std::cout<<"--out is the root name of the new tables. Default name is given. New name is given by filename_out#.bin where # is the number of created table."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
+
 	std::cout<<"--infiles contains the names of starting and ending tables of the interpolation process."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 

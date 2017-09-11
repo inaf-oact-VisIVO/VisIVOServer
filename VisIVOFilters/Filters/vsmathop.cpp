@@ -155,7 +155,10 @@ void VSMathOp::printHelp()
 //---------------------------------------------------------------------
 {
 	std::cout<<"Create a new field in a data table as the result of a mathematical operation between the existing fields"<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op mathop [--expression math_expression.txt] [--compute <<expression>>] [--append] [--outcol col_name] [--out filename_out.bin] [--help] [--file] filename.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op mathop [--expression math_expression.txt] [--compute <<expression>>] [--append] [--outcol col_name] [--out filename_out.bin] [--help] [--history] [--historyfile filename.xml] [--file] filename.bin"<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
+
 
 	std::cout<<"Example: VisIVOFilters --op mathop --expression my_expression.txt --outcol SqrMod --out pos_math.bin --file pos.bin"<<std::endl;
 

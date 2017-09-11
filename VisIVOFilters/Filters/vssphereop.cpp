@@ -177,7 +177,7 @@ void VSSphereOp::printHelp()
 //---------------------------------------------------------------------
 {
 	std::cout<<"Create a  new table from an input table of a sub-box or of a sphere. Operation not allowed on volumes."<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op extraction --geometry geometry_file [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op extraction --geometry geometry_file [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op extraction  --geometry geometry.txt --out pos_extracted.bin --file pos.bin"<<std::endl;
 
@@ -203,6 +203,8 @@ void VSSphereOp::printHelp()
 	std::cout<<"Z	0.0"<<std::endl;
 	std::cout<<"CORNER	10.0"<<std::endl;
 	std::cout<<"--out Name of the new table. Default name is given."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 	return;
 }

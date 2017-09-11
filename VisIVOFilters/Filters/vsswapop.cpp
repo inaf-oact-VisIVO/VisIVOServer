@@ -64,13 +64,16 @@ void VSSwapOp::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Endianism swap: little Endian to big Endian and viceversa of a VisIVO Binary Table."<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op swap   [--override] [--out filename_out.bin]  [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op swap   [--override] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op swap  --override --file inputFile.bin"<<std::endl;
 
 std::cout<<"Note:  "<<std::endl;
 std::cout<<"--override The same input table is swapped."<<std::endl;
 std::cout<<"--out Name of the new table. Default name is given. Ignored if --override is specified."<<std::endl;
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
+
 std::cout<<"--file Input table filename."<<std::endl;
 
 std::cout<<"--help produce this output."<<std::endl;

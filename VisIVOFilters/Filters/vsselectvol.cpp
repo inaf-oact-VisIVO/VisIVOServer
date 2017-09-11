@@ -34,36 +34,40 @@
 	#include <time.h>
 #endif
 #include "vstable.h"
-#include "vsvollimit.h"
+#include "vsselectvol.h"
 #include "VisIVOFiltersConfigure.h"
+#include "visivoutils.h"
 
-const unsigned int VSVolLimitOp::MAX_NUMBER_TO_REDUCE_ROW = 10000;
-const unsigned int VSVolLimitOp::MIN_NUMBER_OF_ROW = 100;
-const unsigned int VSVolLimitOp::MAXOUT = 100000;
+const unsigned int VSSelectVolOp::MAX_NUMBER_TO_REDUCE_ROW = 10000;
+const unsigned int VSSelectVolOp::MIN_NUMBER_OF_ROW = 100;
+const unsigned int VSSelectVolOp::MAXOUT = 100000;
 
 
 //---------------------------------------------------------------------
-VSVolLimitOp::VSVolLimitOp()
+VSSelectVolOp::VSSelectVolOp()
 //---------------------------------------------------------------------
 {
  m_fArray=NULL;
+ m_fArrayWrite=NULL; 
  m_nOfRow=0;
  m_nOfCol=0;	
  m_numCells=0;
 }
 //---------------------------------------------------------------------
-VSVolLimitOp::~VSVolLimitOp()
+VSSelectVolOp::~VSSelectVolOp()
 //---------------------------------------------------------------------
 {
 	if(m_fArray!=NULL)	
  	  for(unsigned int i=0;i<m_nOfCol;i++)
 		{
 			if(m_fArray[i]!=NULL) delete [] m_fArray[i];
+			if(m_fArrayWrite[i]!=NULL) delete [] m_fArrayWrite[i];
 		}
 	if(m_fArray!=NULL) delete [] m_fArray;
+        if(m_fArrayWrite!=NULL) delete [] m_fArrayWrite;
 }
 //---------------------------------------------------------------------
-bool VSVolLimitOp::allocatefArray()
+bool VSSelectVolOp::allocatefArray()
 //---------------------------------------------------------------------
 {
 unsigned long long int tempLL=getMaxNumberInt()*2;
@@ -82,6 +86,21 @@ catch(std::bad_alloc &e)
 	{
 		return false;
 	}
+
+try
+{
+        m_fArrayWrite=new  float*[m_nOfCol];
+}
+catch(std::bad_alloc &e)
+{
+        m_fArrayWrite=NULL;
+}
+
+        if(m_fArrayWrite==NULL)
+        {
+                delete [] m_fArray;
+                return false;
+        }
 
 	bool goodAllocation=false;
 	while(!goodAllocation)
@@ -116,29 +135,62 @@ catch(std::bad_alloc &e)
 					m_nOfRow=m_nOfRow-MAX_NUMBER_TO_REDUCE_ROW;
 				break;
  			}
+try
+{
+                        m_fArrayWrite[i]=new  float[m_nOfRow];
+}
+catch(std::bad_alloc &e)
+{
+        m_fArrayWrite[i]=NULL;
+}
+
+                        if(m_fArrayWrite[i]==NULL) 
+                        {       
+                                goodAllocation=false;
+                                for(unsigned int j=0;j<i;j++)
+                                {       
+                                        delete [] m_fArrayWrite[j];
+                                        delete [] m_fArray[j];
+                                }
+                                delete [] m_fArray[i];
+                                if(m_nOfRow==MIN_NUMBER_OF_ROW)
+                               { 
+                                        delete [] m_fArray;
+                                        delete [] m_fArrayWrite;
+                                        m_fArray=NULL;
+                                        m_fArrayWrite=NULL;
+                                        return false;
+                                }
+                                if(m_nOfRow<=MAX_NUMBER_TO_REDUCE_ROW) 
+                                        m_nOfRow=MIN_NUMBER_OF_ROW;
+                                else
+                                        m_nOfRow=m_nOfRow-MAX_NUMBER_TO_REDUCE_ROW;
+                                break;
+                        }
+
 		}
 	}
 	return true;
 }
 //---------------------------------------------------------------------
-void VSVolLimitOp::printHelp()
+void VSSelectVolOp::printHelp()
 //---------------------------------------------------------------------
 {
-	std::cout<<"It writes on output ascii file the volume cells and their values that satisfy given limits."<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op showvol  [--field column_name] --limits filename_limits [--operator AND/OR]  [--numcells value] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl; 
+	std::cout<<"This filter creates a new volume setting to zero all the volume cells that does not satisfy given limits."<<std::endl<<std::endl;
+	std::cout<<"Optionally it writes an output ascii file containing the volume cells and their values that satisfy given limits."<<std::endl<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op selvol [--field column_name] --limits filename_limits [--operator AND/OR]  [--numcells value] [--out filename_out.bin] [--outlist list_filename] [--help] [--file] inputFile.bin"<<std::endl; 
 
-	std::cout<<"Example: VisIVOFilters --op showvol --field density --limits limitsfile.txt --operator AND --out filename_out.txt  --file inputFile.bin"<<std::endl<<std::endl;
-	std::cout<<"The command produces an ascii file  that list all cells  where limits are satisfied."<<std::endl<<std::endl;
+	std::cout<<"Example: VisIVOFilters --op selvol --field density --limits limitsfile.txt --operator AND --file inputFile.bin"<<std::endl<<std::endl;
+	std::cout<<"The command produces a new volume with all cells where limits are satisfied, all the other cells are set to zero."<<std::endl<<std::endl;
 
 	std::cout<<"Note:"<<std::endl;
 	std::cout<<"--field valid column name  to be reported in the output table. Default value is all column"<<std::endl;
 	std::cout<<"--limits A file that has three columns: a valid column name and an interval that indicate the  limits."<<std::endl;
 	std::cout<<"--operator Limits on all field listed in --limits option file are combined by default with logic AND operator. If this option is given with OR value the field limits are combined with logic OR operator "<<std::endl;
-	std::cout<<"--numcells Set the maximum number of cells that will be reported in the output."<<std::endl;
-	std::cout<<"--out Output table filename. Default name is given."<<std::endl;
-    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
-    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
-    std::cout<<"--file  Input table filename."<<std::endl;
+	std::cout<<"--numcells Set the maximum number of cells that will be reported in the output ascii file."<<std::endl;
+	std::cout<<"--out Output volume filename. Default name is given."<<std::endl;
+	std::cout<<"--outlist Output list filename containing the volume cells satisfying the requested condition. Default name is given."<<std::endl;
+	std::cout<<"--file  Input table filename."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 
 
@@ -146,7 +198,7 @@ void VSVolLimitOp::printHelp()
 }
 
 //---------------------------------------------------------------------
-bool VSVolLimitOp::execute()
+bool VSSelectVolOp::execute()
 //---------------------------------------------------------------------
 // totRows is the total rows of the out tables
 // maxRows is the bigger number of rows among input tables
@@ -166,18 +218,19 @@ bool VSVolLimitOp::execute()
 		
 	}
 	bool andOp = true;
-	std::string filename;
+	std::string filename, tmpDir;
 	unsigned long long int totRows;
 	bool numCellSet=false;
 	int numCell=0;
 	int wrElements=0;
-	 
+	VSTable tableSelectVol;
+ 
 	if(isParameterPresent("numcells"))
 	{
 		numCell=getParameterAsInt("numcells");
 		if(numCell<=0)
 		{
-			std::cerr<<"VolLimit. Invalid numcells. Operation aborted"<<std::endl;
+			std::cerr<<"selvol. Invalid numcells. Operation aborted"<<std::endl;
 			return false;
 
 		}
@@ -202,7 +255,7 @@ bool VSVolLimitOp::execute()
 		}
 		if(m_colNumberSet.size()==0)
 		{
-			std::cerr<<"VolLimit. Invalid field. Operation aborted"<<filename<<std::endl;
+			std::cerr<<"selvol. Invalid field. Operation aborted"<<filename<<std::endl;
 			return false;
 		}
 
@@ -211,7 +264,7 @@ bool VSVolLimitOp::execute()
 	if(getParameterAsString("operator")=="OR") andOp = false;
 	if(getParameterAsString("limits").empty() || getParameterAsString("limits")=="unknown" )
 	{
-		std::cerr<<"VolLimitop: No file with field limits is given"<<std::endl;
+		std::cerr<<"selvol: No file with field limits is given"<<std::endl;
 		return false;
 	} else
 	{
@@ -219,7 +272,7 @@ bool VSVolLimitOp::execute()
 	}
 
 	std::ifstream fileInput(filename.c_str());
-	if(!fileInput)
+	if(!fileInput.is_open())
 	{
 		std::cerr<<"Cannot open table list file"<<filename<<std::endl;
 		return false;
@@ -306,13 +359,57 @@ catch(std::bad_alloc &e)
 		return false;
 	}
 
-	std::stringstream fileNameOutputSStream;
-	fileNameOutputSStream<<getParameterAsString("out");
-	std::string fileNameOutput;
+        std::stringstream fileNameOutputSStream;
+        fileNameOutputSStream<<getParameterAsString("out");
+        std::string fileNameOutput;
 
-	if(fileNameOutputSStream.str()==""||fileNameOutputSStream.str()=="unknown")
+        if(fileNameOutputSStream.str()==""||fileNameOutputSStream.str()=="unknown")
+        {
+                fileNameOutputSStream.str().erase(); //QUI verificare
+                std::string filenameInputTable=m_tables[0]->getLocator();
+                int len=filenameInputTable.length();
+                time_t rawtime;
+                struct tm * timeinfo;
+                char buffer [80];
+                time ( &rawtime );
+                timeinfo = localtime ( &rawtime );
+                strftime (buffer,80,"%Y%m%d%H%M",timeinfo);
+                fileNameOutputSStream<<filenameInputTable.substr(0, len-4)<<"_selectvolume_"<<buffer<<".bin";  //QUI verificare
+        }
+
+        fileNameOutput=fileNameOutputSStream.str();
+        if(fileNameOutput.find(".bin") == std::string::npos)
+                fileNameOutput.append(".bin");
+        m_realOutFilename.push_back(fileNameOutput);
+
+
+        tmpDir=getDir(fileNameOutput);
+//Clean existing tab
+        remove(fileNameOutput.c_str());
+        tableSelectVol.setLocator(fileNameOutput);
+#ifdef VSBIGENDIAN
+        std::string endianism="big";
+
+#else   
+        std::string endianism="little";
+#endif
+
+        tableSelectVol.setEndiannes(endianism);
+
+        tableSelectVol.setType("float");
+        for(unsigned int k=0;k<m_tables[0]->getNumberOfColumns();k++)
+                tableSelectVol.addCol(m_tables[0]->getColName(k));    
+	
+
+
+
+	std::stringstream fileListOutputSStream;
+	fileListOutputSStream<<getParameterAsString("outlist");
+	std::string fileListOutput;
+
+	if(fileListOutputSStream.str()==""||fileListOutputSStream.str()=="unknown")
 	{
-		fileNameOutputSStream.str().erase(); //QUI verificare
+		fileListOutputSStream.str().erase(); //QUI verificare
   		std::string filenameInputTable=m_tables[0]->getLocator();
   		int len=filenameInputTable.length();
 		time_t rawtime;
@@ -321,17 +418,16 @@ catch(std::bad_alloc &e)
 		time ( &rawtime );
 		timeinfo = localtime ( &rawtime );
 		strftime (buffer,80,"%Y%m%d%H%M",timeinfo);
-  		fileNameOutputSStream<<filenameInputTable.substr(0, len-4)<<"_VolLimit_"<<buffer<<".txt";  //QUI verificare
+  		fileListOutputSStream<<filenameInputTable.substr(0, len-4)<<"_VolLimit_"<<buffer<<".txt";  //QUI verificare
 	}
 
-	fileNameOutput=fileNameOutputSStream.str();
-	m_realOutFilename.push_back(fileNameOutput);
-	
-	std::ofstream fileOutput(fileNameOutput.c_str(), std::ios::out);
-	fileOutput<<"X  Y  Z  ";
+	fileListOutput=fileListOutputSStream.str();
+	std::ofstream fileList(fileListOutput.c_str(), std::ios::out);
+	fileList<<"X  Y  Z  ";
+
 	for(int i=0;i<m_colNumberSet.size();i++)
-		fileOutput<<m_tables[0]->getColName(m_colNumberSet[i])<<" ";
-	fileOutput<<std::endl; 
+		fileList<<m_tables[0]->getColName(m_colNumberSet[i])<<" ";
+	fileList<<std::endl; 
 
 //Clean existing tab
 	for(int i=0;i<nOfCol;i++)
@@ -408,27 +504,42 @@ catch(std::bad_alloc &e)
 				int y=globalCounter-z*(tableCells[0]*tableCells[1]);
 				y=y/tableCells[0];
 				int x=globalCounter-z*(tableCells[0]*tableCells[1])-y*tableCells[0];
-				
-				fileOutput<<x+1<<" ";
-				fileOutput<<y+1<<" ";
-				fileOutput<<z+1<<" ";
-				for(int j=0;j<m_colNumberSet.size();j++)
-					fileOutput<<m_fArray[m_colNumberSet[j]][i]<<" ";
-				fileOutput<<std::endl;
+				fileList<<x+1<<" ";
+				fileList<<y+1<<" ";
+				fileList<<z+1<<" ";
+				for(int j=0;j<m_colNumberSet.size();j++){
+					fileList<<m_fArray[m_colNumberSet[j]][i]<<" ";
+					m_fArrayWrite[m_colNumberSet[j]][i]=m_fArray[m_colNumberSet[j]][i];
+				}
+				fileList<<std::endl;
 				wrElements++;
 				if(numCellSet && wrElements==numCell)
 				{
-					fileOutput.close();
+					fileList.close();
 					delete [] colList;
 					return true;
 				}
 			}
-
-		}		
+			else{ // not good cell
+                        	for(int j=0;j<m_colNumberSet.size();j++)
+                                        m_fArrayWrite[m_colNumberSet[j]][i]=0.;
+                            }
+			
+		}
+		
 		startCounter=toRow+1;
 		totEle=totEle-(toRow-fromRow+1);
 	}
-fileOutput.close();
+	unsigned long long int wrNOfRow=m_nOfRow;
+        tableSelectVol.setNumberOfRows(wrNOfRow);
+
+	tableSelectVol.setIsVolume(true);
+  	tableSelectVol.setCellNumber(m_tables[0] -> getCellNumber()[0],m_tables[0] -> getCellNumber()[1],m_tables[0] -> getCellNumber()[2]);
+  	tableSelectVol.setCellSize(m_tables[0] -> getCellSize()[0],m_tables[0] -> getCellSize()[1],m_tables[0] -> getCellSize()[2]);
+
+	tableSelectVol.writeTable(m_fArrayWrite);
+
+fileList.close();
 delete [] colList;
 return true;		
 }

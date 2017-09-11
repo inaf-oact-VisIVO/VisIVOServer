@@ -43,6 +43,13 @@ vsvollimit.cpp
 vsincludeop.cpp
 vsmrfocalpos.cpp
 vsmrcampos.cpp
+vsclustercellop.cpp
+vsmuportalop.cpp
+vsLine.cpp
+vsVector.cpp
+vsVoxel.cpp
+vsselectvol.cpp
+
 )
 else(AHF)
 SET(PRJ_SRC
@@ -88,6 +95,12 @@ vsvollimit.cpp
 vsincludeop.cpp
 
 vsmrcampos.cpp
+vsclustercellop.cpp
+vsmuportalop.cpp
+vsLine.cpp
+vsVector.cpp
+vsVoxel.cpp
+vsselectvol.cpp
 
 )
 

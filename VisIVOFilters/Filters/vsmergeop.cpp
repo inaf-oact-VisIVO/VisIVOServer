@@ -46,7 +46,7 @@ void VSMergeOp::printHelp()
 {
 	std::cout<<"Merge  up to 100 tables"<<std::endl<<std::endl;;
 
-	std::cout<<"Usage: VisIVOFilters --op merge  [--size HUGE/SMALLEST] [--pad value]  [--out filename_out.bin] [--help] [--filelist] table_param.txt"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op merge  [--size HUGE/SMALLEST] [--pad value]  [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--filelist] table_param.txt"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op merge --out out_table_file.bin --filelist table_param.txt"<<std::endl<<std::endl;
 
@@ -54,6 +54,8 @@ void VSMergeOp::printHelp()
 	std::cout<<"--size SMALLEST default option. Produce a new table having the size the smallest table"<<std::endl;
 	std::cout<<"--pad 0 default option. Pad the table rows of smaller table with value if HUGE size is used"<<std::endl;
 	std::cout<<"--out Name of the new table. Default name is given."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--filelist list of tables and valid column name to be merged. Wildcard * meabs all columns."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 
@@ -74,6 +76,9 @@ bool VSMergeOp::execute()
 
 {
 	bool sizeSmall=true;
+    bool mergeVolume=false;
+    const unsigned int *cellNumber;
+    const float *cellSize;
 	std::string filename;
 	int value=-1,tableValue;
 	std::map<std::string, int>::iterator p;
@@ -147,12 +152,36 @@ bool VSMergeOp::execute()
 					{
 						m_listOfTables.insert(make_pair(key,value));
 						m_listColumns[value].push_back(testTable.getColId(stringColumn));
-						if(value==0) totRows=testTable.getNumberOfRows();
-
-						if(value>0 && sizeSmall && totRows>testTable.getNumberOfRows()) totRows=testTable.getNumberOfRows();
-
-						if(value>0 && !sizeSmall && totRows<testTable.getNumberOfRows()) totRows=testTable.getNumberOfRows();
-
+						if(value==0)
+                        {    
+                            totRows=testTable.getNumberOfRows();
+                            if(testTable.getIsVolume())
+                            {
+                                mergeVolume=true;
+                                cellNumber=testTable.getCellNumber();
+                                cellSize=testTable.getCellSize();
+                            }
+                       }    
+						if(value>0 && sizeSmall && totRows>testTable.getNumberOfRows())
+                        {
+                            totRows=testTable.getNumberOfRows();
+                            if(testTable.getIsVolume())
+                            {
+                                mergeVolume=true;
+                                cellNumber=testTable.getCellNumber();
+                                cellSize=testTable.getCellSize();
+                            }
+                        }
+						if(value>0 && !sizeSmall && totRows<testTable.getNumberOfRows()) 
+                        {    
+                            totRows=testTable.getNumberOfRows();
+                            if(testTable.getIsVolume())
+                            {
+                                mergeVolume=true;
+                                cellNumber=testTable.getCellNumber();
+                                cellSize=testTable.getCellSize();
+                            }
+                       }
 /*						std::stringstream sStringColumn;
 						sStringColumn<<stringColumn<<"_tab_"<<value+1;
 						tableMerged.addCol(sStringColumn.str()); */
@@ -172,8 +201,25 @@ bool VSMergeOp::execute()
 						}
 
 						if(value==0) totRows=testTable.getNumberOfRows();
-						if(value>0 && sizeSmall && totRows>testTable.getNumberOfRows()) totRows=testTable.getNumberOfRows();
-						if(value>0 && !sizeSmall && totRows<testTable.getNumberOfRows()) totRows=testTable.getNumberOfRows();
+						if(value>0 && sizeSmall && totRows>testTable.getNumberOfRows())                         {    
+                            totRows=testTable.getNumberOfRows();
+                            if(testTable.getIsVolume())
+                            {
+                                mergeVolume=true;
+                                cellNumber=testTable.getCellNumber();
+                                cellSize=testTable.getCellSize();
+                            }
+                        }
+
+						if(value>0 && !sizeSmall && totRows<testTable.getNumberOfRows())                         {    
+                            totRows=testTable.getNumberOfRows();
+                            if(testTable.getIsVolume())
+                            {
+                                mergeVolume=true;
+                                cellNumber=testTable.getCellNumber();
+                                cellSize=testTable.getCellSize();
+                            }
+                        }
 						if(value==101) return false;
 					}
 
@@ -265,6 +311,12 @@ bool VSMergeOp::execute()
 
 
 	tableMerged.setNumberOfRows(totRows);
+    if(mergeVolume) 
+    {    
+        tableMerged.setCellNumber(cellNumber[0],cellNumber[1],cellNumber[2]);
+        tableMerged.setCellSize(cellSize[0],cellSize[1],cellSize[2]);
+        tableMerged.setIsVolume(true);
+    }
 	int maxInt=getMaxNumberInt();
 	unsigned long long int nOfEle;
 	int maxEle;

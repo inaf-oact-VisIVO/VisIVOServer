@@ -140,13 +140,15 @@ void VSVisualOp::printHelp()
 {
 	std::cout<<"Create an eventually randomized new table from  one or more input tables. All the input table must have the same number of rows. The new table can be used with VisIVOViewer. Cannot be applied to volume tables."<<std::endl<<std::endl;
 
-	std::cout<<"Usage: VisIVOFilters --op visual  [--size number_of_elemnts] [--out filename_out.bin]  [--help] [--filelist] tab_selection_file.txt"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op visual  [--size number_of_elemnts] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--filelist] tab_selection_file.txt"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op visual --out filename_out.bin --filelist tab_selection_file.txt"<<std::endl;
 
 	std::cout<<"Note:"<<std::endl;
 	std::cout<<"--size. Number of max rows in output table. Default is the minimum between 8000000 of rows and the rows of  input tables. Input table must have the same number of rows."<<std::endl;
 	std::cout<<"--out Output table filename. Default name is given."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--filelist  Input text file with a list of tables and columns."<<std::endl;
 	std::cout<<"--help produce this output."<<std::endl;
 

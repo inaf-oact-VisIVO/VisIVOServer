@@ -173,7 +173,7 @@ void VSSelectFieldOp::printHelp()
 //---------------------------------------------------------------------
 {
 	std::cout<<"Create e new table using limits on one or more fields of a data table"<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op selfield  --limits filename_limits [--operator AND/OR] [--outlist list_filename] [--format uns/int/ascii] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op selfield  --limits filename_limits [--operator AND/OR] [--outlist list_filename] [--format uns/int/ascii] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op selfield --limits limitsfile.txt --operator AND --out filename_out.bin --file inputFile.bin"<<std::endl;
 
@@ -182,7 +182,9 @@ void VSSelectFieldOp::printHelp()
 	std::cout<<"--operator Limits on all field listed in --limits option file are combined by default with logic AND operator. If this option is given with OR value the field limits are combined with logic OR operator "<<std::endl;
 	std::cout<<"--out Output table filename. Default name is given."<<std::endl;
 	std::cout<<"--outlist Output filename list of elements of selected points. Default name is given"<<std::endl;  
-	std::cout<<"--format Output filename list data format: unsigned long long int, int, ascii. Default value unsigned long long int"<<std::endl;  
+	std::cout<<"--format Output filename list data format: unsigned long long int, int, ascii. Default value unsigned long long int"<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--file  Input table filename."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 

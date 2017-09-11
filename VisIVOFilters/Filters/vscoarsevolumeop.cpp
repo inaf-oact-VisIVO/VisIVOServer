@@ -66,7 +66,7 @@ void VSCoarseVolumeOp::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Produce a coarsed subvolume with plane extraction from the original volume "<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op coarsevolume  [--perc percentage] [--newres x_res y_res z_res]  [--field column_names] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op coarsevolume  [--perc percentage] [--newres x_res y_res z_res]  [--field column_names] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op coarsevolume  --perc 10.0 --field Mass Temperature   --out subvolume.bin --file inputFile.bin"<<std::endl;
 
@@ -77,6 +77,8 @@ std::cout<<"      --newres a subvolume with new resolution will be produced. No 
 std::cout<<"      --field list of columns contained in the original file. Default:  all columns will be extracted."<<std::endl;
 
 std::cout<<"      --out filename of output result. Default name is given."<<std::endl;
+std::cout<<"      --history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"      --historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 
 return;
 

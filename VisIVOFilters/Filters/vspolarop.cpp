@@ -270,7 +270,7 @@ bool VSPolarOp::execute()
 void VSPolarOp::printHelp()
 {
  std::cout<<"It creates three new fields in a data table as the result of the shperical polar transformation of three existing fields."<<std::endl<<std::endl;
- std::cout<<"Usage: VisIVOFilters --op cartesian2polar --field X Y Z [--append] [--outcol rho theta phi] [--out filename_out.bin] --file input"<<std::endl;
+ std::cout<<"Usage: VisIVOFilters --op cartesian2polar --field X Y Z [--append] [--outcol rho theta phi] [--out filename_out.bin] [--history] [--historyfile filename.xml] --file input"<<std::endl;
 
  std::cout<<"Example: VisIVOFilters --op cartesian2polar --field X Y Z --append --file inputFile.bin"<<std::endl;
 
@@ -279,6 +279,8 @@ void VSPolarOp::printHelp()
  std::cout<<"      --outcol. Three column names of the new fields. Default names are given."<<std::endl;
  std::cout<<"      --append. No new table will be created. The original table will have  new fields "<<std::endl;
  std::cout<<"      --out. Name of the new table. Ignored if -- append is specified. Default nam is given"<<std::endl;
+ std::cout<<"      --history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+ std::cout<<"      --historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
  std::cout<<"      --file. Input file name"<<std::endl;
  std::cout<<"      --help produce this output "<<std::endl;
 return;

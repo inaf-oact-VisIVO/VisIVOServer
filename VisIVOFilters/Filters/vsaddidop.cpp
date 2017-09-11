@@ -41,13 +41,15 @@ if(m_fArray!=NULL) delete [] m_fArray;
 void VSAddIdOp::printHelp()
 {
 	std::cout<<"Add a new column with a sequence of Ids in the input data table."<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op addId [--outcol col_name] [--start start_number] [--help] [--file] inputFile.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op addId [--outcol col_name] [--start start_number] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op addId --outcol PtId  --file inputFile.bin"<<std::endl;
 
 	std::cout<<"Note:"<<std::endl;
 	std::cout<<"--start Starting Id. Default value is 1. Only an int value can be given."<<std::endl;
 	std::cout<<"--outcol. Column name of the new id column. Default name is Id."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--file  Input table filename."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 

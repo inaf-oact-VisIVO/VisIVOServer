@@ -113,7 +113,7 @@ void VSShowTableOp::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Produce an ASCII table with selected field of the first number of rows as specified in the --numrows parameter "<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op showtable [--field column_name] [--numrows num_of_rows] [--rangerows fromRow toRow] [--width format_width] [--precision format_precision] [--out filename_out.txt] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op showtable [--field column_name] [--numrows num_of_rows] [--rangerows fromRow toRow] [--width format_width] [--precision format_precision] [--out filename_out.txt] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op showtable --field X Y Z --numrows 100  --out filename_out.txt --file inputFile.bin"<<std::endl;
 
@@ -123,6 +123,8 @@ std::cout<<"--numrows number of first Rows in the Ascii output file. Default val
 std::cout<<"--rangerows Rows range of the inputFile that will be reported in the ascii output file. First row is 0 . Default range is equal to the all rows of the input table. It is ignored if numrows is specified."<<std::endl;
 std::cout<<"--width field width in the Ascii output file. Default value is given."<<std::endl;
 std::cout<<"--precision field precision in the Ascii output file. Default value is given."<<std::endl;
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 std::cout<<"--out Output ascii filename. Default name is given."<<std::endl;
 std::cout<<"--file  Input table filename."<<std::endl;
 std::cout<<"--help produce this output "<<std::endl;

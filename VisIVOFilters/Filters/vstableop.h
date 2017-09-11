@@ -20,15 +20,16 @@
 #ifndef VSTABLEOP_H
 #define VSTABLEOP_H
 
-/**
-	@author Marco Comparato <marco.comparato@oact.inaf.it>
-*/
 
 #include "vsobject.h"
 
 #include <string>
 #include <vector>
 #include <map>
+
+#ifdef VSMPI
+#include "mpi.h"
+#endif
 
 class VSTable;
 
@@ -41,9 +42,21 @@ class VSTableOp : public VSObject{
   protected:
     std::vector<VSTable *> m_tables; //!table pointers used in the operation
     std::vector<std::string> m_realOutFilename; 
+    int m_MpiSize, m_MpiRank;
+#ifdef VSMPI
+    MPI_Comm m_VS_COMM;    
+#endif
     
   public:
+#ifdef VSMPI
+    VSTableOp(MPI_Comm newcomm=MPI_COMM_WORLD);
+#else
     VSTableOp();
+
+#endif
+    
+    int writeHistory (const char* histFile,const char* opName,std::map<std::string,std::string> appParameter,  std::vector <std::string> outFilename);
+
     ~VSTableOp();
 
     //bool setParameters(std::string parameters);

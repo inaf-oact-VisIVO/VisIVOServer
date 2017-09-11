@@ -126,7 +126,7 @@ void VSStatisticOp::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Produce average, min and max value of field and creates an histogram of fields in the input table"<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op statistic [--list columns_name] [--histogram [bin]] [--range min max] [--out result.txt] [--help] [--file] inputFile.bin"<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op statistic [--list columns_name] [--histogram [bin]] [--range min max] [--out result.txt] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op statistic --list X Y --histogram 1000 --range 10.0 100.0  --out result.txt --file inputFile.bin"<<std::endl;
 
@@ -135,6 +135,8 @@ std::cout<<"--list a valid list of  columns name. Default value all columns."<<s
 std::cout<<"--histogram Produce histogram ascii file  with given number of bin. If bin number is not specified, the default value is fixed to 10% of the total rows of the input table."<<std::endl;
 std::cout<<"--range produce the results only inside the specified interval."<<std::endl;
 std::cout<<"--out Output ascii filename with histogram."<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
+std::cout<<"--filelist list of tables and valid column name to be merged. Wildcard * meabs all columns."<<std::endl;
 std::cout<<"--file  Input table filename."<<std::endl;
 std::cout<<"--help produce this output "<<std::endl;
 

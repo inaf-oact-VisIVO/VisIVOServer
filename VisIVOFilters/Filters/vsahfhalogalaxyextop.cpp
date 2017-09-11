@@ -47,7 +47,7 @@ void VSAhfHaloGalaxyExtOp::printHelp()
 {
 	std::cout<<"Specific filter for Amiga Halo Finder."<<std::endl;
 	std::cout<<"It Extracts up to three ascii mutlist from a general input ascii multilist, following the Ids in a given input table, and using the threshold value given in select value."<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op ahfhalogalaxyext --field col1 col2 col3 --multilist in_mutlist_File [--threshold value] [--out out_multilist_file] [--help] [--file] inputFile.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op ahfhalogalaxyext --field col1 col2 col3 --multilist in_mutlist_File [--threshold value] [--out out_multilist_file] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op ahfhalogalaxyext --field Id1 Id2 Id3 --multilist input.AHF_particles --out my_multilist.lst --file sub_AHF_halos.bin"<<std::endl;
 
@@ -57,6 +57,8 @@ void VSAhfHaloGalaxyExtOp::printHelp()
 	std::cout<<"--multilist. Ascii filename with a multilist."<<std::endl;
 	std::cout<<"--threshold. Selector value among the three columns. Default Value 1.0"<<std::endl;
 	std::cout<<"--out. Output ascii root-filename with a multilist."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--file  Input table filename."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 

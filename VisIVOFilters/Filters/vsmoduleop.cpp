@@ -102,7 +102,7 @@ void VSModuleOp::printHelp()
 //---------------------------------------------------------------------
 {
 	std::cout<<"Creates e new table (or a new field) computing the module of three fields of the input data table"<<std::endl<<std::endl;
-	std::cout<<"c"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op module --field parameters [--append] [--outcol colname] [--out filename_out.bin][--help] [--file] inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op module --field Vx Vy Vz  --outcol Module --append --file inputFile.bin"<<std::endl;
 
@@ -111,6 +111,8 @@ void VSModuleOp::printHelp()
 	std::cout<<"      --outcol. Column name of the new field"<<std::endl;
 	std::cout<<"      --append. No new table will be cretaed. The original table will have the new field "<<std::endl;
 	std::cout<<"      --out. Name of the new table. Ignored if --append is specified."<<std::endl;
+    std::cout<<"      --history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"        --historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"      --help produce this output "<<std::endl;
 
 

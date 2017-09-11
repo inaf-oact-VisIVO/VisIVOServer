@@ -59,7 +59,7 @@ void VSvbt2ahf::printHelp()
 {	
 	std::cout<<"It creates an Amiga halofinder file (float) from six columns of a table, typically a snapshot of a cosmological simulation"<<std::endl<<std::endl;;
 
-	std::cout<<"Usage: VisIVOFilters --op vbt2ahf [--field columns_name]  --par parfile  [--out filename_out] [--help] --file inputFile.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op vbt2ahf [--field columns_name]  --par parfile  [--out filename_out] [--history] [--historyfile filename.xml] [--help] --file inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op vbt2ahf --field X Y Z Vx Vy Vz  --par myFile.par  [--out filename_out] [--help] --file input.bin"<<std::endl<<std::endl;
 
@@ -68,6 +68,8 @@ void VSvbt2ahf::printHelp()
 	std::cout<<"--par  A valid input parameter file. It must contain the following data (space separated):"<<std::endl;
 	std::cout<<"	np (int, number of elements), box (double,  box size), mass_frac (double, mass of each element), vel_fact (float, factor to transform velocity field in Km/sec), omega0, lambda0, omegab, gamma, H_frac, T_initial, z_initial, z_current (double, cosmological parameters), numberOfTimesteps (int), header (string, header identifier)"<<std::endl;
 	std::cout<<"--out is the output amiga data format file. Default name is given."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--file. Input table. Tipically a snapshot of a cosmological simulation."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 	std::cout<<"WARNING for AMIGA HF users. No DONT_KIK_ME, EQ_MOT2,  ART,  ISOLATED, ISOLATED_P, XDOT are included in this filter."<<std::endl;

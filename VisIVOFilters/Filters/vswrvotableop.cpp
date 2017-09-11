@@ -115,7 +115,7 @@ void VSWriteVotableOp::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Produce a VOTable 1.2 with selected field"<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op wrvotable [--field column_name] [--force] [--out filename_out.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op wrvotable [--field column_name] [--force] [--out filename_out.xml] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op wrvotable --field ra dec u   --out votable_out.xml --file inputFile.bin"<<std::endl;
 
@@ -123,6 +123,8 @@ std::cout<<"Note: "<<std::endl;
 std::cout<<"--field Valid columns names. Default value ALL columns will be reported."<<std::endl;
 std::cout<<"--force Must be given to force the VOTable creation when the input table has more than "<<MAXROWS<<" rows."<<std::endl;
 std::cout<<"--out Output VOTable filename. Default name is given."<<std::endl;
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 std::cout<<"--file  Input table filename."<<std::endl;
 std::cout<<"--help produce this output "<<std::endl;
 

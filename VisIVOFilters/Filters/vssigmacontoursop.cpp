@@ -507,7 +507,7 @@ if(((unsigned long long int)m_nOfEle*m_nOfAllocatedCol)>tempLL)
 void VSSigmaContoursOp::printHelp(){
 
 	std::cout<<"Create a new data table, where selected columns have values within (or outside) N sigma contours. NOTE: this filter can be executed only for columns that have a Gaussian distribution"<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op sigmacontours [--nsigma nOfSigma] [--field column_list] [--allcolumns] [--out filename_out.bin] [--help] [--file] filename.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op sigmacontours [--nsigma nOfSigma] [--field column_list] [--allcolumns] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] filename.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op sigmacontours --nsigma 2 --field F1 F2 F5 --allcolumns --out ncontours.bin --file example.bin"<<std::endl;
 
@@ -517,6 +517,8 @@ void VSSigmaContoursOp::printHelp(){
 	std::cout<<"      --exclude. The output table reports fields outside of N sigma contours."<<std::endl;
 	std::cout<<"      --allcolumns. All columns of the original tables are stored in the new table. But only the corresponding rows for the --field selected columns are reported"<<std::endl;
 	std::cout<<"      --out. Name of the new table.  Default name is given."<<std::endl;
+    std::cout<<"      --history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"      --historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"      --file. Input filename"<<std::endl;
 	std::cout<<"      --help produce this output "<<std::endl;
 

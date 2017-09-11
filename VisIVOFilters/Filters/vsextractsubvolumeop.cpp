@@ -64,7 +64,7 @@ void VSExtractSubVolumeOp::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Produce a table which represent a subvolume from the original volume"<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op extractsubvolume   --startingcell X Y Z --resolution x_res y_res z_res [--field column_names] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op extractsubvolume   --startingcell X Y Z --resolution x_res y_res z_res [--field column_names] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op extractsubvolume --startingcell 8 8 8 --field Mass Temperature --resolution 16 16 16  --out mysubvolume.bin --file inputFile.bin"<<std::endl<<std::endl;
 
@@ -73,6 +73,9 @@ std::cout<<"--startingcell X Y Z number of the first cell to be extracted: 0 0 0
 std::cout<<"--resolution  grid size (3D) of the new subgrid"<<std::endl;
 std::cout<<"--field valid columns name list to be reported in the new table."<<std::endl;
 std::cout<<"--out Name of the new table. Default name is given."<<std::endl;
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
+
 std::cout<<"--file Input table filename."<<std::endl;
 
 std::cout<<"--help produce this output "<<std::endl;

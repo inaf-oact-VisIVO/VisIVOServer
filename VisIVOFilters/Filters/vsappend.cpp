@@ -51,7 +51,10 @@ void VSAppendOp::printHelp()
 	std::cout<<"Create e new table appending  data from a list of existing tables"<<std::endl;
 	std::cout<<"Append Filter can append  up to 100 tables with the same number of Columns"<<std::endl<<std::endl;
 
-	std::cout<<"Usage: VisIVOFilters --op append    [--out filename_out.bin] [--help] [--file] table_list"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op append [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] table_list"<<std::endl;
+
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op append  --out out_table.bin --file table_list.txt"<<std::endl<<std::endl;
 	std::cout<<"tab_list.txt is a file that contain a list of a valid table name. The .bin extension is automatically added if the listed filename does not contain it"<<std::endl<<"The filter produce a new table (out_table.bin and out_table.bin.head). The column name are copied from the first table. An error is given if tables contain different number of columns."<<std::endl;

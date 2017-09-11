@@ -46,7 +46,7 @@ void VSAhfHaloListOp::printHelp()
 {
 	std::cout<<"Specific filetr for Amiga Halo Finder."<<std::endl;
 	std::cout<<"It extracts an ascii mutlist from a general input ascii multilist, following the Id in a given input table."<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op ahfhalolist [--field col_name] --multilist in_mutlist_File [--out out_multilist_file] [--help] [--file] inputFile.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op ahfhalolist [--field col_name] --multilist in_mutlist_File [--out out_multilist_file] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op ahfhalolist --field Id --multilist input.AHF_particles --out my_multilist.lst  --file sub_AHF_halos.bin"<<std::endl;
 
@@ -54,6 +54,8 @@ void VSAhfHaloListOp::printHelp()
 	std::cout<<"--field. Column name with contain id column. Default name is Id."<<std::endl;
 	std::cout<<"--multilist. Ascii filename with a multilist."<<std::endl;
 	std::cout<<"--out. Output ascii filename with a multilist."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--file  Input table filename."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 

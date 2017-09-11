@@ -62,7 +62,7 @@ void VSIncludeOp::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Produce a new table or add a new field to the input table. Points inside the sphere (given with center and radius) will have the value invalue, otherwise outvalue."<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op include  --center x_coord y_coord z_coord --radius radius [--field x_col y_col z_col]  [--append] [--out filename_out.bin] [--outcol col_name] [--outvalue outvalue] [--invalue invalue] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op include  --center x_coord y_coord z_coord --radius radius [--field x_col y_col z_col]  [--append] [--history] [--historyfile filename.xml] [--out filename_out.bin] [--outcol col_name] [--outvalue outvalue] [--invalue invalue] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op include  --center 1.0 1.0 1.0 --radius 1.0 --field X Y Z  --append --outcol INOUT [--help] --file inputFile.bin"<<std::endl;
 
@@ -75,7 +75,8 @@ std::cout<<"--out Name of the new table. Default name is given. Ignored if --app
 std::cout<<"--outcol. Column name of the new field"<<std::endl;
 std::cout<<"--outvalue. Value given to points outside the sphere. Devault value is 0."<<std::endl;
 std::cout<<"--invalue. Value given to points inside the sphere. Devault value is 1."<<std::endl;
-
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 std::cout<<"--file Input table filename."<<std::endl;
 
 std::cout<<"--help produce this output."<<std::endl;

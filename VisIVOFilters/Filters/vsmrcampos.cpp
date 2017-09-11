@@ -182,7 +182,7 @@ void VSMRCamPos::printHelp()
 //---------------------------------------------------------------------
 {
 	std::cout<<"Create a  new table in Multi Resolution from an input table. Operation not yet allowed on volumes."<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op mres --points x_col y_col z_col [--pos values]  [--geometry layer_file.txt] [--background vaule] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op mres --points x_col y_col z_col [--pos values]  [--geometry layer_file.txt] [--background vaule] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op mres --points X Y Z --pos 10.0 10.0 10.0  --geometry layer.txt --out pos_layer.bin --file pos.bin"<<std::endl;
 
@@ -201,6 +201,8 @@ void VSMRCamPos::printHelp()
 	std::cout<<"--background  a randomizator value for points outside the geometry.";
 	std::cout<<" Default value is maximum 100000 values from input VBT"<<std::endl;
 	std::cout<<"--out Name of the new table. Default name is given."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 	return;
 }

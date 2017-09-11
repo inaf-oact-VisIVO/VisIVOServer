@@ -35,13 +35,15 @@ void VSChangeColNameop::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Chage the column name in a VBT"<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op changecolname --field column_names --newnames new_names [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op changecolname --field column_names --newnames new_names [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op changecolname --field X_r Y_r --newnames X_n Y_n --file inputFile.bin"<<std::endl;
 
 std::cout<<"Note: "<<std::endl;
 std::cout<<"--field Valid columns names."<<std::endl;
 std::cout<<"--newnames New column names."<<std::endl;
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 std::cout<<"--file  Input table filename."<<std::endl;
 std::cout<<"--help produce this output "<<std::endl;
 

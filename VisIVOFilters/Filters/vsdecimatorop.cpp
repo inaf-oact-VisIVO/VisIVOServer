@@ -143,7 +143,7 @@ void VSDecimatorTableOp::printHelp()
 //---------------------------------------------------------------------
 { 
 std::cout<<"Create a decimator subset from the original data table."<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op decimator --skip step [--list parameters] [--iseed iseed] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op decimator --skip step [--list parameters] [--iseed iseed] [--out filename_out.bin]  [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op decimator --skip 5 --iseed 1 --out filename_out.bin --file inputFile.bin"<<std::endl;
 
@@ -152,6 +152,8 @@ std::cout<<"--skip An integer that represent the number of elements to skip"<<st
 std::cout<<"--perc OBSOLETE: Percentage (from 0.0 to 50.0) of the input file obtained in the output file."<<std::endl;
 std::cout<<"--list Valid columns names of the input table. Default: all columns are included"<<std::endl;
 std::cout<<"--iseed Specify the seed for the random generation. Default value 0."<<std::endl;
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 std::cout<<"--out Output table filename. Default name is given."<<std::endl;
 std::cout<<"--file  Input table filename."<<std::endl;
 std::cout<<"--help produce this output "<<std::endl;

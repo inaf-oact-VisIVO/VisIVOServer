@@ -126,7 +126,7 @@ void VSSplitTableOp::printHelp()
 //---------------------------------------------------------------------
 {
 	std::cout<<"Split an existing table into two or more tables, using a field that will be used to divide the table."<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op splittable [--field column] [--volumesplit direction]  [--numoftables numberOfTable] [--maxsizetable MaxMbyteSize] [--hugesplit] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op splittable [--field column] [--volumesplit direction]  [--numoftables numberOfTable] [--maxsizetable MaxMbyteSize] [--hugesplit] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op splittable --field X --numoftables 10  --out filename_out --file inputFile.bin"<<std::endl<<std::endl;
 
@@ -139,7 +139,9 @@ void VSSplitTableOp::printHelp()
 	std::cout<<"--maxsizetable indicates the maximum size of the split table. VisIVO Filter will compute how many tables will be created. This option is ignored if  --numoftable option is given. "<<std::endl;
 	std::cout<<"--hugesplit. Must be given to force the generation of more than 100 tables from the input table, avoiding errors."<<std::endl;
 	std::cout<<"--out Output prefix root table filename. A suffix _split_#.bin is added to each generated table,  to this prefix. Default name is given."<<std::endl;
-	std::cout<<"--file  Input table filename."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
+    std::cout<<"--file  Input table filename."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 
 

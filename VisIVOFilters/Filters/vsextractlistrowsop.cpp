@@ -85,7 +85,7 @@ void VSExtractListRowsOp::printHelp()
 	std::cout<<"			2) N0 element ids (numbers of rows)."<<std::endl<<std::endl;
 	std::cout<<"Option can be given to provide the NL number. In this case the multi-list file must not contain this information."<<std::endl;
 	std::cout<<"Option can be given to provide the N0 number. In this case the multi-list file must not contain this information, and it is a multilist, each  list must contain N0 elements"<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op extractlist  --multilist filename_list [--binaryint] [--asciilist] [--numberlists nl]  [--listelements n0] [--onelist] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+	std::cout<<"Usage: VisIVOFilters --op extractlist  --multilist filename_list [--binaryint] [--asciilist] [--numberlists nl]  [--listelements n0] [--onelist] [--history] [--historyfile filename.xml] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 	std::cout<<"Example: VisIVOFilters --op extractlist  --multilist mylist.txt --asciilist  --out list_extract.bin --file inputFile.bin"<<std::endl;
 
@@ -97,7 +97,9 @@ void VSExtractListRowsOp::printHelp()
 	std::cout<<"--listelements The multilist file format is just a sequence of nl lists.  Each list has  the same number of n0 elements. This option requires that the --numberlists option is specified, otherwise it is ignored."<<std::endl;
 	std::cout<<"--onelist If this option is given, the multlist file is considered as  one list only. Each element is the ID of the particle to be extracted. The --numberlists and --listelements options will be ignored."<<std::endl;
 	std::cout<<"--out Output table filename. Default name is given."<<std::endl;
-	std::cout<<"--file  Input table filename."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
+    std::cout<<"--file  Input table filename."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 
 

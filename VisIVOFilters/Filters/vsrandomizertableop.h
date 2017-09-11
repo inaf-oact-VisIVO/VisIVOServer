@@ -3,6 +3,9 @@
 
 #include "vstableop.h"
 
+#ifdef VSMPI
+#include "mpi.h"
+#endif
 
 class VSRandomizerTableOp : public VSTableOp
 {
@@ -20,7 +23,9 @@ class VSRandomizerTableOp : public VSTableOp
  unsigned long long int  m_valueToExtract;
   unsigned long long int m_numberOfExtractedValue;//! number of already writed values
   unsigned long long int m_listElement;//! total number of write values
-  public:
+
+
+public:
     VSRandomizerTableOp();
     ~VSRandomizerTableOp();
     void printHelp();

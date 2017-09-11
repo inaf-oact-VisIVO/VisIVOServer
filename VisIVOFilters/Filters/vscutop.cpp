@@ -171,10 +171,10 @@ void VSCutOp::printHelp()
 //---------------------------------------------------------------------
 {
 	std::cout<<"It fixes to a given value fields where a condition is satisfied."<<std::endl<<std::endl;
-	std::cout<<"Usage: VisIVOFilters --op cut  [--field columns_list] --limits filename_limits [--threshold value] [--operator AND/OR] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl; 
+	std::cout<<"Usage: VisIVOFilters --op cut  [--field columns_list] --limits filename_limits [--threshold value] [--operator AND/OR] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl; 
 
 	std::cout<<"Example: VisIVOFilters --op cut --field A B C --limits limitsfile.txt --operator AND --out filename_out.bin --threshold 1.0 --file inputFile.bin"<<std::endl<<std::endl;
-	std::cout<<"The command produces a new table (filename_out.bin and filename_out.bin.head) that contains all the data points and columns of the inputFile table. In any row where of the input table where limits are satisfied, the fields A B and C wil be changed with the threshold value 1.0. Other fields will be not changed."<<std::endl<<std::endl;
+	std::cout<<"The command produces a new table (filename_out.bin and filename_out.bin.head) that contains all the data points and columns of the inputFile table. In any row  of the input table where limits are satisfied, the fields A B and C wil be changed with the threshold value 1.0. Other fields will be not changed."<<std::endl<<std::endl;
 
 	std::cout<<"Note:"<<std::endl;
 	std::cout<<"--limits A file that has three columns: a valid column name and an interval that indicate the  limits."<<std::endl;
@@ -183,6 +183,8 @@ void VSCutOp::printHelp()
 
 	std::cout<<"--operator Limits on all field listed in --limits option file are combined by default with logic AND operator. If this option is given with OR value the field limits are combined with logic OR operator "<<std::endl;
 	std::cout<<"--out Output table filename. Default name is given."<<std::endl;
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+    std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 	std::cout<<"--file  Input table filename."<<std::endl;
 	std::cout<<"--help produce this output "<<std::endl;
 

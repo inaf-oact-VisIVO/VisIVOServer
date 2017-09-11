@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "vstableop.h"
+#include "historyXmlWriter.h"
+
 #include <cstdlib>
 #include <cstring>
 
@@ -30,8 +32,20 @@ const unsigned int VSTableOp::MAX_NUMBER_INT = 250000000;
 //const unsigned int VSTableOp::MAX_NUMBER_INT = 25000000;
 //const unsigned int VSTableOp::MAX_NUMBER_INT = 66000;
 
+#ifdef VSMPI
+VSTableOp::VSTableOp(MPI_Comm newcomm)
+#else
 VSTableOp::VSTableOp()
+#endif
 {
+    m_MpiRank=0;
+    m_MpiSize=1;
+#ifdef VSMPI
+    m_VS_COMM=newcomm;
+    MPI_Comm_size(m_VS_COMM, &m_MpiSize);
+    MPI_Comm_rank(m_VS_COMM, &m_MpiRank);
+#endif
+    
   m_maxNumberInt = MAX_NUMBER_INT;
 //  m_maxNumberInt = 13; Only for debug
 }
@@ -164,28 +178,37 @@ int VSTableOp::getParameterAsInt(std::string parameter)
     
 float VSTableOp::getParameterAsFloat(std::string parameter)
 {
-  if(!m_parameters.count(parameter))
-    return 0;
-
-  std::stringstream ss(m_parameters.find(parameter)->second);
-
-  float ret = 0;
-
-  ss >> ret;
-
-  return ret;
+    if(!m_parameters.count(parameter))
+        return 0;
+    
+    std::stringstream ss(m_parameters.find(parameter)->second);
+    
+    float ret = 0;
+    
+    ss >> ret;
+    
+    return ret;
 }
-int VSTableOp::getMaxNumberInt() 
+int VSTableOp::getMaxNumberInt()
 {
-if(isParameterPresent("memsizelimit"))
-{
-  float sizelimit=getParameterAsFloat("memsizelimit");
-  if(sizelimit>0. && sizelimit<95.0)
-  {
-	m_maxNumberInt=(int) ((float)m_maxNumberInt/100.)*sizelimit;
-	std::cerr<<"Warning: lowered size memory from "<<MAX_NUMBER_INT<<" to "<<m_maxNumberInt<<std::endl;
-  }	
+    if(isParameterPresent("memsizelimit"))
+    {
+        float sizelimit=getParameterAsFloat("memsizelimit");
+        if(sizelimit>0. && sizelimit<95.0)
+        {
+            m_maxNumberInt=(int) ((float)m_maxNumberInt/100.)*sizelimit;
+            std::cerr<<"Warning: lowered size memory from "<<MAX_NUMBER_INT<<" to "<<m_maxNumberInt<<std::endl;
+        }	
+    }
+    return m_maxNumberInt;
 }
-return m_maxNumberInt;
-} 
+
+//---------------------------------------------------------------------
+int VSTableOp::writeHistory (const char* histFile,const char* opName, std::map<std::string,std::string> appParameter, std::vector <std::string> outFilename)
+//---------------------------------------------------------------------
+{
+    new HistoryXmlWriter(histFile, opName,appParameter,outFilename);
+    return 1;
+}
+
 

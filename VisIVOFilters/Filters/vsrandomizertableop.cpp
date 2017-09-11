@@ -134,8 +134,10 @@ catch(std::bad_alloc & e)
 void VSRandomizerTableOp::printHelp()
 //---------------------------------------------------------------------
 { 
+if(m_MpiRank==0)
+{
 std::cout<<"Create a random subset from the original data table."<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op randomizer --perc percentage [--field parameters] [--iseed iseed] [--out filename_out.bin] [--help] [--file] inputFile.bin"<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op randomizer --perc percentage [--field parameters] [--iseed iseed] [--out filename_out.bin] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op randomizer --perc 10.0 --iseed 1 --out filename_out.bin --file inputFile.bin"<<std::endl;
 
@@ -145,10 +147,13 @@ std::cout<<"--field Valid columns names of the input table. Default: all columns
 std::cout<<"--iseed Specify the seed for the random generation. Default value 0."<<std::endl;
 std::cout<<"--out Output table filename. Default name is given."<<std::endl;
 std::cout<<"--file  Input table filename."<<std::endl;
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 std::cout<<"--help produce this output "<<std::endl;
 
+}
 return;
- }
+}
 //---------------------------------------------------------------------
 bool VSRandomizerTableOp::subset(unsigned long long int fromRow,unsigned long long int toRow)
 //---------------------------------------------------------------------

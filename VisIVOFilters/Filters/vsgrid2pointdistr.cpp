@@ -69,7 +69,7 @@ VSGrid2PointDistr::~VSGrid2PointDistr()
 void VSGrid2PointDistr::printHelp()
 {
 std::cout<<"This filter produces a new table or add a new field to the input table.The operation performs the following: 1) It load a  volume (input volume data table) and a table with a  point distribution in the volume 2) It computes, using the CIC (default) or NGP or TSC algorithm, a value (density assumed) for each data point, considering the  cells value where the point is spread on the volume (cellValue*w_factor*cellVolume) 3) It save the property in a new table or add the field to the original input table."<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op grid2point   --points x_col y_col z_col [--field column_name] [--density] [--append] [--out filename_out.bin] [--outcol col_name] [--tsc] [--ngp] --volume inputVolmeData.bin [--gridOrigin xg0 xg1 xg2] [--gridSpacing sg0 sg1 sg2] [--box length] [--periodic] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op grid2point   --points x_col y_col z_col [--field column_name] [--density] [--append] [--out filename_out.bin] [--outcol col_name] [--tsc] [--ngp] --volume inputVolmeData.bin [--gridOrigin xg0 xg1 xg2] [--gridSpacing sg0 sg1 sg2] [--box length] [--periodic] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op grid2point  --points X Y Z --field Mass  --append --outcol distribute --volume inputVolmeData.bin --file inputFile.bin"<<std::endl;
 
@@ -87,6 +87,8 @@ std::cout<<"--gridOrigin. It specifies the coordinate of the lower left corner o
 std::cout<<"--gridSpacing. It specifies the length of each cell dimension in arbitray unit. This parameter is ignored if the box option is given. Default values are assumed from the box of inputFile.bin"<<std::endl;
 std::cout<<"--box. It specifies the length of a box. Default value is assumed from the box of inputFile.bin if the gridSpacing option is not given"<<std::endl;
 std::cout<<"--periodic. It specifies the grid is periodic. Particles outside the grid limits are considered inside on the other side."<<std::endl;
+std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
+std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 
 std::cout<<"--file Input table filename with point distribution."<<std::endl;
 

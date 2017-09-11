@@ -1,4 +1,4 @@
- /***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2008 by Ugo Becciani   *
  *   ugo.becciani@oact.inaf.it   *
  *                                                                         *
@@ -17,56 +17,38 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef VSPOINTDISTRIBUTEOP_H
-#define VSPOINTDISTRIBUTEOP_H
+#ifndef VSMUPORTAL_H
+#define VSMUPORTAL_H
 #include "vstableop.h"
 
 /**
 	@author Ugo Becciani <ugo.becciani@oact.inaf.it>
-*/
-class VSPointDistributeOp: public VSTableOp
-
-{  
+*/  
+class VSMuPortalOp: public VSTableOp
+{
   static const unsigned int MAX_NUMBER_TO_REDUCE_ROW;
   static const unsigned int MIN_NUMBER_OF_ROW;
-  unsigned int m_sampleDimensions[3];
-  double m_modelBounds[6];
-  double m_nullValue;
-  double m_massUnity;
-  unsigned int m_colList[3];	
+  unsigned long long int m_numNewPts; // numer of points grid input value and adjusted after allocation
 
-  int m_splattedScalar;
-  unsigned long long int m_numNewPts;
-  bool m_useConstant;
-  unsigned int m_nOfCol;
-  unsigned int m_nOfRow;
-  float **m_fArray;
-  float **m_grid;
-  float m_origin[3];
-  float m_spacing[3];
-  float m_constValue;
-  bool m_executeDone;
-  bool m_tsc;
-  bool m_cic;
-  bool m_ngp;
-  bool setOrigin();
-  bool setSpacing();
-  bool m_OriginSet;
-  bool m_SpacingSet;
-  bool m_gridSpacing;
-  bool m_avg;
+    unsigned int m_nOfCol;
+    unsigned int m_nOfColPoints;
+    unsigned int m_nOfColVol;
+  unsigned int m_nOfRow; // numer of rows grid input value and adjusted  after allocation
 
-  bool allocateArray(int nField);
-  bool allocateArray(int nField, bool isMP);
-  bool computeModelBounds();
+    float **m_fArray;
+    float **m_outPointsfArray;
+    float **m_outVolfArray;
+    int m_volDim;
 
+
+    bool allocateArray();
 public:
-    VSPointDistributeOp();
-    ~VSPointDistributeOp();
+    VSMuPortalOp();
+
+    ~VSMuPortalOp();
     void printHelp();
     bool execute();
-    bool getOrigin(float *origin); 
-    bool getSpacing(float *spacing); 
+
 };
 
 #endif

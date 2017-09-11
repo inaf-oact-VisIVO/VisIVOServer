@@ -26,17 +26,17 @@
 #ifdef WIN32
 	#include <time.h>
 #endif
-#include "vspointpropertyop.h"
+#include "vsclustercellop.h"
 #include "vspointdistributeop.h"
 #include "vstable.h"
 #include "VisIVOFiltersConfigure.h"
 
 //prova
-const unsigned int VSPointPropertyOp::MAX_NUMBER_TO_REDUCE_ROW = 10000;
-const unsigned int VSPointPropertyOp::MIN_NUMBER_OF_ROW = 100;
+const unsigned int VSClusterCellOp::MAX_NUMBER_TO_REDUCE_ROW = 10000;
+const unsigned int VSClusterCellOp::MIN_NUMBER_OF_ROW = 100;
 
 //---------------------------------------------------------------------
-VSPointPropertyOp::VSPointPropertyOp()
+VSClusterCellOp::VSClusterCellOp()
 {
  m_fArray=NULL;
  m_grid=NULL;
@@ -49,7 +49,7 @@ VSPointPropertyOp::VSPointPropertyOp()
 
 
 //---------------------------------------------------------------------
-VSPointPropertyOp::~VSPointPropertyOp()
+VSClusterCellOp::~VSClusterCellOp()
 {	if(m_fArray!=NULL)
  	  for(unsigned int i=0;i<m_nOfCol;i++)
 	  {
@@ -70,11 +70,11 @@ VSPointPropertyOp::~VSPointPropertyOp()
 //---------------------------------------------------------------------
 
 //---------------------------------------------------------------------
-void VSPointPropertyOp::printHelp()
+void VSClusterCellOp::printHelp()
 //---------------------------------------------------------------------
 {
 std::cout<<"Produce a new table or add a new field to the input table.The operation performs the following: 1) It creates a temporary  volume using a field distribution (CIC algorithm) on a regular mesh; 2) It computes, with the same CIC algorithm, the property for each data point, considering the cells where the point is spread on the volume; 3) It save the property in a new table or add the field to the original input table."<<std::endl<<std::endl;
-std::cout<<"Usage: VisIVOFilters --op pointproperty  --resolution x_res y_res z_res --points x_col y_col z_col [--field column_name] [--constant value] [--append] [--out filename_out.bin] [--outcol col_name] [--periodic] [--history] [--historyfile filename.xml] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
+std::cout<<"Usage: VisIVOFilters --op pointproperty  --resolution x_res y_res z_res --points x_col y_col z_col [--field column_name] [--constant value] [--append] [--out filename_out.bin] [--outcol col_name] [--periodic] [--help] [--file] inputFile.bin"<<std::endl<<std::endl;
 
 std::cout<<"Example: VisIVOFilters --op pointproperty --resolution 16 16 16 --points X Y Z --field Mass  --append --outcol distribute --file inputFile.bin"<<std::endl;
 
@@ -86,8 +86,6 @@ std::cout<<"--constant Assign a constant to all points to be distributed in the 
 std::cout<<"--append. No new table will be cretaed. The original table will have the new field. "<<std::endl;
 std::cout<<"--out Name of the new table. Default name is given. Ignored if --append is specified."<<std::endl;
 std::cout<<"--periodic. It specifies the box is periodic. Particles outside the box limits are considered inside on the other side."<<std::endl;
-std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl;
-std::cout<<"--historyfile [filename.xml]   (optional) Change default history file name  and or directory "<<std::endl;
 std::cout<<"--file Input table filename."<<std::endl;
 std::cout<<"--outcol. Column name of the new field"<<std::endl;
 
@@ -98,7 +96,7 @@ return;
 }
 
 //---------------------------------------------------------------------
-bool VSPointPropertyOp::allocateArray()
+bool VSClusterCellOp::allocateArray()
 //---------------------------------------------------------------------
 {
 	m_fresult=new float*[1];
@@ -205,7 +203,7 @@ return true;
 
 
 //---------------------------------------------------------------------
-bool VSPointPropertyOp::execute()
+bool VSClusterCellOp::execute()
 //---------------------------------------------------------------------
 {
 //cannot be applied to volume tables
@@ -223,7 +221,7 @@ randat=sstmp1.str();
 bool periodic=false;
 if(m_tables[0]->getIsVolume())
 {
-	std::cerr<<"VSPointPropertyOp: cannot be applied to  volume."<<std::endl;
+	std::cerr<<"VSClusterCellOp: cannot be applied to  volume."<<std::endl;
 	return false;
 }
 std::string tempFilename;
@@ -238,7 +236,7 @@ std::string stmp;
 stmp=getParameterAsString("resolution");
 if(stmp==""||stmp=="unknown")
 {
-	std::cerr<<"VSPointPropertyOp: Invalid resolution is given"<<std::endl;
+	std::cerr<<"VSClusterCellOp: Invalid resolution is given"<<std::endl;
 	return false;
 	
 }
@@ -253,7 +251,7 @@ stmp.clear();
 stmp=getParameterAsString("points");
 if(stmp==""||stmp=="unknown")
 {
-	std::cerr<<"VSPointPropertyOp: Invalid points is given"<<std::endl;
+	std::cerr<<"VSClusterCellOp: Invalid points is given"<<std::endl;
 	return false;
 	
 }
@@ -285,7 +283,7 @@ float *ftmp;
 ftmp=new float[3];
 if(!op.getOrigin(ftmp))
 {	
-	std::cerr<<"VSPointPropertyOp: Invalid Origin is given"<<std::endl;
+	std::cerr<<"VSClusterCellOp: Invalid Origin is given"<<std::endl;
 	remove(tempFilename.c_str());
 	tempFilename.append(".head");
 	remove(tempFilename.c_str());
@@ -295,7 +293,7 @@ if(!op.getOrigin(ftmp))
 for(int i=0;i<3;i++) m_origin[i]=ftmp[i];
 if(!op.getSpacing(ftmp))
 {	
-	std::cerr<<"VSPointPropertyOp: Invalid Origin is given"<<std::endl;
+	std::cerr<<"VSClusterCellOp: Invalid Origin is given"<<std::endl;
 	remove(tempFilename.c_str());
 	tempFilename.append(".head");
 	remove(tempFilename.c_str());
