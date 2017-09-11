@@ -22,8 +22,6 @@
 
 #include "hdf5source.h"
 #include "visivoutils.h"
-
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -175,6 +173,7 @@ void HDF5Source::readTable()
   
   for(int k=0; k< m_nOfDatasets; k++)
   {
+    //std::cout<<"Dataset : "<<m_hyperslabStruct[k].datasetName.c_str()<<std::endl;
 #ifdef LIGHT
 
 #ifdef WIN32
@@ -192,40 +191,44 @@ void HDF5Source::readTable()
     hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str());
 
 #else    
-    
    // hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str(),H5P_DEFAULT);
     hid_t sourceObj = H5Dopen(m_sourceId,m_hyperslabStruct[k].datasetName.c_str());
-
 #endif    
 #endif
     hid_t  sourceSpace= H5Dget_space(sourceObj);
     int rank= H5Sget_simple_extent_ndims(sourceSpace);  // rank of dataset
     
-    hsize_t * offset;
-    hsize_t * count;
-    for(int i=0;i<rank-1;i++)
-      count[i]=1;
+      hsize_t * offset = (hsize_t *)calloc(rank, sizeof(hsize_t));
+      hsize_t * count = (hsize_t *)calloc(rank, sizeof(hsize_t));
+//    for(int i=0;i<rank-1;i++)
+      for(int i=0;i<rank;i++)
+	count[i]=1;
     //read/write plane by plane
     bool endReached=false;
     for(int i=0;i<rank;i++)
-	  offset[i]=m_hyperslabStruct[k].offset[i];
+	  offset[i]=m_hyperslabStruct[k].offset[rank-i-1];
 
    while(!endReached)
     {
       int readEle=0;
       if(m_hyperslabStruct[k].count[rank-1]>nOfEle) readEle=nOfEle;
       else readEle=m_hyperslabStruct[k].count[rank-1];
-      unsigned long long int totEle=m_hyperslabStruct[k].count[rank-1];
+      //unsigned long long int totEle=m_hyperslabStruct[k].count[rank-1]-m_hyperslabStruct[k].offset[rank-1];
+      unsigned long long int totEle=m_maxNumberOfRows;
+      //std::cout<<"totEle : "<<totEle<<std::endl;
        while(totEle>0)
       {
-	  count[rank-1]=readEle;  //nOfEle elementi lungo la terza dimensione 
+	  //count[rank-1]=readEle;  //nOfEle elementi lungo la terza dimensione 
+	  count[0]=readEle;
 	  hsize_t s_count[1];
 	  s_count[0]=readEle;
+	  //std::cout<<readEle<<std::endl;
 	  int srank=1;
-	  hid_t memoryspace = H5Screate_simple (srank, s_count, s_count);
+	  //hid_t memoryspace = H5Screate_simple (srank, s_count, s_count);
+	  hid_t memoryspace = H5Screate_simple (srank, count, count);
 	  herr_t status=H5Sselect_hyperslab(sourceSpace, H5S_SELECT_SET, offset, NULL,count, NULL);
-//	  std::clog<<offset[0]<<" "<<offset[1]<<" "<<offset[2]<<" <== Offset"<<std::endl;
-//	  std::clog<<count[0]<<" "<<count[1]<<" "<<count[2]<<" <== Count"<<std::endl;
+	  //std::clog<<offset[0]<<" "<<offset[1]<<" "<<offset[2]<<" <== Offset"<<std::endl;
+	  //std::clog<<count[0]<<" "<<count[1]<<" "<<count[2]<<" <== Count"<<std::endl;
 	  if(status!=0)
 	  {
 	    std::cerr<<"Invalid hyperslab selection. Importer Aborted"<<std::endl;
@@ -244,7 +247,7 @@ void HDF5Source::readTable()
 	  if(totEle==readEle)totEle=0;
 	  else  totEle=totEle-readEle;
 //	  std::clog<<readEle<<" "<<totEle<<" "<<offset[rank-1]<<std::endl;
-	  offset[rank-1]=offset[rank-1]+readEle;
+//	  offset[rank-1]=offset[rank-1]+readEle;
 //	  std::clog<<readEle<<" "<<totEle<<" "<<offset[rank-1]<<std::endl;
 	  if(totEle<readEle)readEle=totEle;
 //	  std::clog<<readEle<<" "<<totEle<<" "<<offset[rank-1]<<std::endl;
@@ -266,8 +269,8 @@ void HDF5Source::readTable()
 	}
 
       }
-      // advance next rows on hyperslab
-      offset[rank-1]=m_hyperslabStruct[k].offset[rank-1]; //reset starting hyperslab in the column
+      /* advance next rows on hyperslab
+//      offset[rank-1]=m_hyperslabStruct[k].offset[rank-1]; //reset starting hyperslab in the column
       if(rank==1) endReached=true;
       for (int i=rank-2;i>=0;i--)
       {
@@ -281,7 +284,21 @@ void HDF5Source::readTable()
 	   offset[i]=m_hyperslabStruct[k].offset[i];
 	else break;
       }
-
+      */
+      if(rank==1) endReached=true;
+      for(int i=1; i<rank;i++){ 
+	offset[i]++;
+	//std::cout<<"offset "<<offset[i]<<" "<<m_hyperslabStruct[k].offset[0]+m_hyperslabStruct[k].count[0]<<std::endl;
+	if(i==rank-1 && offset[i]==m_hyperslabStruct[k].offset[0]+m_hyperslabStruct[k].count[0])
+	{
+	  endReached=true;
+	  break;
+	}
+	if(offset[i]> (m_hyperslabStruct[k].count[rank-i-1]+m_hyperslabStruct[k].offset[rank-i-1])-1)
+	   offset[i]=m_hyperslabStruct[k].offset[rank-i-1];
+	else break;
+      }
+      
     }// while !endReached
     H5Dclose(sourceObj);
   } //for(k
@@ -353,11 +370,24 @@ bool HDF5Source::checkhyperslab()
       
     hsize_t * sMaxdims   = new hsize_t [rank[k]];
     hsize_t * sDims   = new hsize_t [rank[k]];
+    hsize_t tmpsDims;
+
 
     //sDims actual dimension of array, sMaxdims is the maximum size (in our case is not significant)
     H5Sget_simple_extent_dims(sourceSpace[k], sDims, sMaxdims);
     element.datasetName=m_vDatasetList[k];
-    for(int j=0;j<rank[k];j++) element.offset[j]=0;
+    
+    if(m_volumeOrTable!="volume"){
+    for(int i=0, j=rank[k]-1; i<j; i++, j--){ 
+      tmpsDims=sDims[i];
+      sDims[i]=sDims[j];
+      sDims[j]=tmpsDims;
+    }
+    
+    //std::cout<<sDims[0]<<" "<<sDims[1]<<std::endl;
+    }
+    
+    for(int j=0;j<rank[k];j++) element.offset[j]=0;    
     for(int j=0;j<rank[k];j++) element.count[j]=sDims[j];  
 
     //check for hyperslab modification
@@ -380,14 +410,27 @@ bool HDF5Source::checkhyperslab()
 	  std::stringstream ss1;
 	  if(j<2) ss1<<tmp.substr(0,pos);
 	  else ss1<<tmp;
-	  if(countextract==0) ss1>>element.offset[j];
-	  if(countextract==1) ss1>>element.count[j];
+	  if(countextract==0) {
+	    if(m_volumeOrTable=="volume") ss1>>element.offset[j];
+	    else ss1>>element.offset[rank[k]-1-j];
+	  }
+	  if(countextract==1) {
+	    if(m_volumeOrTable=="volume") ss1>>element.count[j];
+	    else ss1>>element.count[rank[k]-1-j];
+	  }
 	  if(pos==std::string::npos) break;
 	  tmp.erase(0,pos+1);
 	}
         countextract++;
       }  // while(!sstmp.eof())
     } // for (int i=0....
+    
+    if(element.count[0]==0){
+      std::cerr<<"HDF5 Importer: dataset "<<m_vDatasetList[k]
+	      <<" has invalid count number. The count number must be greater than 0."
+	      <<std::endl<<"Operation Aborted"<<std::endl;
+      return false;   
+    } 
     
     //adjust hyperslab if necessary
     for(int i=0;i<rank[k];i++)
@@ -421,7 +464,7 @@ bool HDF5Source::checkhyperslab()
 	    if(ii<rank[k]-2) nameCol<<"_";
 	  }  
 	  std::string stm=nameCol.str();
-//	  std::clog<<stm<<std::endl;
+	  //std::clog<<stm<<std::endl;
 	  m_fieldNames.push_back(stm); 
 	  for (int i=rank[k]-2;i>=0;i--)
 	  {
@@ -434,8 +477,9 @@ bool HDF5Source::checkhyperslab()
 	}
 	
       }
-      
-    m_maxNumberOfRows=element.count[rank[k]-1];
+
+    //m_maxNumberOfRows=element.count[rank[k]-1];
+    m_maxNumberOfRows=element.count[rank[k]-1]-element.offset[rank[k]-1];
     if(k>0 && m_volumeOrTable=="volume") //hyperslab must be all equals (rank==3)
 	  for(int j=0;j<3;j++)
 	    if(element.count[j] != m_hyperslabStruct[0].count[j])

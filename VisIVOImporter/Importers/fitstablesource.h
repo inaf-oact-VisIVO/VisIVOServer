@@ -21,6 +21,10 @@
 #include  "abstractsource.h"
 
 #include <vector>
+extern "C" {
+#include "fitsio.h"
+}
+
 
 class FitsTableSource : public AbstractSource 
 {
@@ -35,9 +39,10 @@ class FitsTableSource : public AbstractSource
     void SetScalFields(int col);
   
     std::string GetColName(int ncol);
-    std::string GetColType(int ncol, int *typecode);
+    std::string GetColType(int ncol, int *typecode, long *repeat);
     std::string GetColUnit(int ncol);
     std::string GetColFormat(int ncol);
+    fitsfile *pFile;
 
   protected:
     int Ntable;

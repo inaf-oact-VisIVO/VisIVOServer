@@ -21,7 +21,7 @@
 #include <cstring>
 
 
-#include "asciisource.h"
+#include "muportalsource.h"
 
 #include "visivoutils.h"
 
@@ -31,7 +31,7 @@
 #include <sstream>
 
 //---------------------------------------------------------------------
-int AsciiSource::readData()
+int MuPortalSource::readData()
 //---------------------------------------------------------------------
 {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -65,53 +65,23 @@ int AsciiSource::readData()
     return 1;
 
   std::string tmp = "";
-  bool discardLine=true;
+
+  m_fieldNames.push_back("id_Ev");
+
+  m_fieldNames.push_back("X_A");
+  m_fieldNames.push_back("Y_B");
+
+  m_fieldNames.push_back("X_C");
+  m_fieldNames.push_back("Y_D");
+
+  m_fieldNames.push_back("X_E");
+  m_fieldNames.push_back("Y_F");
+
+  m_fieldNames.push_back("X_G");
+  m_fieldNames.push_back("Y_H");
+
+  m_fieldNames.push_back("energy");
   
-  getline(inFile, tmp); //!read first line
-  tmp = trim(tmp);
-
-  int indexp = tmp.find('#');
-
-  while(indexp == 0)
-  { 
-  	getline(inFile, tmp);
-	indexp = tmp.find('#');
-  }
-
-  findAndReplace(tmp, '\t', ' ');
-  findAndReplace(tmp, '#', ' ');
-  tmp = trim(tmp);
-
- 
- if(tmp.compare(""))
-    fields=tmp;
-
-  std::string data;
-  std::stringstream ss;
-  ss << fields;
-  int suffix=1;
-  while(!ss.eof()) //!fill m_fieldNames: name of columns
-  {
-    ss >> data;
-
-    if(data.compare(""))
-    {
-      for(int k=0;k< m_fieldNames.size();k++)
-      {
-	if(data==m_fieldNames[k])
-	{  
-	  std::cerr<<"Warning. Duplicate column name "<<data;
-	  std::stringstream ksst;
-	  ksst<<suffix;
-	  data=data+"_"+ksst.str();
-	  suffix++;
-	  std::cerr<<" is changed with "<<data<<std::endl;
-	 }
-      }
-      m_fieldNames.push_back(data.c_str()); 
-      data = "";
-    }
-  }
 
   m_nCols=m_fieldNames.size();
   
@@ -155,7 +125,7 @@ int AsciiSource::readData()
     findAndReplace(tmp, '\t', ' ');
     tmp = trim(tmp);
 
-    indexp = tmp.find('#');
+    int indexp = tmp.find('#');
 
     if(indexp == 0)
 	continue;
@@ -163,7 +133,7 @@ int AsciiSource::readData()
     if(tmp.compare(""))
       lineData.push_back(tmp);  //!fill lineData with the row
     
-   
+
     if((lineData.size()==nLoad || inFile.eof()))  //!arrived to maximum allowed 
     {
       //std::clog<<lineData.size()<<endl;
@@ -303,14 +273,14 @@ int AsciiSource::readData()
 }
 
 //---------------------------------------------------------------------
-  int AsciiSource::readHeader()
+  int MuPortalSource::readHeader()
 //---------------------------------------------------------------------
 {
 	
   m_fieldNames.clear();
 
   int i = 0;
-  int rows=-1;
+  int rows=0;
 
   std::vector<std::string> counting;
   std::string::size_type index = std::string::npos;

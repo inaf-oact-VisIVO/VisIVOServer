@@ -21,8 +21,8 @@ gadgetsource.cpp
 
 rawgridsource.cpp
 rawpointssource.cpp
-
-
+muportalsource.cpp
+ramsessource.cpp
 
 )
 
@@ -52,7 +52,8 @@ gadgetsource.cpp
 
 rawgridsource.cpp
 rawpointssource.cpp
-
+muportalsource.cpp
+ramsessource.cpp
 
 
 )

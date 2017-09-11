@@ -23,7 +23,7 @@
 
 
 #include "abstractsource.h"
-#include <hdf5.h>
+#include "hdf5.h"
 
     struct hyperdef
     { 

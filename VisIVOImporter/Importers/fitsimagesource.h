@@ -25,15 +25,30 @@
 #include "abstractsource.h"
 
 
+extern "C" {
+#include "fitsio.h"
+}
 
 
-class FitsImageSource : public AbstractSource
+class FitsImageSource : public AbstractSource 
 {
   public:
  
   // Read the header file and set the basic table parameters
     int readHeader();
     int readData();
+private:
+    fitsfile *pFile;
+    
+protected:
+    int Ntable;
+    int hdunum;
+    int hdutype;
+    int casesen;
+    int status;
+    
+    std::vector<std::string> m_fields;
+    std::vector <int> scalFields;
  
   
 };

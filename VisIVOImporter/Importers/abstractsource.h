@@ -39,16 +39,20 @@ class AbstractSource
 			   const char* type, long unsigned int points, 
 			   const char* login, const char* binaryHeader, 
 			   float missing, float text, std::string datasetdList,
-			   std::vector<std::string> hyperslab);
+			   std::vector<std::string> hyperslab, int fitshdunum);
 
     void setPointsFileName(const char *fileName,const char *binaryName);
 //     void releaseResources();
 
     virtual int readHeader() = 0;
     virtual int readData() = 0;
+    
+    int writeHistory (const char* histFile,const char* format,const char* out,const char* tableOrVolume,double comput[],double size[],const char* login, const char* binaryHeader, float missing,float text, const char* endian,const char* type, long unsigned int points, const char* vo, const char* se, const char* lfnout,const char* inputFile);
+
 
   protected:
-   static const unsigned int MAX_LOAD;
+    static const unsigned int MAX_LOAD;
+    static const unsigned int MAX_LARGE_LOAD;
    float MISSING_VALUE; //! a negative value used in case of missing data
    float TEXT_VALUE; //! a negative value used in case of ascii text
    std::string m_pointsFileName;
@@ -59,6 +63,7 @@ class AbstractSource
     std::vector<std::string> m_fieldNames;  //!column List
     std::string m_volumeOrTable;
     std::string m_type;
+    std::string m_file;
     std::string m_endian;
     std::string m_login;
     std::string m_binaryHeader;
@@ -66,7 +71,7 @@ class AbstractSource
     double m_cellSize[3], m_cellComp[3];
     int maxInt(){return MAX_INT;};
     std::vector<std::string>  m_hyperslab;
-
+    int m_fitshdunum;
 };
 
 #endif

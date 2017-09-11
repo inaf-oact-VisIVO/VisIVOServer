@@ -29,11 +29,6 @@
 #include <sstream>
 #include "visivoutils.h"
 
-extern "C" {
-#include "fitsio.h"
-}
-
-fitsfile *pFile;
 
 //----------------------------------------------------------------------------
 int FitsTableSource::readHeader()
@@ -42,8 +37,6 @@ int FitsTableSource::readHeader()
 {
   return 0;
 }
-
-
 //----------------------------------------------------------------------------
 int FitsTableSource::readData()
 //----------------------------------------------------------------------------
@@ -71,15 +64,22 @@ int FitsTableSource::readData()
   int hdunum1 = 0;
   int hdutype = 0;
   int typecode;
+  long repeat, width;
+  if(m_fitshdunum==-1) m_fitshdunum=2;
+
   unsigned long long int res=0;
       
   long firstrow = 1;
   long firstelem = 1;
   long nelements;
-  float *DataArrayScal = 0;
+  float **DataArrayScal;
   char *nullArray = 0;
-  int err_ret=0;  
+  int err_ret=0;
+  int fitsCol;
+    char *ttype;
+    ttype= new char[FLEN_VALUE];
   status=0;
+    m_nCols=0;
   err_ret=fits_open_file(&pFile, m_pointsFileName.c_str(), READONLY, &status); //!open FITS input file
   if(err_ret!=0)
   {
@@ -87,48 +87,68 @@ int FitsTableSource::readData()
 	return -1;
   } 
   fits_get_num_hdus(pFile, &hdunum, &status);
-  fits_get_hdu_num(pFile,  &hdunum1); 
+   if(hdunum<m_fitshdunum)
+   {
+       std::cerr<<"Invalid fits hdu number "<<m_fitshdunum<<" The fits table contains only "<<hdunum<<" hdus block"<<std::endl;
+       return -1;
+   }
+  fits_get_hdu_num(pFile,  &hdunum1);
   fits_get_hdu_type(pFile, &hdutype, &status);
-  fits_movabs_hdu(pFile, 2, &hdutype, &status);
-  fits_get_hdu_num(pFile,  &hdunum1); 
+
+  fits_movabs_hdu(pFile, m_fitshdunum, &hdutype, &status);
+  fits_get_hdu_num(pFile,  &hdunum1);
+    status=0;
+    hdutype=0;
+    fits_get_hdu_type(pFile,&hdutype,&status );
+    if(hdutype==0)
+    {
+        std::cerr<<"Invalid fits hdu type "<<hdutype<<" The fits hdu is not a table."<<std::endl;
+        return -1;
+    }
+    
+        
   fits_get_num_rows(pFile, &nRows, &status);
-  fits_get_num_cols(pFile, &m_nCols, &status);
+  fits_get_num_cols(pFile, &fitsCol, &status);
   status = 0;
     
   m_nRows=int(nRows);
  int nLoad=MAX_LOAD;
-  
-     if(m_nRows<=nLoad)
-     nLoad=m_nRows;
+ 
+       char templ[2] = {'*', '\0'};
 
         //!get col names into vecotr m_fields
-  for(int is = 1; is <= m_nCols; is++) 
-  {
-    char colname[70];
-    char templ[2] = {'*', '\0'};
-    fits_get_colname(pFile, casesen, templ, colname, &is, &status);
-    std::string nomeColonna = colname;
-    m_fieldNames.push_back(nomeColonna);
+    char **colname;
+    colname=new char*[fitsCol];
+    int is=0;
+    for(int i = 1; i <= fitsCol; i++)
+    {
+        
+        colname[i-1]=new char[128];
+         fits_get_colname(pFile, CASESEN, templ, colname[i-1], &is, &status);
+//        std::clog<<colname[i-1]<<std::endl;
+    }
+    is=0;
+    for(int i = 1; i <= fitsCol; i++)
+    {
+        status=0;
+        fits_get_coltype(pFile, i, &typecode, &repeat, &width, &status);
+    
+    m_nCols+=repeat;
+        
+        
+    std::string nomeColonna = colname[i-1];
+      
+    if(repeat>1)
+    {
+        for(int j=0;j<repeat;j++)
+        {
+            std::stringstream temp1;
+            temp1<<nomeColonna<<"_"<<j;
+            m_fieldNames.push_back(temp1.str());
+        }
+    } else
+        m_fieldNames.push_back(nomeColonna);
   }
-  try
-  {
-    DataArrayScal = new float[nLoad];
-  }
-  catch (std::bad_alloc & e)
-  {
-    return 1;
-  }
-  try
-  {  
-    nullArray = new char[nLoad];
-  }
-  catch (std::bad_alloc & e )
-  {
-    return 1;
-  }
-  
-  for(i = 0; i < nLoad; i++)
-    nullArray[i] = 0;
         
   nelements = (long)m_nRows;
   status = 0;
@@ -142,65 +162,96 @@ int FitsTableSource::readData()
 
   char **sData = 0;
   long pos=0;
+  long totRead;
+  int vbtColNum=0;
     
-    
-  for(i = 0; i < m_nCols; i++)
+  for(i = 0; i < fitsCol; i++)
   {
-     firstrow=1;  
-     int nLoad=MAX_LOAD;
+      nLoad=MAX_LOAD;
+    totRead=0;
+    type = GetColType(i,&typecode,&repeat);
+    unit = GetColUnit(i);
+//    std::clog<<"type "<<type<<" unit"<<unit<<std::endl;
 
-     if(m_nRows<=nLoad)
-        nLoad=m_nRows;
-    
-     res=m_nRows;
-
-//    int nLoad/*=(int)(10000000/m_nCols)*/;
-     while(res!=0)
-     { 
+      if(m_nRows*repeat<=nLoad)
+          nLoad=m_nRows*repeat;
+      long nChanc=nLoad/repeat;
+      try
+      {
+          DataArrayScal = new float*[repeat];
+      }
+      catch (std::bad_alloc & e)
+      {
+          return 1;
+      }
+      for (int k=0;k<repeat;k++)
+      {
+          try
+          {
+              DataArrayScal[k] = new float[nChanc];
+          }
+          catch (std::bad_alloc & e)
+          {
+              return 1;
+          }
+      }
+      
+      
+ 
+      firstelem=1;
+      firstrow=1;
+      res=m_nRows*repeat;
+        
+      while(res!=0)
+      {
          if(nLoad>res)
-     	 	nLoad=res; 
-
-
-           type = GetColType(i,&typecode);
-           unit = GetColUnit(i);
+     	 	nLoad=res;
+ 
+          nelements=nChanc*repeat;
+          if(nelements>res)
+              nelements=res;
+          nChanc=nelements/repeat;
+          try
+          {
+              nullArray = new char[nChanc*repeat];
+          }
+          catch (std::bad_alloc & e )
+          {
+              return 1;
+          }
+          
+          for(int ii = 0; ii < nChanc*repeat; ii++)
+              nullArray[ii] = 0;
+          
 
            if(!(iCompare(type, "Type: String"))) //!string file reading
            {
-             int stringSize = 0;
+               
+               float *readColData;
+                   try
+                   {
+                       readColData = new float[nelements];
+                   }
+                   catch (std::bad_alloc & e)
+                   {
+                       return 1;
+                   }
+               
+               for(j = 0; j <nelements; j++)
+                       readColData[j] = TEXT_VALUE;  //!here there is the
 
-             format = GetColFormat(i);
-
-             int localHDUType = GetHDUType();
-             if(localHDUType == 2)
-             {
-       
-               format.erase(format.size() - 1, 1);
-             }
-             else
-             {
-               format.erase(0, 1);
-             }
-
-             stringSize = atoi(format.c_str()) + 1;
-
-             if(stringSize < 2)
-             {
-               delete [] sData;
-               sData = 0;
           
-
-               break;
-             }
-
-             sData = new char*[nLoad];
-
-             for(j = 0; j < nLoad; j++)
-               sData[j] = new char[stringSize];
-
-             fits_read_col(pFile, TSTRING, i , firstrow,
-                           firstelem, nelements, &nullstr, sData, 
-                           &anynul, &status);
-				firstelem=firstelem+nLoad;
+          for(j = 0; j < nChanc; j++)
+          {
+              for(int kk=0;kk<repeat;kk++)
+              {
+                  DataArrayScal[kk][j]=readColData[kk*nChanc+j];
+              }
+          }
+          delete [] readColData;
+          
+               
+           
            }
     
            else
@@ -212,71 +263,98 @@ int FitsTableSource::readData()
 			unsigned char *readColData;
 try
   {
-    			readColData = new unsigned char[nLoad];
+    			readColData = new unsigned char[nelements];
   }
 catch (std::bad_alloc & e)
   {
     return 1;
   }
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, readColData, nullArray, &anynul, &status);
-             		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=readColData[j];
-			firstelem=firstelem+nLoad;
-			delete [] readColData;
-			}
+                fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nelements, readColData, nullArray, &anynul, &status);
+                for(j = 0; j <nelements; j++)
+                    if(nullArray[j] == 1)
+                        readColData[j] = MISSING_VALUE;  //!here there is the
+                
+                delete [] nullArray;
+                
+                for(j = 0; j < nChanc; j++)
+                {
+                    for(int kk=0;kk<repeat;kk++)
+                    {
+                        DataArrayScal[kk][j]=readColData[kk*nChanc+j];
+                    }
+                }
+                delete [] readColData;
+                
+
+ 			}
 			break;
     		  case 21:
 			{
 			short *readColData;
 try
   {
-    			readColData = new short[nLoad];
+    			readColData = new short[nelements];
   }
 catch (std::bad_alloc & e)
   {
     return 1;
   }
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, readColData, nullArray, &anynul, &status);
-             		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=readColData[j];
-			firstelem=firstelem+nLoad;
-			delete [] readColData;
-			}
+                fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nelements, readColData, nullArray, &anynul, &status);
+                for(j = 0; j <nelements; j++)
+                    if(nullArray[j] == 1)
+                        readColData[j] = MISSING_VALUE;  //!here there is the
+                
+                delete [] nullArray;
+                
+                for(j = 0; j < nChanc; j++)
+                {
+                    for(int kk=0;kk<repeat;kk++)
+                    {
+                        DataArrayScal[kk][j]=readColData[kk*nChanc+j];
+                    }
+                }
+                delete [] readColData;
+ 			}
 			break;
     		  case 30:
 			{
 			unsigned int *readColData;
 try
   {
-    			readColData = new unsigned int[nLoad];
+    			readColData = new unsigned int[nelements];
   }
 catch (std::bad_alloc & e)
   {
     return 1;
   }
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, readColData, nullArray, &anynul, &status);
-             		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=readColData[j];
-			firstelem=firstelem+nLoad;
-			delete [] readColData;
-			}
+ 			}
 			break;
     		  case 31:
 			{
 			int *readColData;
 try
   {
-    			readColData = new int[nLoad];
+    			readColData = new int[nelements];
   }
 catch (std::bad_alloc & e)
   {
     return 1;
   }
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, readColData, nullArray, &anynul, &status);
-             		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=readColData[j];
-			firstelem=firstelem+nLoad;
-			delete [] readColData;
+                fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nelements, readColData, nullArray, &anynul, &status);
+                for(j = 0; j <nelements; j++)
+                    if(nullArray[j] == 1)
+                        readColData[j] = MISSING_VALUE;  //!here there is the
+                
+                delete [] nullArray;
+                
+                for(j = 0; j < nChanc; j++)
+                {
+                    for(int kk=0;kk<repeat;kk++)
+                    {
+                        DataArrayScal[kk][j]=readColData[kk*nChanc+j];
+                    }
+                }
+                delete [] readColData;
 			}
 			break;
     		  case 40:
@@ -284,57 +362,96 @@ catch (std::bad_alloc & e)
 			unsigned long int *readColData;
 try
   {
-    			readColData = new unsigned long int[nLoad];
+    			readColData = new unsigned long int[nelements];
   }
 catch (std::bad_alloc & e)
   {
     return 1;
   }
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, readColData, nullArray, &anynul, &status);
-             		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=readColData[j];
-			firstelem=firstelem+nLoad;
-			delete [] readColData;
-			}
+ 			}
 			break;
     		  case 41:
 			{
 			long int *readColData;
 try
   {
-    			readColData = new long int[nLoad];
+    			readColData = new long int[nelements];
   }
 catch (std::bad_alloc & e)
   {
     return 1;
   }
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, readColData, nullArray, &anynul, &status);
-             		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=readColData[j];
-			firstelem=firstelem+nLoad;
-			delete [] readColData;
-			}
+                fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nelements, readColData, nullArray, &anynul, &status);
+                for(j = 0; j <nelements; j++)
+                    if(nullArray[j] == 1)
+                        readColData[j] = MISSING_VALUE;  //!here there is the
+                
+                delete [] nullArray;
+                
+                for(j = 0; j < nChanc; j++)
+                {
+                    for(int kk=0;kk<repeat;kk++)
+                    {
+                        DataArrayScal[kk][j]=readColData[kk*nChanc+j];
+                    }
+                }
+                delete [] readColData;
+ 			}
 			break;
     		  case 42:
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, DataArrayScal, nullArray, &anynul, &status);
-			firstelem=firstelem+nLoad;
-			break;
+			{
+                float *readColData;
+                try
+                {
+                    readColData = new float[nelements];
+                }
+                catch (std::bad_alloc & e)
+                {
+                    return 1;
+                }
+                fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nelements, readColData, nullArray, &anynul, &status);
+                for(j = 0; j <nelements; j++)
+                    if(nullArray[j] == 1)
+                        readColData[j] = MISSING_VALUE;  //!here there is the
+                
+                delete [] nullArray;
+                
+                for(j = 0; j < nChanc; j++)
+                {
+                    for(int kk=0;kk<repeat;kk++)
+                    {
+                        DataArrayScal[kk][j]=readColData[kk*nChanc+j];
+                    }
+                }
+                delete [] readColData;
+ 			}
+                break;
     		  case 81:
 			{
 			long long int *readColData;
 try
   {
-    			readColData = new long long int[nLoad];
+    			readColData = new long long int[nelements];
   }
 catch (std::bad_alloc & e)
   {
     return 1;
   }
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, readColData, nullArray, &anynul, &status);
-             		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=readColData[j];
-			firstrow=firstrow+nLoad;
-			delete [] readColData;
+                fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nelements, readColData, nullArray, &anynul, &status);
+                for(j = 0; j <nelements; j++)
+                    if(nullArray[j] == 1)
+                        readColData[j] = MISSING_VALUE;  //!here there is the
+                
+                delete [] nullArray;
+                
+                for(j = 0; j < nChanc; j++)
+                {
+                    for(int kk=0;kk<repeat;kk++)
+                    {
+                        DataArrayScal[kk][j]=readColData[kk*nChanc+j];
+                    }
+                }
+                delete [] readColData;
 			}
 			break;
     		  case 82:
@@ -342,83 +459,89 @@ catch (std::bad_alloc & e)
 			double *readColData;
 try
   {
-    			readColData = new double[nLoad];
+    			readColData = new double[nelements];
   }
 catch (std::bad_alloc & e)
   {
     return 1;
   }
-             		fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nLoad, readColData, nullArray, &anynul, &status);
-             		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=readColData[j];
-			firstrow=firstrow+nLoad;
-			delete [] readColData;
-			}
+                fits_read_colnull(pFile, typecode, i+1 , firstrow,firstelem, nelements, readColData, nullArray, &anynul, &status);
+                for(j = 0; j <nelements; j++)
+                    if(nullArray[j] == 1)
+                        readColData[j] = MISSING_VALUE;  //!here there is the
+                
+                delete [] nullArray;
+                int counter=0;
+                for(int kk=0;kk<repeat;kk++)
+                {
+                    for(j = 0; j < nChanc; j++)
+                    {
+                        DataArrayScal[kk][j]=readColData[j*repeat+kk];
+                    }
+                }
+                delete [] readColData;
+ 			}
 			break;
     		  default:  
-			std::cerr<<"Invalid "<<type<<" in column "<<numeroScal<<std::endl;
+			std::cerr<<"Invalid "<<type<<" in column '"<<colname[i]<<"' ... putting MISSING_VALUE "<<std::endl;
              		for(j = 0; j < nLoad; j++)
-				DataArrayScal[j]=TEXT_VALUE;
-			break;
+                        for(j = 0; j < nChanc; j++)
+                        {
+                            for(int kk=0;kk<repeat;kk++)
+                            {
+                                DataArrayScal[kk][j]=MISSING_VALUE;
+                            }
+                        }
+                break;
   		}//switch
-          }//else
-
-    //!to substitute null values with a fake value equals to
-    //!the mean of the valid values
-//            double sum = 0;
-//            double nValidValues = 0;
-//            double fakeValue = 0;
-// 
-//            for(j = 0; j < nLoad; j++)
-//              if(nullArray[j] == 0)
-//            {
-//              sum += DataArrayScal[j];
-//              nValidValues++;
-//            }
-// 
-//            fakeValue = sum/nValidValues;
-
-//            for(j = 0; j <nLoad; j++)
-//              if(nullArray[j] == 1)
-//                DataArrayScal[j] = fakeValue;  //!here there is the substitution
-
-           if(!(iCompare(unit, "mas")))
-             masToRad(DataArrayScal, nLoad);
+ 
+    }//else
+          
+          
+          
+/*           if(!(iCompare(unit, "mas")))
+             masToRad(DataArrayScal, nelements);
            else if(!(iCompare(unit, "\"h:m:s\"")))
-             hmsToRad(sData, DataArrayScal, nLoad);
+             hmsToRad(sData, DataArrayScal, nelements);
            else if(!(iCompare(unit, "\"d:m:s\"")))
-             dmsToRad(sData, DataArrayScal, nLoad);
+             dmsToRad(sData, DataArrayScal, nelements);
            else if(!(iCompare(unit, "deg")))
-             degToRad(DataArrayScal, nLoad);
+             degToRad(DataArrayScal, nelements);
+*/
+ 
+           if(repeat==1)
+           {
+                  outfile.write((char*)(DataArrayScal[0]), sizeof(float)*nChanc);
+           }
+           else
+           {
+               for(int jj=0;jj<repeat;jj++)
+               {
+                   outfile.seekp(((vbtColNum+jj)*m_nRows+totRead*jj)*sizeof(float),std::ios::beg);
+                   outfile.write((char*)(DataArrayScal[jj]), sizeof(float)*nChanc);
+            }
+           }
+
+          for(int jj=0;jj<repeat;jj++)
+              delete [] DataArrayScal[jj];
+          delete [] DataArrayScal;
+          
+           res-=nChanc*repeat;
+          totRead+=nelements/repeat;
+          firstrow+=nChanc;
 
      
-           for(j = 0; j <nLoad; j++)
-             if(nullArray[j] == 1)
-               DataArrayScal[j] = MISSING_VALUE;  //!here there is the       
-
-      
-           outfile.write((char*)(DataArrayScal), sizeof(float)*nLoad); 
-           res=res-nLoad;
-
-           if(sData)
-           {
-             for(j = 0; j < nLoad; j++)
-               delete [] sData[j];
-
-             delete [] sData;
-             sData = 0;
-           }
-    
      } //while(res!=0)
-  }
+        
+      vbtColNum+=repeat;
+      
+  }// for i=0
 
 
-
-  delete [] DataArrayScal;
-  delete [] nullArray;
         //!close fits file
   fits_close_file(pFile, &status);
   outfile.close();
+
   makeHeader(m_nRows,m_pointsBinaryName,m_fieldNames,m_cellSize,m_cellComp,m_volumeOrTable);
  
 
@@ -531,15 +654,14 @@ catch (std::bad_alloc & e)
   return fieldname;
 }
 //----------------------------------------------------------------------------
-  std::string FitsTableSource::GetColType(int ncol, int *typecode)
+  std::string FitsTableSource::GetColType(int ncol, int *typecode,long *repeat)
 //----------------------------------------------------------------------------
 {
   
-  long repeat;
   long width;
   std::string fieldtype = "";
   status = 0;
-  fits_get_coltype(pFile, ncol+1, typecode, &repeat, &width, &status);
+  fits_get_coltype(pFile, ncol+1, typecode, repeat, &width, &status);
 
   switch(*typecode)
   {

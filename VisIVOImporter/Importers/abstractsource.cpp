@@ -21,13 +21,14 @@
 #include <cstring>
 
 #include "abstractsource.h"
-
+#include "historyXmlWriter.h"
 #include "visivoutils.h"
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 const unsigned int AbstractSource::MAX_LOAD=1000000;
+const unsigned int AbstractSource::MAX_LARGE_LOAD=100000000;
 const  int AbstractSource::MAX_INT=200000000;
 
 
@@ -74,11 +75,12 @@ void AbstractSource::setPointsFileName(const char* fileName, const char* binaryN
 				       const char* login, const char* binaryHeader, 
 				       float missing, float text, 
 				       std::string datasetdList,
-				       std::vector<std::string> hyperslab)
+				       std::vector<std::string> hyperslab, int fitshdunum)
 //---------------------------------------------------------------------
 {
   m_pointsFileName = fileName;
   m_pointsBinaryName=binaryName;
+  m_file=tableOrVolume;
   m_login=login;
   m_binaryHeader=binaryHeader;
 
@@ -99,6 +101,7 @@ void AbstractSource::setPointsFileName(const char* fileName, const char* binaryN
   m_endian=endian;
   MISSING_VALUE=missing;
   TEXT_VALUE=text;
+    m_fitshdunum=fitshdunum;
 
   return;
 }
@@ -136,3 +139,16 @@ int AbstractSource::readData()
 {
   return 1;
 }
+
+//---------------------------------------------------------------------
+int AbstractSource::writeHistory (const char* histFile,const char* format,const char* out,const char* tableOrVolume,double comput[],double size[],
+                                   const char* login, const char* binaryHeader, float missing,float text, const char* endian,
+                                   const char* type, long unsigned int points,
+                                   const char* vo, const char* se, const char* lfnout,const char* inputFile)
+//---------------------------------------------------------------------
+{
+    new HistoryXmlWriter(histFile,format,out,tableOrVolume,comput, size, login, binaryHeader, missing, text, endian, type, points, vo, se, lfnout, inputFile);
+    return 1;
+}
+
+

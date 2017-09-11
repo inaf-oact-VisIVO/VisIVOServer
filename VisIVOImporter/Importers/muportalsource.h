@@ -18,42 +18,19 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef VOSOURCENEW_h
-#define VOSOURCENEW_h
+#ifndef MUPORTALSOURCE_h
+#define MUPORTALSOURCE_h
 
 #include "abstractsource.h"
 
 #include <string>
 #include <vector>
-#include <fstream>
 
-class VOSourcenew : public AbstractSource
+class MuPortalSource : public AbstractSource
 {
-  static const unsigned int MAX_NUMBER_INT; //! maximum number of integer
-  static const unsigned int MAX_NUMBER_TO_REDUCE_ROW;
-  static const unsigned int MIN_NUMBER_OF_ROW;
-	std::ifstream m_inputFile;
-	std::ofstream m_outfile;
-	std::vector<std::string> m_fieldName;
-	float **m_fArray;
-	char *m_buffer;
-	bool allocateArray();
-	bool writeData();
-	unsigned long long int m_nOfRow;
-	unsigned long long int m_alreadyWritten;
-	int m_nOfEle;
-	int m_toWrite;
-	int m_nOfCol;
-	int m_length;
-	bool m_notgood;
-    bool is_number(const std::string& s);
-
   public:
     int readHeader();
     int readData();
-    VOSourcenew();
-    ~VOSourcenew();
-
 
 };
 

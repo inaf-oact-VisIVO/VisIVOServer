@@ -228,7 +228,12 @@ while(!m_inputFile.eof())
 				size_t foundTD,foundEndTD;
 				foundTD=st1.find("<TD>",pos);
 				foundEndTD=st1.find("</TD>",pos);
+//                std::clog<<st1.substr(foundTD+4,foundEndTD-foundTD-4)<<std::endl;
+                if( is_number(st1.substr(foundTD+4,foundEndTD-foundTD-4)))
 				m_fArray[i][indexRow]=atof(st1.substr(foundTD+4,foundEndTD-foundTD-4).c_str());
+                else
+                    m_fArray[i][indexRow]=TEXT_VALUE;
+                
 				finalwrite=true;
 				pos=foundEndTD+4;
 			}
@@ -484,3 +489,9 @@ while(!m_inputFile.eof())
 return 0;
 }
 
+bool VOSourcenew::is_number(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
