@@ -14,9 +14,11 @@ OPTION (SPLCUDA "You must select ON to compile with CUDA support" OFF)
 OPTION (VSMPI "You must select ON to compile with MPI support" OFF)
 
 
-SET(CFITSIO_DIR "/opt/local/" CACHE PATH "")
+SET(CFITSIO_INCLUDE_DIR "/opt/local/" CACHE PATH "")
+SET(CFITSIO_LIB_DIR "/opt/local/" CACHE PATH "")
 SET(CURL_DIR "/opt/local/" CACHE PATH "")
-SET(HDF5_DIR "/opt/local/" CACHE PATH "")
+SET(HDF5_INCLUDE_DIR "/opt/local/" CACHE PATH "")
+SET(HDF5_LIB_DIR "/opt/local/" CACHE PATH "")
 SET(VTK_DIR "/opt/vtk6.20/lib/cmake/vtk-6.2/")
 
 #SET(VTK_DIR "/opt/vtk5.10/lib/vtk-5.10/")
@@ -206,13 +208,13 @@ if(LIGHT)
 #LINK_DIRECTORIES(/opt/local/var/macports/software/hdf5-18/1.8.7_1/opt/local/lib)
 
 
-INCLUDE_DIRECTORIES(${CFITSIO_DIR}/include)
+INCLUDE_DIRECTORIES(${CFITSIO_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${CURL_DIR}/include)
-INCLUDE_DIRECTORIES(${HDF5_DIR}/include)
+INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
 
-LINK_DIRECTORIES(${CFITSIO_DIR}/lib)
+LINK_DIRECTORIES(${CFITSIO_LIB_DIR})
 LINK_DIRECTORIES(${CURL_DIR}/lib)
-LINK_DIRECTORIES(${HDF5_DIR}/lib)
+LINK_DIRECTORIES(${HDF5_LIB_DIR})
 
 else(LIGHT)
 
