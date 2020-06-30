@@ -12,6 +12,8 @@ imagesize=medium
 #cycleoffset=0
 #cycle_skip_from=0
 #cycle_skip_to=0
+#cliplarge=yes
+#cliprange=0.01 1000
 ######## Sect 2 Points and vectors
 x=X
 y=Y

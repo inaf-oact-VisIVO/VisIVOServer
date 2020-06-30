@@ -26,31 +26,31 @@ extern "C" {
 }
 
 
-class FitsTableSource : public AbstractSource 
+class FitsTableSource : public AbstractSource
 {
-  public:
+public:
     int readHeader();
     int readData();
     
-  private:
+private:
     long GetNumRows(int ntab);
     int GetNumColumns(int ntab);
     int GetHDUType();
     void SetScalFields(int col);
-  
+    
     std::string GetColName(int ncol);
     std::string GetColType(int ncol, int *typecode, long *repeat);
     std::string GetColUnit(int ncol);
     std::string GetColFormat(int ncol);
     fitsfile *pFile;
-
-  protected:
+    
+protected:
     int Ntable;
     int hdunum;
     int hdutype;
     int casesen;
-    int status; 
-  
+    int status;
+    
     std::vector<std::string> m_fields;
     std::vector <int> scalFields;
 	

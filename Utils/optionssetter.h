@@ -159,6 +159,18 @@ struct VisIVOServerOptions
   std::string VO;
   std::string lfnout;
   std::string se;
+
+// clipping plane
+    bool clipset;
+    double cliprange[2];
+    
+    //history
+    bool m_historyEnabled;
+    std::string m_historyFile;
+    
+    //splotch recalc cam
+    bool autocalcCam;
+
 };
 
 class OptionsSetter
@@ -171,6 +183,9 @@ class OptionsSetter
    
     OptionsSetter ( );
     ~OptionsSetter ( );
+    
+    void writeHistory();
+
     int parseOption (const std::vector<std::string> arguments );
     bool setInternalData (VisIVOViewer *env);
     void showHelp();
@@ -208,7 +223,11 @@ class OptionsSetter
     std::vector<double> m_cyclecamRoll;
     std::vector<int> m_cyclePlane;
     std::vector<std::string> m_cyclePlanePointNormal;
-    bool m_inputLfnGiven;  
+    bool m_inputLfnGiven;
+    bool fileIsAtTheEnd;
+    
+    std::map<std::string,std::string> viewParameter;
+    std::vector <std::string> outFilename;
 };
 
 #endif

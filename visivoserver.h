@@ -55,6 +55,12 @@ struct VisIVOFilter
   char visualList[256];
   char math[512];
   char MRbackground[64];
+  char dimvox[256];
+  char trackplanedist[64];
+  char innerdist[64];
+  char outpoints[256];
+  char outvol[256];
+
 };
 
 struct VisIVOImporter
@@ -128,6 +134,7 @@ struct VisIVOViewer
   char labelIntensity[256];
   char labelColor[256];
   char labelhsml[256];
+  double cliprange[2];
 };
 
 struct VBT

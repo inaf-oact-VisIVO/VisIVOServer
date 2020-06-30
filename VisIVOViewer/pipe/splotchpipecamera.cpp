@@ -253,12 +253,15 @@ void SplotchPipeCamera::setMirror()
 int SplotchPipeCamera::vtkCameraData(SplotchCamera *splCamera)
 //------------------------------------------------------------------------------------
 {
+    
+    
   int i = 0;
   int j = 0;
  
   std::ifstream inFile;
 
   vtkFloatArray *radiusArrays =vtkFloatArray::New();
+    
   vtkFloatArray *xAxis=vtkFloatArray::New();
   vtkFloatArray *yAxis=vtkFloatArray::New();
   vtkFloatArray *zAxis=vtkFloatArray::New();

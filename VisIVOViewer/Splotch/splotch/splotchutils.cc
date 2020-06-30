@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2010
+ * Copyright (c) 2004-2011
  *              Martin Reinecke (1), Klaus Dolag (1)
  *               (1) Max-Planck-Institute for Astrophysics
  *
@@ -19,6 +19,7 @@
  *
  */
 #include <fstream>
+#include <sstream>
 #include "splotch/splotchutils.h"
 #include "cxxsupport/mpi_support.h"
 #include "cxxsupport/string_utils.h"
@@ -59,14 +60,9 @@ void get_colourmaps (paramfile &params, vector<COLOURMAP> &amap, VisIVOServerOpt
 #else
 void get_colourmaps (paramfile &params, vector<COLOURMAP> &amap)
 #endif
-{
-bool VisIVOPalette=false;  
-#ifdef SPLVISIVO
-    int ptypes=1; //VISIVO ptypes could contain also dark and star: now we have only gas
-#else
-    int ptypes = params.find<int>("ptypes",1);
-#endif
-    
+  {
+  int ptypes = params.find<int>("ptypes",1);
+
   bool master = mpiMgr.master();
   amap.resize(ptypes);
 
@@ -81,70 +77,83 @@ bool VisIVOPalette=false;
       }
     else
       {
+      bool VisIVOPalette=false;
 #ifdef SPLVISIVO
-          
 //reading colortable from visivo
-       // string paletteFile=params.find<string>("palette"+dataToString(itype),"none"); //itype is 0 in VisIVO
-         
-        //if(paletteFile=="none")  //VisIVO color table
-        if (opt.color!="none") 
-        {	
-            //Internal palette
-            int nVVColours=0;
-            int maxIdPalette=1;
-            SelectLookTable(&opt);  //the Table is loaded only one time
-            nVVColours=opt.extPalR.size();
-            double step;
-            
-            if (opt.extPalId.size()!=0) 
-              maxIdPalette=opt.extPalId[opt.extPalId.size()-1];
-           
-                for (int i=0; i<opt.extPalR.size(); i++)
-                {
-                    float rrr,ggg,bbb;
-                    rrr=(float)opt.extPalR[i]; //these vale are already normalized to 255
-                    ggg=(float)opt.extPalG[i];
-                    bbb=(float)opt.extPalB[i]; 
-                    if(opt.extPalId.size()!=0)
-                    {
-                        if(i<opt.extPalR.size()-1)
-                            step=1./maxIdPalette*opt.extPalId[i];
-                            //step=i*((1./(opt.extPalId[i+1]-opt.extPalId[i]))/(maxIdPalette));
-                        else
-                            step=1;
-                    }
-                    else
-                        step =i*( 1./(nVVColours-1));
-                    
-                    amap[itype].addVal(step,COLOUR(rrr,ggg,bbb));
-                    
-                }
-            VisIVOPalette=true;
-                        
-        }
-            
-#endif
-      if(!VisIVOPalette)
-      {
-      ifstream infile (params.find<string>("palette"+dataToString(itype)).c_str());
-      planck_assert (infile,"could not open palette file  <" +
-        params.find<string>("palette"+dataToString(itype)) + ">");
-      string dummy;
-      int nColours;
-      infile >> dummy >> dummy >> nColours;
-      if (master)
-        cout << " loading " << nColours << " entries of color table of ptype " << itype << endl;
-      double step = 1./(nColours-1);
-      for (int i=0; i<nColours; i++)
+      string paletteFile=params.find<string>("palette"+dataToString(itype),"none"); //itype is 0 in VisIVO
+          
+        std::cout<<"paletteFile:"<<paletteFile<<std::endl;
+          
+      if(paletteFile=="none")  //VisIVO color table
         {
-            float rrr,ggg,bbb;
-            infile >> rrr >> ggg >> bbb;
-            //amap[itype].addVal(opt.extPalId[i],COLOUR(rrr/255,ggg/255,bbb/255));
-            amap[itype].addVal(i*step,COLOUR(rrr/255,ggg/255,bbb/255));
+        int nVVColours=0;
+        SelectLookTable(&opt);  //the Table is loaded only one time
+        nVVColours=opt.extPalR.size();
+        double step = 1./(nVVColours-1);
+        for (int i=0; i<opt.extPalR.size(); i++)
+          {
+          float rrr,ggg,bbb;
+          rrr=(float)opt.extPalR[i]; //these vale are already normalized to 255
+          ggg=(float)opt.extPalG[i];
+          bbb=(float)opt.extPalB[i];
+          amap[itype].addVal(i*step,COLOUR(rrr,ggg,bbb));
+          }
+        VisIVOPalette=true;
         }
-      } //if(!VisIVOPalette)
+      else
+      {
+          /*
+          int nColours = 0;
+          // load visivo palette
 
-	
+          ifstream infile1 (opt.colorTable.c_str());
+          planck_assert (infile1, "could not open visivo palette file  <" + opt.colorTable+ ">");
+          std::string line1;
+          while(std::getline(infile1,line1))
+              nColours++;
+          infile1.close();
+          double step = 1./(nColours-1);
+          // load visivo palette
+          ifstream infile (opt.colorTable.c_str());
+          planck_assert (infile,"could not open visivo palette file  <" + opt.colorTable+">");
+          
+          std::string line;
+          
+          int i = 0;
+          while(std::getline(infile,line))
+          {
+              std::istringstream iss(line);
+              float dummy, r, g, b;
+              if(!(iss >> dummy >> r >> g >> b))
+                  std::cout << "Error reading visivo palette file" << std::endl;
+              else
+                  amap[itype].addVal(i*step,COLOUR(r,g,b));
+              
+              ++i;
+          }
+           
+           */
+      }
+#endif
+      if (!VisIVOPalette)
+        {
+        ifstream infile (params.find<string>("palette"+dataToString(itype)).c_str());
+        planck_assert (infile,"could not open palette file  <" +
+          params.find<string>("palette"+dataToString(itype)) + ">");
+        string dummy;
+        int nColours;
+        infile >> dummy >> dummy >> nColours;
+        if (master)
+          cout << " loading " << nColours << " entries of color table of ptype " << itype << endl;
+        double step = 1./(nColours-1);
+        for (int i=0; i<nColours; i++)
+          {
+          float rrr,ggg,bbb;
+          infile >> rrr >> ggg >> bbb;
+          amap[itype].addVal(i*step,COLOUR(rrr/255,ggg/255,bbb/255));
+          }
+        } //if(!VisIVOPalette)
+
       }
     amap[itype].sortMap();
     }
@@ -153,14 +162,14 @@ bool VisIVOPalette=false;
 void timeReport()
   {
   if (mpiMgr.master())
-    tstack_report("Splotch total time");
+    tstack_report("Splotch");
   }
 
 void hostTimeReport(wallTimerSet &Timers)
   {
   cout << "Ranging Data (secs)        : " << Timers.acc("range") << endl;
   cout << "Build Index List (secs)    : " << Timers.acc("buildindex") << endl;
-  cout << "Interpolating Data (secs)  : " << Timers.acc("interoplate") << endl;
+  cout << "Interpolating Data (secs)  : " << Timers.acc("interpolate") << endl;
   cout << "Transforming Data (secs)   : " << Timers.acc("transform") << endl;
   cout << "Sorting Data (secs)        : " << Timers.acc("sort") << endl;
   cout << "Coloring Sub-Data (secs)   : " << Timers.acc("coloring") << endl;

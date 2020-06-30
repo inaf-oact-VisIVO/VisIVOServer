@@ -37,14 +37,17 @@
 class MPI_Manager
   {
   public:
-    enum redOp { Sum, Min, Max };
+    enum redOp { Sum, Min, Max, Prod };
 
   private:
     void gatherv_helper1_m (int nval_loc, arr<int> &nval, arr<int> &offset,
       int &nval_tot) const;
-    void gatherRawVoid (const void *in, tsize num, void *out, NDT type) const;
+    void gatherRawVoid (const void *in, tsize num, void *out, NDT type,
+      int root=0) const;
     void gathervRawVoid (const void *in, tsize num, void *out,
       const int *nval, const int *offset, NDT type) const;
+    void all2allv_easy_prep (tsize insz, const arr<int> &numin, arr<int> &disin,
+      arr<int> &numout, arr<int> &disout) const;
 
     int num_ranks_, rank_;
 
@@ -110,13 +113,14 @@ class MPI_Manager
       tsize src) const
       { sendrecv_replaceRaw(&data, 1, dest, src); }
 
-    template<typename T> void gather_m (const T &in, arr<T> &out) const
+    template<typename T> void gather_m (const T &in, arr<T> &out, int root=0)
+      const
       {
       out.alloc(num_ranks_);
-      gatherRawVoid (&in,1,&out[0],nativeType<T>());
+      gatherRawVoid (&in,1,&out[0],nativeType<T>(),root);
       }
-    template<typename T> void gather_s (const T &in) const
-      { gatherRawVoid (&in,1,0,nativeType<T>()); }
+    template<typename T> void gather_s (const T &in, int root=0) const
+      { gatherRawVoid (&in,1,0,nativeType<T>(),root); }
 
     template<typename T> void gatherv_m (const arr<T> &in, arr<T> &out) const
       {
@@ -155,20 +159,23 @@ class MPI_Manager
       }
 
     void reduceRawVoid (const void *in, void *out, NDT type, tsize num,
-      redOp op, int root) const;
+      redOp op, int root=0) const;
     template<typename T> void reduceRaw (const T *in, T *out, tsize num,
-      redOp op, int root) const
+      redOp op, int root=0) const
       { reduceRawVoid (in, out, nativeType<T>(), num, op, root); }
     template<typename T> void reduce (const arr<T> &in, arr<T> &out, redOp op,
       int root=0) const
       { (rank_==root) ? reduce_m (in, out, op) : reduce_s (in, op, root); }
+    template<typename T> void reduce (const T &in, T &out, redOp op,
+      int root=0) const
+      { reduceRaw (&in,&out,1,op,root); }
     template<typename T> void reduce_m (const arr<T> &in, arr<T> &out,
       redOp op) const
       {
       out.alloc(in.size());
       reduceRaw (&in[0], &out[0], in.size(), op, rank_);
       }
-    template<typename T> void reduce_s (const arr<T> &in, redOp op, int root)
+    template<typename T> void reduce_s (const arr<T> &in, redOp op, int root=0)
       const
       { reduceRaw (&in[0], 0, in.size(), op, root); }
 
@@ -211,12 +218,12 @@ class MPI_Manager
     template<typename T> void allreduce (T &data, redOp op) const
       { allreduceRaw (&data, 1, op); }
 
-    void bcastRawVoid (void *data, NDT type, tsize num, int root) const;
-    template<typename T> void bcastRaw (T *data, tsize num, int root) const
+    void bcastRawVoid (void *data, NDT type, tsize num, int root=0) const;
+    template<typename T> void bcastRaw (T *data, tsize num, int root=0) const
       { bcastRawVoid (data, nativeType<T>(), num, root); }
-    template<typename T> void bcast (arr<T> &data, int root) const
+    template<typename T> void bcast (arr<T> &data, int root=0) const
       { bcastRaw (&data[0], data.size(), root); }
-    template<typename T> void bcast (T &data, int root) const
+    template<typename T> void bcast (T &data, int root=0) const
       { bcastRaw (&data, 1, root); }
 
     /*! NB: \a num refers to the <i>total</i> number of items in the arrays;
@@ -248,20 +255,9 @@ class MPI_Manager
     template<typename T> void all2allv_easy (const arr<T> &in,
       const arr<int> &numin, arr<T> &out, arr<int> &numout) const
       {
-      tsize n=num_ranks_;
-      planck_assert (numin.size()==n,"array size mismatch");
-      numout.alloc(n);
-      all2all (numin,numout);
-      arr<int> disin(n), disout(n);
-      disin[0]=disout[0]=0;
-      for (tsize i=1; i<n; ++i)
-        {
-        disin [i]=disin [i-1]+numin [i-1];
-        disout[i]=disout[i-1]+numout[i-1];
-        }
-      planck_assert(in.size()==tsize(disin[n-1]+numin[n-1]),
-        "incorrect array size");
-      out.alloc(disout[n-1]+numout[n-1]);
+      arr<int> disin,disout;
+      all2allv_easy_prep (in.size(),numin,disin,numout,disout);
+      out.alloc(disout[num_ranks_-1]+numout[num_ranks_-1]);
       all2allvRawVoid (&in[0], &numin[0], &disin[0], &out[0], &numout[0],
         &disout[0], nativeType<T>());
       }

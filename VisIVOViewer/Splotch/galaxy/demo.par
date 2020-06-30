@@ -1,0 +1,43 @@
+# Output File
+OutFile=newgas.h5
+# Source images parameters 0=BMP, 1=FITS
+InFileType=1
+GalaxyFileR=m51_8000x8000.raw
+GalaxyFileG=m51_8000x8000.raw
+GalaxyFileB=m51_8000x8000.raw
+GalaxyFileI=m51_8000x8000_256.raw
+xres=8000
+yres=8000
+Rth=0.85
+Gth=0
+Bth=0
+ColorDepth=2
+# Bulge geometric parameters
+#BulgeSize=10000000
+BulgeSize=0
+GroupingBulge=0
+SigmaxBulge=0.025 
+SigmayBulge=0.025 
+SigmazBulge=0.02 
+# Disk geometric parameters
+#DiskSize=10000000
+DiskSize=0
+GroupingDisk=0
+SigmaxDisk=0.45
+SigmayDisk=0.45
+SigmazDisk=0.02
+# Globular Clusters geometric parameter
+NGlobes=0
+Gsigma=0.005
+SigmaxGcluster=0.45
+SigmayGcluster=0.45
+SigmazGcluster=0.40
+# Arms geometric parameters
+GroupingArms=1
+SigmazArms=0.005
+NperGroupArms=4
+ScaledxresArms=4000
+ScaledyresArms=4000
+CompressionFactorArms=5.0
+# Density calculation parameters
+Smooth=0.01

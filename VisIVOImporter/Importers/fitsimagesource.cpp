@@ -34,10 +34,10 @@ extern "C" {
 
 
 //---------------------------------------------------------------------
- int FitsImageSource::readHeader()
+int FitsImageSource::readHeader()
 //---------------------------------------------------------------------
 {
-return 0;
+    return 0;
 }
 
 //---------------------------------------------------------------------
@@ -68,7 +68,7 @@ int FitsImageSource::readData()
     int typecode;
     long repeat, width;
     if(m_fitshdunum==-1) m_fitshdunum=1;
-   
+    
     unsigned long long int res=0;
     
     long firstrow = 1;
@@ -90,8 +90,8 @@ int FitsImageSource::readData()
     fits_get_num_hdus(pFile, &hdunum, &status);
     if(hdunum<m_fitshdunum)
     {
-            std::cerr<<"Invalid fits hdu number "<<m_fitshdunum<<" The fits table contains only "<<hdunum<<" hdus block"<<std::endl;
-            return -1;
+        std::cerr<<"Invalid fits hdu number "<<m_fitshdunum<<" The fits table contains only "<<hdunum<<" hdus block"<<std::endl;
+        return -1;
     }
     fits_get_hdu_num(pFile,  &hdunum1);
     fits_get_hdu_type(pFile, &hdutype, &status);
@@ -112,7 +112,7 @@ int FitsImageSource::readData()
     {
         std::cerr<<"Only "<<naxis<<" axes. The fits hdu is not an image."<<std::endl;
         return -1;
-    
+        
     }
     if(m_file=="volume" && naxis<3)
     {
@@ -122,36 +122,36 @@ int FitsImageSource::readData()
     }
     long dimAx[naxis];
     fits_get_img_size(pFile, naxis,dimAx, &status);
- 
-//    std::clog<<dimAx[0]<<" "<<dimAx[1]<<" "<<dimAx[2]<<std::endl;
+    
+    //    std::clog<<dimAx[0]<<" "<<dimAx[1]<<" "<<dimAx[2]<<std::endl;
     int volDim;
     long *firstpix;
     firstpix= new long[naxis];
     for(int i=0;i<naxis;i++) firstpix[i]=1;
     int totPlane=1;
-
+    
     if(m_file=="volume")
+    {
+        m_nRows=int(dimAx[0]*dimAx[1]*dimAx[2]);
+        m_cellComp[0]=dimAx[0];
+        m_cellComp[1]=dimAx[1];
+        m_cellComp[2]=dimAx[2];
+        volDim=3;
+        std::stringstream temp1;
+        temp1<<m_pointsFileName;
+        if(naxis>3)temp1<<"_"<<0;
+        m_fieldNames.push_back(temp1.str());
+        if(naxis>3)
         {
-            m_nRows=int(dimAx[0]*dimAx[1]*dimAx[2]);
-            m_cellComp[0]=dimAx[0];
-            m_cellComp[1]=dimAx[1];
-            m_cellComp[2]=dimAx[2];
-              volDim=3;
-            std::stringstream temp1;
-            temp1<<m_pointsFileName;
-            if(naxis>3)temp1<<"_"<<0;
-            m_fieldNames.push_back(temp1.str());
-            if(naxis>3)
+            for(int i=3;i<naxis;i++)   totPlane*=dimAx[i];
+            for(int i=1;i<totPlane;i++)
             {
-                 for(int i=3;i<naxis;i++)   totPlane*=dimAx[i];
-                for(int i=1;i<totPlane;i++)
-                {
-                    std::stringstream temp1;
-                    temp1<<m_pointsFileName<<"_"<<i;
-                    m_fieldNames.push_back(temp1.str());
-               }
+                std::stringstream temp1;
+                temp1<<m_pointsFileName<<"_"<<i;
+                m_fieldNames.push_back(temp1.str());
             }
         }
+    }
     else
     {
         m_nRows=int(dimAx[0]*dimAx[1]);
@@ -186,7 +186,7 @@ int FitsImageSource::readData()
     {
         std::cerr<<"Very Large planar image number of pixel "<<res<<" exceed the maximum planar image "<<MAX_LARGE_LOAD;
         std::cerr<<"Importer Aborted."<<std::endl;
-       return -1;
+        return -1;
     }
     std::ofstream outfile(m_pointsBinaryName.c_str(),std::ofstream::binary );  //!open out binary file
     float *DataArrayScal;
@@ -205,27 +205,27 @@ int FitsImageSource::readData()
             firstpix[j]++;
             if(firstpix[j]>dimAx[j])
             {
-                    firstpix[j]=1;
-                    if(j==naxis-1) newPlane=false;
+                firstpix[j]=1;
+                if(j==naxis-1) newPlane=false;
             }
             else
             {
                 newPlane=true;
                 break;
             }
-                
+            
         }
     }
-
     
-        
-        //!close fits file
-        fits_close_file(pFile, &status);
-        outfile.close();
     
-        m_volumeOrTable="volume";
-        makeHeader(m_nRows,m_pointsBinaryName,m_fieldNames,m_cellSize,m_cellComp,m_volumeOrTable);
-        
-        
-        return 0;
+    
+    //!close fits file
+    fits_close_file(pFile, &status);
+    outfile.close();
+    
+    m_volumeOrTable="volume";
+    makeHeader(m_nRows,m_pointsBinaryName,m_fieldNames,m_cellSize,m_cellComp,m_volumeOrTable);
+    
+    
+    return 0;
 }

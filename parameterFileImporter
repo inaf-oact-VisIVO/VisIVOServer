@@ -59,6 +59,15 @@
 #out=filename_out.bin
 #file=InputVOTable.xml
 
+
+#fformat=muportal
+#out=filename_out.bin
+#file=InputPlanesData
+
+#fformat=ramses
+#out=filename_out.bin
+#file=InputDirectoryRamsesPartricles
+
 #-----------------------
 # Remote Data Input format Options
 

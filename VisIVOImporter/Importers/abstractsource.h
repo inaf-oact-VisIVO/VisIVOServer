@@ -39,7 +39,7 @@ class AbstractSource
 			   const char* type, long unsigned int points, 
 			   const char* login, const char* binaryHeader, 
 			   float missing, float text, std::string datasetdList,
-			   std::vector<std::string> hyperslab, int fitshdunum);
+			   std::vector<std::string> hyperslab, int fitshdunum, int ascastextcol);
 
     void setPointsFileName(const char *fileName,const char *binaryName);
 //     void releaseResources();
@@ -51,8 +51,9 @@ class AbstractSource
 
 
   protected:
-    static const unsigned int MAX_LOAD;
-    static const unsigned int MAX_LARGE_LOAD;
+   static const unsigned int MAX_LOAD;
+   static const unsigned int MAX_LARGE_LOAD;
+
    float MISSING_VALUE; //! a negative value used in case of missing data
    float TEXT_VALUE; //! a negative value used in case of ascii text
    std::string m_pointsFileName;
@@ -72,6 +73,8 @@ class AbstractSource
     int maxInt(){return MAX_INT;};
     std::vector<std::string>  m_hyperslab;
     int m_fitshdunum;
+    int m_textcol;
+
 };
 
 #endif

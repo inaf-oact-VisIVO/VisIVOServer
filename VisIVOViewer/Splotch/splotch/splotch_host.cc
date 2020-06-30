@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2010
+ * Copyright (c) 2004-2011
  *              Martin Reinecke (1), Klaus Dolag (1)
  *               (1) Max-Planck-Institute for Astrophysics
  *
@@ -30,12 +30,13 @@
 #include "cxxsupport/walltimer.h"
 #include "cxxsupport/sse_utils_cxx.h"
 #include "cxxsupport/string_utils.h"
+#include "cxxsupport/openmp_support.h"
 
 #define SPLOTCH_CLASSIC
 
 using namespace std;
 
-namespace {
+namespace host_funct {
 
 const float32 h2sigma = 0.5*pow(pi,-1./6.);
 const float32 sqrtpi = sqrt(pi);
@@ -51,12 +52,11 @@ const float32 rfac=1.5*h2sigma/(sqrt(2.)*sigma0);
 #else
 const float32 rfac=1.;
 #endif
+    
 #ifdef SPLVISIVO
-void particle_project(paramfile &params, vector<particle_sim> &p,
-  const vec3 &campos, const vec3 &lookat, vec3 sky, VisIVOServerOptions &opt)
+    void particle_project(paramfile &params, vector<particle_sim> &p, const vec3 &campos, const vec3 &lookat, vec3 sky, VisIVOServerOptions &opt)
 #else
-void particle_project(paramfile &params, vector<particle_sim> &p,
-  const vec3 &campos, const vec3 &lookat, vec3 sky)
+    void particle_project(paramfile &params, vector<particle_sim> &p, const vec3 &campos, const vec3 &lookat, vec3 sky)
 #endif
   {
   int xres = params.find<int>("xres",800),
@@ -68,11 +68,11 @@ void particle_project(paramfile &params, vector<particle_sim> &p,
   float32 ycorr = .5f*(yres-xres);
   float32 res2 = 0.5f*xres;
 #ifdef SPLVISIVO
-    float32 fov=opt.fov;
-//    float32 fov = params.find<float32>("fov",45); //in degrees
+      float32 fov=opt.fov;
 #else
   float32 fov = params.find<float32>("fov",45); //in degrees
 #endif
+      
   float32 fovfct = tan(fov*0.5f*degr2rad);
   int npart=p.size();
 
@@ -166,6 +166,50 @@ void particle_project(paramfile &params, vector<particle_sim> &p,
     p[m].active = true;
     }
 }
+// this is to check the .r distribution:
+  float mymin=1e15;
+  float mymax=-1e15;
+  for (long m1=0; m1<npart; ++m1)
+    {
+	mymin = min(mymin,p[m1].x);
+        mymax = max(mymax,p[m1].x);
+    } 
+  cout << "MYMIN, MYMAX: " << mymin << " " << mymax << endl;
+  long countsmall=0;
+  long countinter1=0;
+  long countinter2=0;
+  long countinter3=0;
+  long countinter4=0;
+  long countlarge=0;
+  long countactive=0;
+  float r_th = params.find<float>("rth",0.0);
+  if(r_th != 0.0)
+    {	
+    for (long m=0; m<npart; ++m)
+      {
+        if(p[m].active == true)
+        {
+	  if(p[m].r < 1.0)countsmall++;
+          if(p[m].r >= 1.0 && p[m].r < r_th)countinter1++;
+          if(p[m].r >= 1.0 && p[m].r < 2*r_th)countinter2++;
+          if(p[m].r >= 1.0 && p[m].r < 4*r_th)countinter3++;
+          if(p[m].r >= 1.0 && p[m].r < 8*r_th)countinter4++;
+          if(p[m].r >= 8*r_th)countlarge++;
+          countactive++;
+        }
+      }
+    cout << "NUMBER OF ACTIVE PARTICLES = " << countactive << endl;
+    cout << "PARTICLES WITH r < 1 = " << countsmall << endl;
+    cout << "PARTICLES WITH 1 <= r < " << r_th << " = " << countinter1 << endl;
+    cout << "PARTICLES WITH 1 <= r < " << 2*r_th << " = " << countinter2 << endl;
+    cout << "PARTICLES WITH 1 <= r < " << 4*r_th << " = " << countinter3 << endl;
+    cout << "PARTICLES WITH 1 <= r < " << 8*r_th << " = " << countinter4 << endl;
+    cout << "PARTICLES WITH r >= " << 8*r_th << " = " << countlarge << endl;
+
+    }
+
+
+
   }
 
 void particle_colorize(paramfile &params, vector<particle_sim> &p,
@@ -239,7 +283,8 @@ void particle_sort(vector<particle_sim> &p, int sort_type, bool verbose)
 
 const int chunkdim=100;
 
-void render_new (vector<particle_sim> &p, arr2<COLOUR> &pic,
+//common interface for CPU and GPU version
+void render_new (particle_sim *p, int npart, arr2<COLOUR> &pic,
   bool a_eq_e, float32 grayabsorb)
   {
   planck_assert(a_eq_e || (mpiMgr.num_ranks()==1),
@@ -248,20 +293,27 @@ void render_new (vector<particle_sim> &p, arr2<COLOUR> &pic,
   int xres=pic.size1(), yres=pic.size2();
   int ncx=(xres+chunkdim-1)/chunkdim, ncy=(yres+chunkdim-1)/chunkdim;
 
-  arr2<vector<uint32> > idx(ncx,ncy);
+  arr<arr2<vector<uint32> > > idx;
   float32 rcell=sqrt(2.f)*(chunkdim*0.5f-0.5f);
   float32 cmid0=0.5f*(chunkdim-1);
 
   exptable<float32> xexp(-20.);
-#ifdef PLANCK_HAVE_SSE
+#ifdef __SSE2__
   const float32 taylorlimit=xexp.taylorLimit();
 #endif
 
   pic.fill(COLOUR(0,0,0));
 
-  tstack_push("Chunk preparation");
+  tstack_push("Host Chunk preparation");
+#pragma omp parallel
+{
+  arr2<vector<uint32> > lidx(ncx,ncy);
+  int mythread=openmp_thread_num(),
+      nthreads=openmp_num_threads();
 
-  for (tsize i=0; i<p.size(); ++i)
+  int64 lo, hi;
+  calcShareGeneral (0, npart, nthreads, mythread, lo, hi);
+  for (int64 i=lo; i<hi; ++i)
     {
     particle_sim &pp(p[i]);
     float32 rfacr = rfac*pp.r;
@@ -280,19 +332,30 @@ void render_new (vector<particle_sim> &p, arr2<COLOUR> &pic,
           float32 cy=cmid0+iy*chunkdim;
           float32 rtot2 = (pp.x-cx)*(pp.x-cx) + (pp.y-cy)*(pp.y-cy);
           if (rtot2<sumsq)
-            idx[ix][iy].push_back(i);
+            lidx[ix][iy].push_back(i);
           }
         }
       }
     }
+#pragma omp barrier
+#pragma omp single
+  {
+  idx.alloc(nthreads);
+  }
+#pragma omp barrier
+#pragma omp critical (render1)
+  {
+  idx[mythread].swap(lidx);
+  }
+} // end of parallel region
 
-  tstack_replace("Chunk preparation","Rendering proper");
+  tstack_replace("Host Chunk preparation","Host Rendering proper");
 
   work_distributor wd (xres,yres,chunkdim,chunkdim);
 #pragma omp parallel
 {
   arr<float32> pre1(chunkdim);
-#ifdef PLANCK_HAVE_SSE
+#ifdef __SSE2__
   arr2_align<V4sf,16> lpic(chunkdim,chunkdim);
 #else
   arr2<COLOUR> lpic(chunkdim,chunkdim);
@@ -301,126 +364,119 @@ void render_new (vector<particle_sim> &p, arr2<COLOUR> &pic,
 #pragma omp for schedule(dynamic,1)
   for (chunk=0; chunk<wd.nchunks(); ++chunk)
     {
-      /*
-      std::cout<<wd.nchunks()<<std::endl;
-      std::cout<<"chunk=";
-      std::cout<<chunk<<std::endl;
-      */
     int x0, x1, y0, y1;
     wd.chunk_info(chunk,x0,x1,y0,y1);
     int x0s=x0, y0s=y0;
     x1-=x0; x0=0; y1-=y0; y0=0;
     lpic.fast_alloc(x1-x0,y1-y0);
-#ifdef PLANCK_HAVE_SSE
+#ifdef __SSE2__
     lpic.fill(V4sf(0.));
 #else
     lpic.fill(COLOUR(0,0,0));
 #endif
     int cx, cy;
     wd.chunk_info_idx(chunk,cx,cy);
-    const vector<uint32> &v(idx[cx][cy]);
-
-    for (tsize m=0; m<v.size(); ++m)
+    for (tsize t=0; t<idx.size(); ++t)
       {
-      const particle_sim &pp(p[v[m]]);
-      float32 rfacr=pp.r*rfac;
-      float32 posx=pp.x, posy=pp.y;
-      posx-=x0s; posy-=y0s;
-      int minx=int(posx-rfacr+1);
-      minx=max(minx,x0);
-      int maxx=int(posx+rfacr+1);
-      maxx=min(maxx,x1);
-      int miny=int(posy-rfacr+1);
-      miny=max(miny,y0);
-      int maxy=int(posy+rfacr+1);
-      maxy=min(maxy,y1);
+      const vector<uint32> &v(idx[t][cx][cy]);
 
-      float32 radsq = rfacr*rfacr;
-      float32 sigma = h2sigma*pp.r;
-      float32 stp = -1.f/(sigma*sigma);
-
-      COLOUR a(-pp.e.r,-pp.e.g,-pp.e.b);
-#ifdef PLANCK_HAVE_SSE
-      V4sf va(a.r,a.g,a.b,0.f);
-#endif
-
-      for (int y=miny; y<maxy; ++y)
-        pre1[y]=xexp(stp*(y-posy)*(y-posy));
-
-      if (a_eq_e)
+      for (tsize m=0; m<v.size(); ++m)
         {
-        for (int x=minx; x<maxx; ++x)
-          {
-          float32 dxsq=(x-posx)*(x-posx);
-          float32 dy=sqrt(radsq-dxsq);
-          int miny2=max(miny,int(posy-dy+1)),
-              maxy2=min(maxy,int(posy+dy+1));
-          float32 pre2 = xexp(stp*dxsq);
-          for (int y=miny2; y<maxy2; ++y)
-            {
-            float32 att = pre1[y]*pre2;
-#ifdef PLANCK_HAVE_SSE
-            lpic[x][y]+=va*att;
-#else
-            lpic[x][y].r += att*a.r;
-            lpic[x][y].g += att*a.g;
-            lpic[x][y].b += att*a.b;
-#endif
-            }
-          }
-        }
-      else
-        {
-        COLOUR q(pp.e.r/(pp.e.r+grayabsorb),
-                 pp.e.g/(pp.e.g+grayabsorb),
-                 pp.e.b/(pp.e.b+grayabsorb));
-#ifdef PLANCK_HAVE_SSE
-        float32 maxa=max(abs(a.r),max(abs(a.g),abs(a.b)));
-        V4sf vq(q.r,q.g,q.b,0.f);
-#endif
+        const particle_sim &pp(p[v[m]]);
+        float32 rfacr=pp.r*rfac;
+        float32 posx=pp.x, posy=pp.y;
+        posx-=x0s; posy-=y0s;
+        int minx=int(posx-rfacr+1);
+        minx=max(minx,x0);
+        int maxx=int(posx+rfacr+1);
+        maxx=min(maxx,x1);
+        int miny=int(posy-rfacr+1);
+        miny=max(miny,y0);
+        int maxy=int(posy+rfacr+1);
+        maxy=min(maxy,y1);
 
-        for (int x=minx; x<maxx; ++x)
+        float32 radsq = rfacr*rfacr;
+        float32 sigma = h2sigma*pp.r;
+        float32 stp = -1.f/(sigma*sigma);
+
+        COLOUR a(-pp.e.r,-pp.e.g,-pp.e.b);
+  #ifdef __SSE2__
+        V4sf va(a.r,a.g,a.b,0.f);
+  #endif
+
+        for (int y=miny; y<maxy; ++y)
+          pre1[y]=xexp(stp*(y-posy)*(y-posy));
+
+        if (a_eq_e)
           {
-          float32 dxsq=(x-posx)*(x-posx);
-          float32 dy=sqrt(radsq-dxsq);
-          int miny2=max(miny,int(posy-dy+1)),
-              maxy2=min(maxy,int(posy+dy+1));
-          float32 pre2 = xexp(stp*dxsq);
-          for (int y=miny2; y<maxy2; ++y)
+          for (int x=minx; x<maxx; ++x)
             {
-            float32 att = pre1[y]*pre2;
-#ifdef PLANCK_HAVE_SSE
-            if ((maxa*att)<taylorlimit)
-              lpic[x][y]+=(lpic[x][y]-vq)*va*att;
-            else
+            float32 dxsq=(x-posx)*(x-posx);
+            float32 dy=sqrt(radsq-dxsq);
+            int miny2=max(miny,int(posy-dy+1)),
+                maxy2=min(maxy,int(posy+dy+1));
+            float32 pre2 = xexp(stp*dxsq);
+            for (int y=miny2; y<maxy2; ++y)
               {
-              V4sf::Tu tmp;
-              tmp.v=lpic[x][y].v;
-              tmp.d[0] += xexp.expm1(att*a.r)*(tmp.d[0]-q.r);
-              tmp.d[1] += xexp.expm1(att*a.g)*(tmp.d[1]-q.g);
-              tmp.d[2] += xexp.expm1(att*a.b)*(tmp.d[2]-q.b);
-              lpic[x][y]=tmp.v;
+              float32 att = pre1[y]*pre2;
+  #ifdef __SSE2__
+              lpic[x][y]+=va*att;
+  #else
+              lpic[x][y].r += att*a.r;
+              lpic[x][y].g += att*a.g;
+              lpic[x][y].b += att*a.b;
+  #endif
               }
-#else
-            lpic[x][y].r += xexp.expm1(att*a.r)*(lpic[x][y].r-q.r);
-            lpic[x][y].g += xexp.expm1(att*a.g)*(lpic[x][y].g-q.g);
-            lpic[x][y].b += xexp.expm1(att*a.b)*(lpic[x][y].b-q.b);
-#endif
             }
           }
-        }
-      } // for particle
+        else
+          {
+          COLOUR q(pp.e.r/(pp.e.r+grayabsorb),
+                  pp.e.g/(pp.e.g+grayabsorb),
+                  pp.e.b/(pp.e.b+grayabsorb));
+  #ifdef __SSE2__
+          float32 maxa=max(abs(a.r),max(abs(a.g),abs(a.b)));
+          V4sf vq(q.r,q.g,q.b,0.f);
+  #endif
 
+          for (int x=minx; x<maxx; ++x)
+            {
+            float32 dxsq=(x-posx)*(x-posx);
+            float32 dy=sqrt(radsq-dxsq);
+            int miny2=max(miny,int(posy-dy+1)),
+                maxy2=min(maxy,int(posy+dy+1));
+            float32 pre2 = xexp(stp*dxsq);
+            for (int y=miny2; y<maxy2; ++y)
+              {
+              float32 att = pre1[y]*pre2;
+  #ifdef __SSE2__
+              if ((maxa*att)<taylorlimit)
+                lpic[x][y]+=(lpic[x][y]-vq)*va*att;
+              else
+                {
+                V4sf::Tu tmp;
+                tmp.v=lpic[x][y].v;
+                tmp.d[0] += xexp.expm1(att*a.r)*(tmp.d[0]-q.r);
+                tmp.d[1] += xexp.expm1(att*a.g)*(tmp.d[1]-q.g);
+                tmp.d[2] += xexp.expm1(att*a.b)*(tmp.d[2]-q.b);
+                lpic[x][y]=tmp.v;
+                }
+  #else
+              lpic[x][y].r += xexp.expm1(att*a.r)*(lpic[x][y].r-q.r);
+              lpic[x][y].g += xexp.expm1(att*a.g)*(lpic[x][y].g-q.g);
+              lpic[x][y].b += xexp.expm1(att*a.b)*(lpic[x][y].b-q.b);
+  #endif
+              }
+            }
+          }
+        } // for particle
+      }
     for (int ix=0;ix<x1;ix++)
       for (int iy=0;iy<y1;iy++)
-#ifdef PLANCK_HAVE_SSE
+#ifdef __SSE2__
         {
         COLOUR &c(pic[ix+x0s][iy+y0s]); float32 dum;
-//	std::clog<<"ix="<<ix<<" iy="<<iy;
-//	std::clog<<" c.r g b ="<<c.r<<" "<<c.g<<" "<<c.b<<" dum="<<dum<<std::endl;
         lpic[ix][iy].writeTo(c.r,c.g,c.b,dum);
-//	std::clog<<" POST ix="<<ix<<" iy="<<iy;
-//	std::clog<<" c.r g b ="<<c.r<<" "<<c.g<<" "<<c.b<<" dum="<<dum<<std::endl;
         }
 #else
         pic[ix+x0s][iy+y0s]=lpic[ix][iy];
@@ -428,20 +484,23 @@ void render_new (vector<particle_sim> &p, arr2<COLOUR> &pic,
     } // for this chunk
 } // #pragma omp parallel
 
-  tstack_pop("Rendering proper");
+  tstack_pop("Host Rendering proper");
   }
 
-} // unnamed namespace
+}
+
+using namespace host_funct;
+
 #ifdef SPLVISIVO
 void host_rendering (paramfile &params, vector<particle_sim> &particles,
-  arr2<COLOUR> &pic, const vec3 &campos, const vec3 &lookat, const vec3 &sky,
-  vector<COLOURMAP> &amap, float b_brightness,VisIVOServerOptions &opt)
+                     arr2<COLOUR> &pic, const vec3 &campos, const vec3 &lookat, const vec3 &sky,
+                     vector<COLOURMAP> &amap, float b_brightness,VisIVOServerOptions &opt)
 #else
 void host_rendering (paramfile &params, vector<particle_sim> &particles,
   arr2<COLOUR> &pic, const vec3 &campos, const vec3 &lookat, const vec3 &sky,
   vector<COLOURMAP> &amap, float b_brightness)
 #endif
-  {
+{
   bool master = mpiMgr.master();
   tsize npart = particles.size();
   tsize npart_all = npart;
@@ -453,12 +512,13 @@ void host_rendering (paramfile &params, vector<particle_sim> &particles,
   tstack_push("3D transform");
   if (master)
     cout << endl << "host: applying geometry (" << npart_all << ") ..." << endl;
+    
 #ifdef SPLVISIVO
-  particle_project(params, particles, campos, lookat, sky, opt);
+    particle_project(params, particles, campos, lookat, sky, opt);
 #else
-  particle_project(params, particles, campos, lookat, sky);
+    particle_project(params, particles, campos, lookat, sky);
 #endif
-  tstack_replace("3D transform","Particle coloring");
+    tstack_replace("3D transform","Particle coloring");
 
 // ------------------------------------
 // ----------- Coloring ---------------
@@ -466,11 +526,13 @@ void host_rendering (paramfile &params, vector<particle_sim> &particles,
   if (master)
     cout << endl << "host: calculating colors (" << npart_all << ") ..." << endl;
   particle_colorize(params, particles, amap, b_brightness);
-  tstack_replace("Particle coloring","Particle sorting");
+  tstack_pop("Particle coloring");
 
+#if 0
 // ------------------------------------
 // -- Eliminating inactive particles --
 // ------------------------------------
+  tstack_push("Particle elimination");
   if (master)
     cout << endl << "host: eliminating inactive particles ..." << endl;
   tdiff i1=0, i2=particles.size()-1;
@@ -487,10 +549,13 @@ void host_rendering (paramfile &params, vector<particle_sim> &particles,
   mpiMgr.allreduce (npart_all,MPI_Manager::Sum);
   if (master)
     cout << npart_all << " particles left" << endl;
+  tstack_pop("Particle elimination");
+#endif
 
 // --------------------------------
 // ----------- Sorting ------------
 // --------------------------------
+  tstack_push("Particle sorting");
   if (!params.find<bool>("a_eq_e",true))
     {
     if (master)
@@ -511,8 +576,7 @@ void host_rendering (paramfile &params, vector<particle_sim> &particles,
   bool a_eq_e = params.find<bool>("a_eq_e",true);
   float32 grayabsorb = params.find<float32>("gray_absorption",0.2);
 
-
   tstack_push("Rendering");
-  render_new (particles,pic,a_eq_e,grayabsorb);
+  render_new (&(particles[0]),particles.size(),pic,a_eq_e,grayabsorb);
   tstack_pop("Rendering");
   }

@@ -119,7 +119,6 @@ template<typename It, typename Comp> inline void indirectSort (It begin, It end,
   Comp comp)
   {
   using namespace std;
-  typedef typename iterator_traits<It>::value_type T;
   vector<std::size_t> idx;
   buildIndex (begin,end,idx,comp);
   sortByIndex (begin,end,idx);

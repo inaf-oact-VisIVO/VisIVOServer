@@ -206,6 +206,19 @@
 #file=inputFile.bin
 
 #---------------------
+#  module Filter
+#
+#op=poca   
+#resolution = 590 240 240
+#dimvox=10
+#trackplanedist=100
+#innerdist=300
+#outpoints= pocaPointsFile.bin
+#outvol= volFile.bin
+#help=true 
+#file=inputFile.bin
+
+#---------------------
 #  pointdistribute Filter
 #
 #op=pointdistribute   

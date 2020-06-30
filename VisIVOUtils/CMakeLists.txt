@@ -5,8 +5,8 @@ SET(PRJ_SRC
   vscreateslices.cpp
   vscreategenericslices.cpp
   vsutils.cpp
-
-
+  vsloadhistory.cpp
+  vstextcol.cpp
 
 
 )

@@ -27,10 +27,23 @@
 #include <map>
 #include <string>
 
+#ifdef VSMPI
+#include "mpi.h" 
+#endif
+
 class startFilter
 {
   public:
-  startFilter(std::map<std::string,std::string> appParameters);
+    
+    bool m_historyEnabled;
+    const char* m_opName;
+
+#ifdef VSMPI
+    MPI_Comm m_VS_COMM;
+    startFilter(std::map<std::string,std::string> appParameters,MPI_Comm newcom=MPI_COMM_WORLD);
+#else
+   startFilter(std::map<std::string,std::string> appParameters);
+#endif
 };
 
 #endif

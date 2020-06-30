@@ -25,7 +25,7 @@
 /*
  *  This file contains functionality related to wall-clock timers
  *
- *  Copyright (C) 2010, 2011 Max-Planck-Society
+ *  Copyright (C) 2010, 2011, 2012 Max-Planck-Society
  *  Author: Martin Reinecke
  */
 
@@ -49,7 +49,7 @@ double wallTimer::acc() const
 
 int wallTimerSet::getIndex(const string &name)
   {
-  map<std::string,int>::iterator it = lut.find(name);
+  maptype::const_iterator it = lut.find(name);
   if (it!=lut.end())
     return it->second;
   timer.push_back(wallTimer());
@@ -81,7 +81,7 @@ double wallTimerSet::acc(const string &name)
 void wallTimerSet::report() const
   {
   cout << "\nWall clock timer report:" << endl;
-  for (map<string,int>::const_iterator it=lut.begin(); it!=lut.end(); ++it)
+  for (maptype::const_iterator it=lut.begin(); it!=lut.end(); ++it)
     printf("  %-15s: %10.5fs\n", it->first.c_str(), timer[it->second].acc());
   cout << "End wall clock timer report\n" << endl;
   }
@@ -90,31 +90,50 @@ wallTimerSet wallTimers;
 
 namespace {
 
-struct tstack_entry
+class tstack_node;
+
+typedef map<string,tstack_node>::iterator Ti;
+typedef map<string,tstack_node>::const_iterator Tci;
+typedef pair<Tci,double> Tipair;
+
+class tstack_node
   {
-  string fullname, name;
+  public:
+    tstack_node *parent;
+    wallTimer wt;
+    string name;
+    map<string,tstack_node> child;
+
+    tstack_node(const string &name_, tstack_node *parent_)
+      : parent(parent_), name(name_) {}
+
+    int max_namelen() const
+      {
+      int res=name.length();
+      for (Tci it=child.begin(); it!=child.end(); ++it)
+        res=max(res,it->second.max_namelen());
+      return res;
+      }
   };
 
-vector<tstack_entry> tstack;
-wallTimerSet stackTimers;
+tstack_node tstack_root("root",0);
+tstack_node *curnode=0;
+double overhead=0.;
 
 struct timecomp
   {
-  bool operator() (const pair<string,double> &a, const pair<string,double> &b)
-    const
+  bool operator() (const Tipair &a, const Tipair &b) const
     { return a.second>b.second; }
   };
 
-void tstack_report(const string &stem, const string &indent, int twidth, int slen)
+void tstack_report(const tstack_node &node, const string &indent, int twidth,
+  int slen)
   {
-  double total=stackTimers.acc(stem);
-  unsigned int lstem=stem.size();
-  vector<pair<string,double> > tmp;
-  const map<string,int> &tbl (stackTimers.table());
-  for (map<string,int>::const_iterator it=tbl.begin(); it!=tbl.end(); ++it)
-    if (it->first.find(stem)==0) // begins with the stem
-      if (it->first.substr(lstem,string::npos).rfind("$")==0)
-        tmp.push_back(make_pair(it->first,stackTimers.acc(it->second)));
+  double total=node.wt.acc();
+  vector<Tipair> tmp;
+  for (Tci it=node.child.begin(); it!=node.child.end(); ++it)
+    tmp.push_back(make_pair(it,it->second.wt.acc()));
+
   if (tmp.size()>0)
     {
     sort(tmp.begin(),tmp.end(),timecomp());
@@ -123,9 +142,9 @@ void tstack_report(const string &stem, const string &indent, int twidth, int sle
     for (unsigned i=0; i<tmp.size(); ++i)
       {
       printf("%s+- %-*s:%6.2f%% (%*.4fs)\n",indent.c_str(),slen,
-        tmp[i].first.substr(lstem+1,string::npos).c_str(),
-        100*tmp[i].second/total,twidth,tmp[i].second);
-      tstack_report(tmp[i].first,indent+"|  ",twidth,slen);
+        (tmp[i].first->first).c_str(), 100*tmp[i].second/total,twidth,
+        tmp[i].second);
+      tstack_report(tmp[i].first->second,indent+"|  ",twidth,slen);
       tsum+=tmp[i].second;
       }
     printf("%s+- %-*s:%6.2f%% (%*.4fs)\n%s\n",indent.c_str(),slen,
@@ -137,39 +156,72 @@ void tstack_report(const string &stem, const string &indent, int twidth, int sle
 
 void tstack_push(const string &name)
   {
-  tstack_entry entry;
-  entry.name=name;
-  entry.fullname=tstack.empty() ? string("$")+name :
-    tstack.back().fullname + "$" + name;
-  tstack.push_back(entry);
-  stackTimers.start(entry.fullname);
+  double t0=wallTime();
+  if (curnode==0) curnode=&tstack_root;
+  Ti it=curnode->child.find(name);
+  if (it==curnode->child.end())
+    it=curnode->child.insert (make_pair(name,tstack_node(name,curnode))).first;
+  curnode=&(it->second);
+  double t1=wallTime();
+  curnode->wt.start(0.5*(t0+t1));
+  overhead+=t1-t0;
   }
 void tstack_pop(const string &name)
   {
-  planck_assert((!tstack.empty()) && (tstack.back().name==name),
-    "incorrect tstack operation");
-  stackTimers.stop(tstack.back().fullname);
-  tstack.pop_back();
+  double t0=wallTime();
+  planck_assert(curnode && (curnode->name==name), "invalid tstack operation");
+  double t1=wallTime();
+  curnode->wt.stop(0.5*(t0+t1));
+  curnode=curnode->parent;
+  overhead+=t1-t0;
   }
 void tstack_pop()
   {
-  planck_assert(!tstack.empty(), "incorrect tstack operation");
-  stackTimers.stop(tstack.back().fullname);
-  tstack.pop_back();
+  double t0=wallTime();
+  planck_assert(curnode, "invalid tstack operation");
+  double t1=wallTime();
+  curnode->wt.stop(0.5*(t0+t1));
+  curnode=curnode->parent;
+  overhead+=t1-t0;
+  }
+void tstack_replace(const string &name2)
+  {
+  double t0=wallTime();
+  planck_assert(curnode, "invalid tstack operation");
+  tstack_node *savenode=curnode;
+  curnode=curnode->parent;
+  Ti it=curnode->child.find(name2);
+  if (it==curnode->child.end())
+    it=curnode->child.insert(make_pair(name2,tstack_node(name2,curnode))).first;
+  curnode=&(it->second);
+  double t1=wallTime();
+  double t=0.5*(t0+t1);
+  savenode->wt.stop(t);
+  curnode->wt.start(t);
+  overhead+=t1-t0;
   }
 void tstack_replace(const string &name1, const string &name2)
-  { tstack_pop(name1); tstack_push(name2); }
-void tstack_replace(const string &name)
-  { tstack_pop(); tstack_push(name); }
+  {
+  planck_assert(curnode && (curnode->name==name1), "invalid tstack operation");
+  tstack_replace(name2);
+  }
+
 void tstack_report(const string &stem)
   {
-  double total=stackTimers.acc(string("$")+stem);
+  const tstack_node *ptr = 0;
+  for (Tci it=tstack_root.child.begin(); it!=tstack_root.child.end(); ++it)
+    if (it->first==stem)
+      ptr=&(it->second);
+
+  planck_assert(ptr,"invalid stem");
+  int slen=string("<unaccounted>").size();
+  slen = max(slen,ptr->max_namelen());
+
+  double total=ptr->wt.acc();
   printf("\nTotal wall clock time for '%s': %1.4fs\n",stem.c_str(),total);
 
-  int slen=string("<unaccounted>").size();
-  const map<string,int> &tbl (stackTimers.table());
-  for (map<string,int>::const_iterator it=tbl.begin(); it!=tbl.end(); ++it)
-    slen=max(slen,int(it->first.size()-it->first.rfind("$")));
   int logtime=max(1,int(log10(total)+1));
-  tstack_report(string("$")+stem,"",logtime+5,slen);
+  tstack_report(*ptr,"",logtime+5,slen);
+
+  printf("\nAccumulated timing overhead: approx. %1.4fs\n",overhead);
   }

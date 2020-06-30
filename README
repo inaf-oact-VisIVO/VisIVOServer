@@ -1,6 +1,6 @@
 VisIVO Server
 
-Version 1.2  - April 2011
+Version 2.0  - November 2011
 
 To install and test VisIVO on a Server read VisIVO.HowtoBuild. The user must customize CMakeLists.txt
 
@@ -16,7 +16,7 @@ The directory testGLite contains  jdls. VisIVO.jdl to test VisIVOImporter, VisIV
 
 The distribution contains the user manuals:
 
-VisIVOApi1.2.pdf  (Library User Manual)
+VisIVOApi2.0.pdf  (Library User Manual)
 
-VisIVOFilters1.2.pdf  VisIVOImporter1.2.pdf  VisIVOUtils1.2.pdf  VisIVOViewer1.2.pdf (User Manuals)
+VisIVOFilters2.0.pdf  VisIVOImporter2.0.pdf  VisIVOUtils2.0.pdf  VisIVOViewer2.0.pdf (User Manuals)
 

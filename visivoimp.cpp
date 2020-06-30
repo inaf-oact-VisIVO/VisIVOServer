@@ -267,7 +267,7 @@ for(int idPar=0; idPar<NPAR; idPar++)
       std::string arg1=args[i+1];
       if((arg=="--fformat") && arg1=="fitstable" )
       {
-	for (i=0;i<args.size();i++) 
+	  for (i=0;i<args.size();i++) 
     	{
 		std::string arg2=args[i];
 		if(arg2=="--out")

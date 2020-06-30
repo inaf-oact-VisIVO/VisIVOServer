@@ -13,61 +13,85 @@
 #endif
 
 class sceneMaker
-  {
-  private:
+{
+private:
     struct scene
-      {
-      vec3 campos, lookat, sky;
-      double fidx;
-      std::string outname;
-      bool keep_particles, reuse_particles;
-      scene (const vec3 &c, const vec3 &l, const vec3 &s, double fdx,
-             const std::string &oname, bool keep, bool reuse)
-        : campos(c), lookat(l), sky(s), fidx(fdx), outname(oname),
-          keep_particles(keep), reuse_particles(reuse) {}
-	
-      };
-
+    {
+        paramfile sceneParameters;
+        
+        std::string outname;
+        bool keep_particles, reuse_particles;
+        
+        scene (const paramfile &scnParms,
+               const std::string &oname, bool keep, bool reuse)
+        : sceneParameters(scnParms), outname(oname),
+        keep_particles(keep), reuse_particles(reuse) {}
+        scene (const std::string &oname, bool keep, bool reuse)
+        : outname(oname), keep_particles(keep), reuse_particles(reuse) {}
+    };
+    
     std::vector<scene> scenes;
     int cur_scene;
-
     paramfile &params;
-
     int interpol_mode;
-
     double boxsize;
-// only used if interpol_mode>0
-    std::vector<particle_sim> p1,p2;
-    std::vector<MyIDType> id1,id2;
-    std::vector<uint32> idx1,idx2;
-    int snr1_now,snr2_now;
-    double time1,time2;
-// only used if interpol_mode>1
-    std::vector<vec3f> vel1,vel2;
-
-// only used if interpol_mode>0
-    void particle_interpolate(std::vector<particle_sim> &p, double frac);
-
-// only used if the same particles are used for more than one scene
+    
+    // only used if interpol_mode>0
+    std::vector<particle_sim> p1, p2;
+    std::vector<MyIDType> id1, id2;
+    std::vector<MyIDType> idx1, idx2;
+    
+    int snr1_now, snr2_now;
+    
+    // buffers to hold the times relevant to the *currently loaded snapshots*
+    double time1, time2;
+    double redshift1, redshift2;
+    
+    // only used if interpol_mode>1
+    std::vector<vec3f> vel1, vel2;
+    
+    // only used if the same particles are used for more than one scene
     std::vector<particle_sim> p_orig;
+    
+    // only used if interpol_mode>0
+    void particle_interpolate(std::vector<particle_sim> &p, double frac) const;
 
 #ifdef SPLVISIVO
-   void fetchFiles(std::vector<particle_sim> &particle_data, double fidx,VisIVOServerOptions &opt);
+      void particle_normalize(std::vector<particle_sim> &p, bool verbose, VisIVOServerOptions &opt) const;
+#else
+    void particle_normalize(std::vector<particle_sim> &p, bool verbose) const;
+#endif
+#ifdef SPLVISIVO
+    void fetchFiles(std::vector<particle_sim> &particle_data, double fidx, VisIVOServerOptions &opt);
 #else
     void fetchFiles(std::vector<particle_sim> &particle_data, double fidx);
 #endif
-  public:
+    // --- routines and variables for the MPI parallelization of the particle interpolation ---
+    // exchange particle IDs
+    void MpiFetchRemoteParticles();
+    // reset the data structures after rendering
+    void MpiStripRemoteParticles();
+    // save the number of particles which are initially in p2
+    MyIDType numberOfLocalParticles;
+    // vectors to hold a backup of the data at time2
+    std::vector<particle_sim> p2Backup;
+    std::vector<MyIDType> id2Backup;
+    std::vector<MyIDType> idx2Backup;
+    std::vector<vec3f> vel2Backup;
+    // --- routines and variables necessary for the MPI parallelization of the interpolation ---/
+    
+public:
 #ifdef SPLVISIVO
-    sceneMaker (paramfile &par, VisIVOServerOptions &opt);
-    bool getNextScene (std::vector<particle_sim> &particle_data, 
+    sceneMaker (paramfile &par,VisIVOServerOptions &opt);
+    bool getNextScene (std::vector<particle_sim> &particle_data,
                        std::vector<particle_sim> &r_points, vec3 &campos,
-                       vec3 &lookat, vec3 &sky, std::string &outfile, VisIVOServerOptions &opt);
+                       vec3 &lookat, vec3 &sky, std::string &outfile,VisIVOServerOptions &opt);
 #else
-    sceneMaker (paramfile &par);
-    bool getNextScene (std::vector<particle_sim> &particle_data, 
-                       std::vector<particle_sim> &r_points, vec3 &campos,
-                       vec3 &lookat, vec3 &sky, std::string &outfile);
+sceneMaker (paramfile &par);
+bool getNextScene (std::vector<particle_sim> &particle_data,
+                   std::vector<particle_sim> &r_points, vec3 &campos,
+                   vec3 &lookat, vec3 &sky, std::string &outfile);
 #endif
-  };
+};
 
 #endif

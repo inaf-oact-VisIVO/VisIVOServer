@@ -25,7 +25,7 @@
 /*
  *  Classes for creation and output of image files
  *
- *  Copyright (C) 2003-2011 Max-Planck-Society
+ *  Copyright (C) 2003-2012 Max-Planck-Society
  *  Author: Martin Reinecke
  */
 
@@ -39,8 +39,8 @@
 
 using namespace std;
 
-const Font medium_bold_font = { 0, 128, 7, 13, medium_bold_font_data };
-const Font giant_font = { 0, 128, 9, 15, giant_font_data };
+const MP_Font medium_bold_font = { 0, 128, 7, 13, medium_bold_font_data };
+const MP_Font giant_font = { 0, 128, 9, 15, giant_font_data };
 
 void Palette::setPredefined (int num)
   {
@@ -107,7 +107,7 @@ void LS_Image::annotate_centered (int xpos, int ypos, const Colour &col,
   annotate (xpos,ypos,col,text,scale);
   }
 
-void LS_Image::set_font (const Font &fnt)
+void LS_Image::set_font (const MP_Font &fnt)
   { font = fnt; }
 
 void LS_Image::write_TGA (const string &file) const
@@ -126,6 +126,8 @@ void LS_Image::write_TGA (const string &file) const
   for (tsize j=0; j<yres; ++j)
     for (tsize i=0; i<xres; ++i)
       bo << pixel[i][j].b << pixel[i][j].g << pixel[i][j].r;
+
+  planck_assert(out,"error writing output file '" + file + "'");
   }
 
 namespace {
@@ -165,7 +167,7 @@ void LS_Image::write_TGA_rle(const string &file) const
 
   bostream bo(out);
   const uint8 header[18] = { 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    xres%256, xres/256, yres%256, yres/256, 24, 32 };
+    uint8(xres%256), uint8(xres/256), uint8(yres%256), uint8(yres/256), 24, 32};
 
   bo.put(header,18);
   for (tsize y=0; y<yres; ++y)
@@ -199,6 +201,7 @@ void LS_Image::write_TGA_rle(const string &file) const
         }
       }
     }
+  planck_assert(out,"error writing output file '" + file + "'");
   }
 
 void LS_Image::write_PPM (const string &file) const
@@ -218,4 +221,6 @@ void LS_Image::write_PPM (const string &file) const
   for (tsize j=0; j<yres; ++j)
     for (tsize i=0; i<xres; ++i)
       bo << pixel[i][j].r << pixel[i][j].g << pixel[i][j].b;
+
+  planck_assert(out,"error writing output file '" + file + "'");
   }

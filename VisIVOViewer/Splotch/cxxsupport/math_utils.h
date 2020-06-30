@@ -25,7 +25,7 @@
 /*! \file math_utils.h
  *  Various convenience mathematical functions.
  *
- *  Copyright (C) 2002-2011 Max-Planck-Society
+ *  Copyright (C) 2002-2012 Max-Planck-Society
  *  \author Martin Reinecke
  */
 
@@ -33,23 +33,24 @@
 #define PLANCK_MATH_UTILS_H
 
 #include <cmath>
+#include <algorithm>
 #include "datatypes.h"
 
 /*! \defgroup mathutilsgroup Mathematical helper functions */
 /*! \{ */
 
-/*! Returns \e true if | \a a-b | < \a epsilon * | \a b |, else \e false. */
+/*! Returns \e true if | \a a-b | <= \a epsilon * | \a b |, else \e false. */
 template<typename F> inline bool approx (F a, F b, F epsilon=1e-5)
   {
   using namespace std;
-  return abs(a-b) < (epsilon*abs(b));
+  return abs(a-b) <= (epsilon*abs(b));
   }
 
-/*! Returns \e true if | \a a-b | < \a epsilon, else \e false. */
+/*! Returns \e true if | \a a-b | <= \a epsilon, else \e false. */
 template<typename F> inline bool abs_approx (F a, F b, F epsilon=1e-5)
   {
   using namespace std;
-  return abs(a-b) < epsilon;
+  return abs(a-b) <= epsilon;
   }
 
 /*! Returns the largest integer which is smaller than (or equal to) \a arg. */
@@ -69,7 +70,11 @@ template<typename I, typename F> inline I nearest (F arg)
 inline double fmodulo (double v1, double v2)
   {
   using namespace std;
-  return (v1>=0) ? ((v1<v2) ? v1 : fmod(v1,v2)) : (fmod(v1,v2)+v2);
+  if (v1>=0)
+    return (v1<v2) ? v1 : fmod(v1,v2);
+  double tmp=fmod(v1,v2)+v2;
+  return (tmp==v2) ? 0. : tmp;
+//  return (v1>=0) ? ((v1<v2) ? v1 : fmod(v1,v2)) : (fmod(v1,v2)+v2);
   }
 
 /*! Returns the remainder of the division \a v1/v2.
@@ -101,8 +106,13 @@ template<typename I> struct isqrt_helper__ <I, true>
   static uint32 isqrt (I arg)
     {
     using namespace std;
-    long double arg2 = static_cast<long double>(arg)+0.5;
-    return uint32 (sqrt(arg2));
+    I res = sqrt(double(arg)+0.5);
+    if (arg<(int64(1)<<50)) return uint32(res);
+    if (res*res>arg)
+      --res;
+    else if ((res+1)*(res+1)<=arg)
+      ++res;
+    return uint32(res);
     }
   };
 
@@ -111,9 +121,9 @@ template<typename I> inline uint32 isqrt (I arg)
   { return isqrt_helper__<I,(sizeof(I)>4)>::isqrt(arg); }
 
 /*! Returns the largest integer \a n that fulfills \a 2^n<=arg. */
-template<typename I> inline unsigned int ilog2 (I arg)
+template<typename I> inline int ilog2 (I arg)
   {
-  unsigned int res=0;
+  int res=0;
   while (arg > 0x0000FFFF) { res+=16; arg>>=16; }
   if (arg > 0x000000FF) { res|=8; arg>>=8; }
   if (arg > 0x0000000F) { res|=4; arg>>=4; }

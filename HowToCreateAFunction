@@ -1,24 +1,396 @@
 VisIVOViewer
 
 VisIVO Viewer
-1) Define the Variable corresponding to the VisIVOViewer setting option (SetAtt)
-(ex. #define VV_SET_AXES 1008) in visivo.h. NOTE: the last option number for flags 
-is < 1499. Option variables are 1000 - 2000 range
 
-2) check if the operation need of parameters and add it to VisIVOViewer structure
+create new option
+1) add the option flag and/or values in struct VisIVOServerOptions in the optionsetter.h dile in Utils folder
 
-3) Define the funcion in visivoset.cpp or add the option in VV_SetAtt. 
-In case of simple option (e.g --showbox) NO action must be operated if the option 
-does not have a value to be reported in the structure VisIVOViewer (in visivoviewer.h)
+    double cliprange[2];
+    
+2) put the default values in OptionsSetter::OptionsSetter ( ) (constructor in optionsetter.cpp (Utils folder)
 
-4) Set the args in visivoview.cpp: set flags (ex. --showaxes) and parameters 
+    m_vServer.cliplarge=false;
+    m_vServer.cliprange[0]=0.01;
+    m_vServer.cliprange[1]=1.0e+3;
+
+3) include the option reading from file and from command line (
+-- options) in OptionsSetter::parseOption 
+
+FROM FILE:
+      tmp="none";
+      tmp=params.find<std::string>("cliprange","0.01 1.0e+3");
+      if(tmp=="yes")
+      {
+          m_vServer.cliprange[0]=0.01;
+          m_vServer.cliprange[1]=1.0e+13;
+      }
+
+      std::stringstream sstmp(tmp);
+      int countcr=0;
+      while(!sstmp.eof())
+      {
+          sstmp>>m_vServer.cliprange[countcr]; QUI   probabile che cliplarge booleano in struct si possa eliminare!!
+          countcr++;
+          if(countcr==2) break;
+      }
+      
+FROM COMMAND LINE
+     
+          else if (arguments[i]=="--cliplarge")
+    {
+        m_vServer.cliprange[0]=0.01;
+        m_vServer.cliprange[1]=1.0e+13;
+    }
+    else if (arguments[i]=="--cliprange")
+    {
+        std::string ck1Input=arguments[i+1];
+        std::string ck2Input=arguments[i+2];
+         
+        if(ck1Input.substr(0,2).compare("--")==0 || ck2Input.substr(0,2).compare("--")==0)
+        {
+            std::cerr<<"Error on --cliprange argument: "<<ck1Input<<" "<<ck2Input <<std::endl;
+            return -1;
+        }	
+        std::stringstream total;
+        total<<arguments[i+1];
+        total>>m_vServer.cliprange[0];
+        total.clear();
+        total<<arguments[i+2];
+        total>>m_vServer.cliprange[1];
+        i=i+2;
+     }
+
+
+4) update the option on parameterFileViewer in the visivo root path
+
+#cliplarge=yes
+#cliprange=0.01 1000
+
+5) API:  in case of NEW option add the attribute code in visivodef.h
+
+#define VV_SET_CLIPLARGE 1513
+#define VV_SET_CLIPRANGE 1514
+
+. NOTE: the last option number for flags is < 1499. Option variables are 1000 - 2000 range
+
+6) define the field in struct VisIVOViewer in visvoserver.h
+
+struct VisIVOViewer
+{
+....
+  double cliprange[2];
+}
+7) in visivoset.cpp  int VV_SetAtt(VisIVOViewer *env, int code, char *value) add the option if the option has associated values
+
+if(code==VV_SET_CLIPRANGE)
+{
+	std::stringstream sstmp(sValue);
+	sstmp>>env->cliprange[0];
+	sstmp>>env->cliprange[1];
+}
+
+
+8) In case of more complex options define a new funciont in visivoset.cpp add a new function 
+
+//----------------------------
+int VV_EnableSplotch(VisIVOViewer *env)
+//---------------------------
+{    
+    env->setatt[VV_SET_SPLOTCH-VV_PARAM]=1;
+    env->setatt[VV_SET_VOLUME-VV_PARAM]=0; //disable volume
+ ..
+   return noError;
+
+}
+
+ All intermediate files should start with ".VS_" and saved name in extFile vector 
+in visivoset.cpp
+
+9)  add the prototype in visivo.h
+
+int VV_EnableSplotch(VisIVOViewer *env);
+
+10) add the option in visivoview.cpp in the function
+int VV_View(VisIVOViewer *env)
+
+    case VV_SET_CLIPRANGE:
+      {
+	std::stringstream sstmp;
+	sstmp << env->cliprange[0]<<" ";
+	sstmp << env->cliprange[1]<<" ";
+	std::string stmp;
+	sstmp>>stmp;
+	args.push_back("--cliprange");
+	args.push_back(stmp.c_str());
+	break;
+      }
+    case VV_SET_CLIPLARGE:
+      {
+	args.push_back("--cliplarge");
+	break;
+      }
+10) update the documentation and create the pdf file in the root folder.
+
+11) Compile and commit on svn
+
+Notes:
+
+-- Set the args in visivoview.cpp: set flags (ex. --showaxes) and parameters 
 if any (--colortable temperature)
 
-5) Let env->setatt[VV_SET_INTERNAL-VV_PARAM]=1 when data (if there is one all must be 
+-- Let env->setatt[VV_SET_INTERNAL-VV_PARAM]=1 when data (if there is one all must be 
 internal!) comes from internal array
 
-6) External data columns must be put to 0  env->setatt[VV_SET_$$$ -VV_PARAM]=0 in 
+-- External data columns must be put to 0  env->setatt[VV_SET_$$$ -VV_PARAM]=0 in 
 VV_View (at the beginning) on visivoview.cpp file.
 
-7) All intermediate files should start with ".VS_" and saved name in extFile vector 
+Debug the new code:
+		Xcode: click on the project name, on the left panel TARGETS VisIVOFilter -> Build Phases -> Compile sources--> SCROLL up to the bottom of the window "+" key and add the cpp file. (Add Other...). 
+		Compile (select ALL_BUILD on the top/left menu (near STOP button))
+	 	XCode Product/ Schema/  Edit Schema/ Arguments: add  and select arguments
+	 	XCode Product/ Schema/  Edit Schema/ Options: set the working direct
+	 	XCode. set file breakpoints: open file and click on the row number
+	 	Debug code : press Run button on top left
+	 	
+	 
+In a NEW build directory (e.g. rootPath/build6) create the library: 
+a) in the root path copy CMakeLists.txt eanble OPTION (VSAPILIB "You must select ON to create Library" ON)
+b) in build6 execute ccmake .. ("c", "c", "g",  make)
+c) give the make command
+d) restore CMakeList.txt OPTION (VSAPILIB "You must select ON to create Library" OFF)
+
+***************************************************
+
+VisIVOImporter
+Create a New importer or option
+
+mainimporter.cpp in the root path is the main for the creation of VisIVOImporter command
+
+1) modify commandline.cpp in Utils folder
+	1.1) include new h files
+	#include "newimportersource.h"
+    1.2)
+    ADD options on parseOption() method (if necessary)
+    1.3)
+    ON loadfile() method add:
+        
+		else if(m_type=="newimporter")
+			pSource = new NewImportersource();
+	1.4)
+		create .h and .cpp files (copy it from existing one) and update CmakeList.txt. Xcode click on the project name on the left panel TARGETS VisIVOImporter -> Build Phases -> Compile sources--> bottom of the window "+" key and add the cpp file. (Add Other...)
+	1.5)
+	 	Compile and verify the new importer.  
+	 	Compile (select ALL_BUILD on the top/left menu (near STOP button))
+ 	
+	 	XCode Product Edit Schema Arguments: add  and select arguments
+	 	XCode Product Edit Schema Options: set the working direct
+	 	XCode. set file breakpoints: open file and click on the row number
+	 	Debug code : press Run button on top left
+
+	1.6) 
+		update the parameterFileImporter on the root path:
+		
+		#fformat=newimporter
+		#out=filename_out.bin
+		#file=inputdatafile
+
+	
+2) Create the library API call
+2.1)
+in the root path modify the visivoset.cpp file
+the function VI_SetAtt 
+
+add
+ && sValue!="newimporter")
+ 
+ 2.2) 
+ in case of NEW option add the attribute code in visivodef.h
+ #define VI_SET_NEWOPT 15
+
+  2.3)
+ in case of NEW option modify visivoserver.h in the root path:  the env variable to host the new option
+ struct VisIVOImporter
+{
+  int setatt[1000];  // MUST BE EQUAL TO NPAR in visivodef.h QUI MASSIMO NUMERO PAR
+===>   float newoptvalue ;
+};
+2.4) 
+in case of NEW option
+in visivoset.cpp add in VI_SetAtt()
+add the new option
+if(code==VI_SET_NEWOPT)
+{
+	std::stringstream sstmp(sValue);
+	sstmp>>env->newoptvalue;
+}
+2.5) 
+in case of NEW option
+add the new case in visivoimp.cpp
+    case VI_SET_NEWOPT:
+    {
+      args.push_back("--newopt");
+      args.push_back(env->newoptvalue);
+      break;
+    }
+3.0) In a NEW build directory (e.g. rootPath/build6) create the library: 
+a) in the root path copy CMakeLists.txt eanble OPTION (VSAPILIB "You must select ON to create Library" ON)
+b) in build6 execute ccmake .. ("c", "c", "g",  make)
+c) give the make command
+d) restore CMakeList.txt OPTION (VSAPILIB "You must select ON to create Library" OFF)
+3.0) UPDATE the documentation 
+4.0) UPDATE API doc. 
+
+New options:
+
+VI_SET_NEWOPT 
+Option:  --newopt  (hdf5 data format only)
+Call: VI_SetAtt(&env, VI_SET_NEWOPT," value");
+Note:  The value filed must contain the ...... 
+See VisIVOImporter User Guide for more details.
+
+5.0) add the new files on svn and commit the news.
+
+***************************************************
+
+VisIVOFilters
+Create a New filter or option
+
+mainFilter.cpp in the root path is the main for the creation of VisIVOImporter command
+
+1.1) Add the filter operation "--op newfilter" in startfilter.cpp on Utils folder
+
+#include "vsnewfilter.h"
+
+if(sstreamOp.str()=="newfilter") idOp=37;
+
+and the operation commands like this:
+
+    case 37:
+    {
+        //serial
+        if(rank==0)  //serialized
+        {
+            iter =appParameters.find("help");
+            if( iter != appParameters.end())
+            {
+                VSNewFilterOp op;
+                op.printHelp();
+                return;
+            }
+            
+            iter =appParameters.find("file");
+            if( iter == appParameters.end())
+            {
+                std::cerr <<"No input file table is provided"<<std::endl;
+                return;
+            }
+            std::stringstream sFilename(iter->second);
+            sFilename>>filename;
+            if(filename.find(".bin") == std::string::npos)
+                filename.append(".bin");
+            VSTable table(filename);
+            if(!table.tableExist())
+            {
+                std::cerr <<"No valid input file table is provided"<<std::endl;
+                return;
+            }
+            
+            
+            VSNewFilterOp op;
+            op.setParameters(appParameters);
+            op.addInput(&table);
+            op.execute();
+            valOutFilename=op.realOutFilename();
+        }
+        break;
+    }
+
+
+
+	1.2)
+		create vsnewfilter.h and vsnewfilter.cpp files (copy it from existing one) and update VisIVOFilters/Filters/CmakeList.txt (in two sections: AHF and else). Xcode: click on the project name, on the left panel TARGETS VisIVOFilter -> Build Phases -> Compile sources--> SCROLL up to the bottom of the window "+" key and add the cpp file. (Add Other...).  		Compile (select ALL_BUILD on the top/left menu (near STOP button))
+
+		1.3)
+		The filter class must contain the "printHelp" and "execute" methods and it must be derived from  VsTableOp (see vstableop.h)
+		1.4) if the filter creates new files, to be compatible with gLite each file (.bin) must be pushed in the m_realOutFilename variable defined on VSTableOp class 
+		m_realOutFilename.push_back(fileNameOutputVol)
+	1.5)
+	 	Compile and verify the new filter.  
+	 	XCode Product Edit Schema Arguments: add  and select arguments
+	 	XCode Product Edit Schema Options: set the working direct
+	 	XCode. set file breakpoints: open file and click on the row number
+	 	Debug code : press Run button on top left
+	1.6) 
+		update the parameterFileImporter on the root path:
+		
+		#fformat=newimporter
+		#newopt=value
+		#out=filename_out.bin
+		#file=inputdatafile
+
+	
+2) Create the library API call
+2.1)
+ 
+ in case of new option add the attribute code in visivodef.h
+ #define VF_SET_NEWOPT 2156 (unique number between 2000-4000)
+
+
+  2.3)
+ modify visivoserver.h the env variable to host the new option
+ struct VisIVOImporter
+{
+  int setatt[1000];  // MUST BE EQUAL TO NPAR in visivodef.h QUI MASSIMO NUMERO PAR
+===>   char newoptvalue[64] ;
+};
+2.4) 
 in visivoset.cpp
+add in VF_SetAtt(VisIVOFilter *env, int code, char *value) function the setting for the new filter options
+
+if(code==VF_SET_NEWOPT)
+  strcpy(env->newopt,sValue.c_str());
+
+
+2.5) 
+add the new case in visivofil.cpp
+      case VF_SET_NEWOPT:
+      {
+	key="newopt"; value=env->newoptvalue;
+	break;
+      }
+3.0) UPDATE the documentation
+4.0) UPDATE API doc. 
+
+
+Filter: New Filter
+
+Generic Options: 
+--op,  VF_SET_OPERATION (i.e. VF_SetAtt(&env, VF_SET_OPERATION,"newfilter");)
+--out, VF_SET_OUTVBT
+
+Specific Options: 
+
+VF_SET_NEWOPT 
+Option:  --newopt  
+Call: VF_SetAtt(&env, VI_SET_NEWOPT," value");
+Note:  The value filed must contain the ...... 
+See VisIVOFilter User Guide for more details.
+
+5.0) In a NEW build directory (e.g. rootPath/build6) create the library: 
+a) in the root path copy CMakeLists.txt eanble OPTION (VSAPILIB "You must select ON to create Library" ON)
+b) in build6 execute ccmake .. ("c", "c", "g",  make)
+c) give the make command
+d) restore CMakeList.txt OPTION (VSAPILIB "You must select ON to create Library" OFF)
+
+6.0) add the new files on svn and commit the news.
+
+*************************
+NOTES:
+
+On Xcode to open a .h file on MAC : 
+		1) click pointer on the filename and highlites the name, 
+		2) AppleKey on the filename 
+		3) Click on the left mouse button
+
+To set a debug Arguments/Options:
+Click on Product-->Edit Schema then select the options.

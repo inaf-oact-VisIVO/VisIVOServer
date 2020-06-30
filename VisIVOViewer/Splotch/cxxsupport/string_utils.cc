@@ -26,7 +26,7 @@
  *  This file contains the implementation of various convenience functions
  *  used by the Planck LevelS package.
  *
- *  Copyright (C) 2002-2011 Max-Planck-Society
+ *  Copyright (C) 2002-2012 Max-Planck-Society
  *  Author: Martin Reinecke
  */
 
@@ -36,6 +36,7 @@
 #include <iomanip>
 #include <string>
 #include <cstring>
+#include <cctype>
 #include "string_utils.h"
 
 using namespace std;
@@ -96,8 +97,11 @@ template string dataToString (const unsigned long long &x);
 string intToString(int64 x, tsize width)
   {
   ostringstream strstrm;
-  strstrm << setw(width) << setfill('0') << x;
-  return trim(strstrm.str());
+  (x>=0) ? strstrm << setw(width) << setfill('0') << x
+         : strstrm << "-" << setw(width-1) << setfill('0') << -x;
+  string res = strstrm.str();
+  planck_assert(res.size()==width,"number too large");
+  return trim(res);
   }
 
 namespace {
@@ -208,6 +212,83 @@ void parse_file (const string &filename, map<string,string> &dict)
 
 namespace {
 
+bool isParam (const string &s)
+  {
+  if (s.size()<2) return false;
+  if (s[0]!='-') return false;
+  return !(isdigit(s[1]) || (s[1]=='.'));
+  }
+
+} // unnamed namespace
+
+void parse_cmdline_classic (int argc, const char **argv,
+  const vector<string> &leading_args, map<string,string> &dict)
+  {
+  dict.clear();
+  planck_assert(tsize(argc)>leading_args.size(),"not enough arguments");
+  for (tsize i=0; i<leading_args.size(); ++i)
+    dict[leading_args[i]] = argv[i+1];
+  int curarg=leading_args.size()+1;
+  while (curarg<argc)
+    {
+    string param=argv[curarg];
+    planck_assert(isParam(param),"unrecognized command line format");
+    if ((curarg==argc-1) || isParam(argv[curarg+1]))
+      {
+      dict[param.substr(1)]="true";
+      ++curarg;
+      }
+    else
+      {
+      dict[param.substr(1)]=argv[curarg+1];
+      curarg+=2;
+      }
+    }
+  }
+
+void parse_cmdline_classic (int argc, const char **argv,
+  map<string,string> &dict)
+  { parse_cmdline_classic (argc, argv, vector<string>(), dict); }
+
+void parse_cmdline_equalsign (int argc, const char **argv,
+  const vector<string> &leading_args, map<string,string> &dict)
+  {
+  dict.clear();
+  planck_assert(tsize(argc)>leading_args.size(),"not enough arguments");
+  for (tsize i=0; i<leading_args.size(); ++i)
+    dict[leading_args[i]] = argv[i+1];
+  for (int i=leading_args.size()+1; i<argc; ++i)
+    {
+    string arg=trim(argv[i]);
+    if (arg.size()>0)
+      {
+      string::size_type eqpos=arg.find("=");
+      if (eqpos!=string::npos)
+        {
+        string key=trim(arg.substr(0,eqpos)),
+               value=trim(arg.substr(eqpos+1,string::npos));
+        if (key=="")
+          cerr << "Warning: empty key in argument'" << arg << "'" << endl;
+        else
+          {
+          if (dict.find(key)!=dict.end())
+            cerr << "Warning: key '" << key << "' multiply defined" << endl;
+          dict[key]=value;
+          }
+        }
+      else
+        cerr << "Warning: unrecognized format in argument '" << arg << "'"
+             << endl;
+      }
+    }
+  }
+
+void parse_cmdline_equalsign (int argc, const char **argv,
+  map<string,string> &dict)
+  { parse_cmdline_equalsign (argc, argv, vector<string>(), dict); }
+
+namespace {
+
 template<typename T> void split (istream &stream, vector<T> &list)
   {
   list.clear();
@@ -243,4 +324,18 @@ void tokenize (const string &inp, char delim, vector<string> &list)
   list.clear();
   while (getline(stream,token,delim))
     list.push_back(token);
+  }
+
+void parse_words_from_file (const string &filename, vector<string> &words)
+  {
+  words.clear();
+  ifstream inp(filename.c_str());
+  planck_assert (inp,"Could not open file '"+filename+"'.");
+  while (inp)
+    {
+    string word;
+    inp>>word;
+    word=trim(word);
+    if (word!="") words.push_back(word);
+    }
   }

@@ -1,0 +1,62 @@
+UNITS:
+All models will be created in internal units, ranging from -1 to 1.
+Models based on images will scale the images to fit into these coordinates.
+
+COMPONENTS:
+So far, once can compose the model out of uop to 6 components, which are 
+specified by their names. The names are just are an extension to all
+teh parameters and do not specify what model to use for them:
+"Gas","Bulge","Disk","GCluster","Stars","BHs"
+
+
+MODELS:
+0: No model (absent)
+Do<COMPONENT> = 0
+
+1: Spherical component  (for exampel bulge)
+Do<COMPONENT> = 1
+N<COMPONENT>=1000000      # Number of particles to create
+Sigmax<COMPONENT>=0.3     # With of exponential distribution in x direction
+Sigmay<COMPONENT>=0.3     # With of exponential distribution in y direction
+Sigmaz<COMPONENT>=0.005   # With of exponential distribution in z direction
+hsml<COMPONENT>=0.0001    # Size for the particles to use
+
+2: Distribution of spherical Components (like globular clusters)
+Do<COMPONENT>GCluster=2
+N<COMPONENT>=10000        # Total number of particles to create
+Nmaxper<COMPONENT>=500    # Number of particles for each object
+                          # => Nuber of objects = N<COMPONENT>/Nmaxper<COMPONENT>
+Sigmax<COMPONENT>=0.1     # With of exponential distribution in x direction
+Sigmay<COMPONENT>=0.1     # With of exponential distribution in y direction
+Sigmaz<COMPONENT>=0.1     # With of exponential distribution in z direction
+Sigma<COMPONENT>=0.005    # With of exponential distribution within each object
+hsml<COMPONENT>=0.0001    # Size for the particles to use
+
+3: Stellar disk component, defined by Sigma_z and colored/cutted from images
+Do<COMPONENT>=3
+N<COMPONENT>=10000000     # Maximum number of particles to possible create
+NperPixel<COMPONENT>=100  # Number of particles to create per defined pixel in the mask
+InFileType<COMPONENT>=1   # 0: read .bmp file     1: read raw .dat file 
+<COMPONENT>xres=2700      # number of pixels in the x direction
+<COMPONENT>yres=2700      # number of pixels in the y direction
+<COMPONENT>FileRGB=<file> # File containg the color information (RGB)
+<COMPONENT>FileMask=<file># File containg the mask information (Grayscale)
+hsml<COMPONENT>=0.0001    # Size for the particles to use
+
+4: Gas disk component, defined by Sigma_z (modulated by mask) and colored/cutted from images
+Do<COMPONENT>=4
+N<COMPONENT>=10000000     # Maximum number of particles to possible create
+NperPixel<COMPONENT>=100  # Number of particles to create per defined pixel in the mask
+Sigmaz<COMPONENT>=0.1     # With factor for exponential distribution in z direction
+Sigmazfixed<COMPONENT>=0.1# Minimum with of exponential distribution in z direction
+                          # => width = (Sigmazfixed<COMPONENT> + mask) * Sigmaz<COMPONENT>
+InFileType<COMPONENT>=1   # 0: read .bmp file     1: read raw .dat file 
+<COMPONENT>xres=2700      # number of pixels in the x direction
+<COMPONENT>yres=2700      # number of pixels in the y direction
+<COMPONENT>FileRGB=<file> # File containg the color information (RGB)
+<COMPONENT>FileMask=<file># File containg the mask information (Grayscale)
+hsml<COMPONENT>=0.0001    # Size for the particles to use
+NperGroup<COMPONENT>=30   # Number of particles to create per defined master pixel (created from mask)
+Scaledxres<COMPONENT>=900 # Re-group mask to lower x-resolution    
+Scaledyres<COMPONENT>=900 # Re-group mask to lower y-resolution
+

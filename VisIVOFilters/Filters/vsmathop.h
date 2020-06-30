@@ -39,6 +39,8 @@ static const unsigned int MIN_NUMBER_OF_ROW;
   std::vector<std::string> m_colName;	
   std::vector<std::string> m_colOldName;
   std::string m_mathExpression;
+  std::string m_mathOldExpression;
+
   bool nameSub();
 
   public:

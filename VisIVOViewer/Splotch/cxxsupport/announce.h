@@ -38,9 +38,19 @@
     source code and the parallelisation techniques enabled. */
 void announce (const std::string &name);
 
+/*! Prints a banner containing \a name and checks if \a argc_valid is true.
+    If not, the string \a usage is printed and the program is terminated. */
+void module_startup (const std::string &name, bool argc_valid,
+  const std::string &usage, bool verbose=true);
+
 /*! Prints a banner containing \a name and checks if \a argc==argc_expected.
     If not, a usage description is given and the program is terminated. */
 void module_startup (const std::string &name, int argc, const char **argv,
   int argc_expected, const std::string &argv_expected, bool verbose=true);
+
+/*! Prints a banner containing \a name and checks if \a argc>=2.
+    If not, a usage description is given and the program is terminated. */
+void module_startup (const std::string &name, int argc, const char **argv,
+  bool verbose=true);
 
 #endif

@@ -2,7 +2,6 @@
 #include <vector>
 #include <string>
 
-#include "cxxsupport/string_utils.h"
 #include "cxxsupport/arr.h"
 #include "cxxsupport/sort_utils.h"
 #include "cxxsupport/paramfile.h"
@@ -79,13 +78,9 @@ bool visivo_reader (paramfile &params, vector<particle_sim> &points, VisIVOServe
 		if(opt.columns.find(opt.spIField)!=opt.columns.end())
 		  points[i].I =(float)floatSwap((char *)(&opt.tableData[opt.columns.find(opt.spIField)->second][i]));
 
-		//if(opt.columns.find(opt.spC1Field)!=opt.columns.end())
-		//if(opt.columns.find(opt.colorScalar)!=opt.columns.end())
-        if(opt.colorScalar!="none")
-            points[i].e.r =(float)floatSwap((char *)(&opt.tableData[opt.columns.find(opt.colorScalar)->second][i]));
-        else
-			points[i].e.r=1.0;
-        
+		if(opt.columns.find(opt.spC1Field)!=opt.columns.end())
+		  points[i].e.r =(float)floatSwap((char *)(&opt.tableData[opt.columns.find(opt.spC1Field)->second][i]));
+
 		if(opt.columns.find(opt.spC2Field)!=opt.columns.end())
 		  points[i].e.g =(float)floatSwap((char *)(&opt.tableData[opt.columns.find(opt.spC2Field)->second][i]));
 		else
@@ -110,20 +105,13 @@ bool visivo_reader (paramfile &params, vector<particle_sim> &points, VisIVOServe
 		        points[i].r = (fix_size==0.0) ? 
 		          size_fac*opt.tableData[opt.columns.find(opt.sprField)->second][i] : fix_size;
 		else
-		{
 			points[i].r=size_fac*1.0;
-			//if(i<10) std::cout<<points[i].r<<std::endl;
-		}
 		if(opt.columns.find(opt.spIField)!=opt.columns.end())
 		        points[i].I =opt.tableData[opt.columns.find(opt.spIField)->second][i];
 		else
 			points[i].I=0.5;
-		//if(opt.columns.find(opt.spC1Field)!=opt.columns.end())
-        //if(opt.columns.find(opt.colorScalar)!=opt.columns.end())
-        if(opt.colorScalar!="none")
-        {
-		        points[i].e.r =opt.tableData[opt.columns.find(opt.colorScalar)->second][i];
-		}
+		if(opt.columns.find(opt.spC1Field)!=opt.columns.end())
+		        points[i].e.r =opt.tableData[opt.columns.find(opt.spC1Field)->second][i];
 		else
 			points[i].e.r=1.0;
 		if(opt.columns.find(opt.spC2Field)!=opt.columns.end())

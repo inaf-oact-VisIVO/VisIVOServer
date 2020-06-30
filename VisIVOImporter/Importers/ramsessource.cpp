@@ -100,7 +100,7 @@ std::vector<particle> RamsesSource::Read(std::string inputName)
 	currentFile = 1;
 
 	// Check how many particles in total
-	int total = calculateTotalParticles();
+	int total = computeTotalParticles();
     if(total <=0) return points;
 	// std::cout << "Total particles in Ramses files: " << total << std::endl;
 
@@ -108,7 +108,7 @@ std::vector<particle> RamsesSource::Read(std::string inputName)
 	while(currentFile <= numCpus)
 	{	
 		// Read current file
-		std::vector<particle> p = ReadIndividual(getCurrentFilename());
+		std::vector<particle> p = ReadIndivid(getCurrentFilename());
 
 		// Add these particles to full list
 		// (do this in read to allow indicidual reads to be mpi parallelised?)
@@ -136,7 +136,7 @@ std::vector<particle> RamsesSource::Read(std::string inputName)
 }
 
 //---------------------------------------------------------------------
-int RamsesSource::calculateTotalParticles()
+int RamsesSource::computeTotalParticles()
 //---------------------------------------------------------------------
 {
 	// Work out total number of particles used in Ramses simulation
@@ -206,7 +206,7 @@ std::string RamsesSource::getCurrentFilename()
 }
 
 //---------------------------------------------------------------------
-std::vector<particle> RamsesSource::ReadIndividual(std::string filename)
+std::vector<particle> RamsesSource::ReadIndivid(std::string filename)
 //---------------------------------------------------------------------
 {
 	// Vector for particle data
@@ -274,16 +274,16 @@ ramsesHeader RamsesSource::ReadHeader(std::ifstream& file)
 	int dSize;
 
 	// For each integer value, read/discard delimiting 4bytes and read data
-	ByteSkip(file,sizeof(int));
+	ByteSkipper(file,sizeof(int));
 	h.ncpu = IByteRead(file);
 
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 	h.ndim = IByteRead(file);;
 
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 	h.npart = IByteRead(file);
 
-	ByteSkip(file,sizeof(int));
+	ByteSkipper(file,sizeof(int));
 
 	// For localseed, check for quadwords -real(16) - and store in second double if necessary
 	// Returns nan for real(16) at the moment (probably cant store in doubles...)
@@ -291,23 +291,23 @@ ramsesHeader RamsesSource::ReadHeader(std::ifstream& file)
 	h.localseed1 = DByteRead(file);
 	h.localseed2 = (dSize == QWORD_PRECISION) ?  DByteRead(file) : 0;
 	
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 	h.nstar_tot = IByteRead(file);
 
-	ByteSkip(file,sizeof(int));
+	ByteSkipper(file,sizeof(int));
 
 	// For doubles, check for real(8) vs real(4)
 	dSize = IByteRead(file);
 	h.mstar_tot = (dSize == DOUBLE_PRECISION) ?  DByteRead(file) : FByteRead(file);
-	ByteSkip(file,sizeof(int));
+	ByteSkipper(file,sizeof(int));
 
 	dSize = IByteRead(file);
 	h.mstar_lost = (dSize == DOUBLE_PRECISION) ?  DByteRead(file) : FByteRead(file);
 
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 	h.nsink = IByteRead(file);
 
-	ByteSkip(file,sizeof(int));
+	ByteSkipper(file,sizeof(int));
 
 	return h;
 }
@@ -323,7 +323,7 @@ void RamsesSource::ReadFloatData(ramsesHeader& h, std::vector<particle>& particl
 	}
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read y data
 	for(int i = 0; i < h.npart; i++)
@@ -332,7 +332,7 @@ void RamsesSource::ReadFloatData(ramsesHeader& h, std::vector<particle>& particl
 	}
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read z data
 	for(int i = 0; i < h.npart; i++)
@@ -341,7 +341,7 @@ void RamsesSource::ReadFloatData(ramsesHeader& h, std::vector<particle>& particl
 	}			
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read vx data
 	for(int i = 0; i < h.npart; i++)
@@ -350,7 +350,7 @@ void RamsesSource::ReadFloatData(ramsesHeader& h, std::vector<particle>& particl
 	}	
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read vy data
 	for(int i = 0; i < h.npart; i++)
@@ -359,7 +359,7 @@ void RamsesSource::ReadFloatData(ramsesHeader& h, std::vector<particle>& particl
 	}	
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read vz data
 	for(int i = 0; i < h.npart; i++)
@@ -368,7 +368,7 @@ void RamsesSource::ReadFloatData(ramsesHeader& h, std::vector<particle>& particl
 	}	
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read mass data
 	for(int i = 0; i < h.npart; i++)
@@ -377,7 +377,7 @@ void RamsesSource::ReadFloatData(ramsesHeader& h, std::vector<particle>& particl
 	}		
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read identity data
 	for(int i = 0; i < h.npart; i++)
@@ -386,7 +386,7 @@ void RamsesSource::ReadFloatData(ramsesHeader& h, std::vector<particle>& particl
 	}	
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read level data
 	for(int i = 0; i < h.npart; i++)
@@ -406,7 +406,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 	}
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read y data
 	for(int i = 0; i < h.npart; i++)
@@ -415,7 +415,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 	}
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read z data
 	for(int i = 0; i < h.npart; i++)
@@ -424,7 +424,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 	}			
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read vx data
 	for(int i = 0; i < h.npart; i++)
@@ -433,7 +433,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 	}	
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read vy data
 	for(int i = 0; i < h.npart; i++)
@@ -442,7 +442,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 	}	
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read vz data
 	for(int i = 0; i < h.npart; i++)
@@ -451,7 +451,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 	}	
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read mass data
 	for(int i = 0; i < h.npart; i++)
@@ -460,7 +460,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 	}
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read identity data
 	for(int i = 0; i < h.npart; i++)
@@ -469,7 +469,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 	}	
 
 	// Skip delimiters
-	ByteSkip(file,sizeof(int)*2);
+	ByteSkipper(file,sizeof(int)*2);
 
 	// Read level data
 	for(int i = 0; i < h.npart; i++)
@@ -479,7 +479,7 @@ void RamsesSource::ReadDoubleData(ramsesHeader& h, std::vector<particle>& partic
 }
 
 //---------------------------------------------------------------------
-void ByteSkip(std::ifstream& file, int count)
+void ByteSkipper(std::ifstream& file, int count)
 //---------------------------------------------------------------------
 {
 	char* c = new char(count);

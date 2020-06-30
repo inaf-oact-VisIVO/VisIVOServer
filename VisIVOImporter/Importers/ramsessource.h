@@ -65,9 +65,9 @@ class RamsesSource : public AbstractSource
 private:
 
 	std::vector<particle> Read(std::string);
-	int calculateTotalParticles();
+	int computeTotalParticles();
 	std::string getCurrentFilename();
-	std::vector<particle> ReadIndividual(std::string filename);
+	std::vector<particle> ReadIndivid(std::string filename);
 	ramsesHeader ReadHeader(std::ifstream&);
 	void ReadFloatData(ramsesHeader&, std::vector<particle>&, std::ifstream&);
 	void ReadDoubleData(ramsesHeader&, std::vector<particle>&, std::ifstream&);
@@ -84,7 +84,7 @@ private:
 // Ramses outputs fortran unformatted file, so do not use file>>container it wont work.
 
 template<typename T>
-T ByteRead(std::ifstream& file)
+T ByteReader(std::ifstream& file)
 {
 	int dataSize = sizeof(T);
 
@@ -101,15 +101,15 @@ T ByteRead(std::ifstream& file)
 
 // Typedef specialisations of this function
 typedef int (*ByteReadI_type)(std::ifstream&);
-ByteReadI_type const IByteRead = &ByteRead<int>;
+ByteReadI_type const IByteRead = &ByteReader<int>;
 
 typedef float (*ByteReadF_type)(std::ifstream&);
-ByteReadF_type const FByteRead = &ByteRead<float>;
+ByteReadF_type const FByteRead = &ByteReader<float>;
 
 typedef double (*ByteReadD_type)(std::ifstream&);
-ByteReadD_type const DByteRead = &ByteRead<double>;
+ByteReadD_type const DByteRead = &ByteReader<double>;
 
 // Skip count bytes of unformatted data
-void ByteSkip(std::ifstream& file, int count);
+void ByteSkipper(std::ifstream& file, int count);
 
 #endif

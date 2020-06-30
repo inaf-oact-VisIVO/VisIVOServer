@@ -53,6 +53,7 @@ double wallTime(void)
 #endif
   }
 
+/*
 typedef struct
   {
   double ts,ta;
@@ -79,3 +80,4 @@ void wTimer_stop(int n)
   }
 double wTimer_acc(int n)
   { return wT[n].on ? wT[n].ta+wallTime()-wT[n].ts : wT[n].ta; }
+*/

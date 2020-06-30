@@ -44,6 +44,10 @@
 #include "hdf5source.h"
 #include "rawgridsource.h"
 #include "rawpointssource.h"
+#include "muportalsource.h"
+#include "ramsessource.h"
+#include "vialacteasource.h"
+
 #ifdef WIN32
 	#include <io.h>
 #else
@@ -67,10 +71,12 @@ CommandLine::CommandLine ( )
 	m_npoints=0;
 	m_file="table";
   	m_binaryHeader="noheader";
+    m_historyEnabled=false;
+    m_historyFile="hist.xml";
 
 	m_size[0]=m_size[1]=m_size[2]=1;
 	m_comput[0]=m_comput[1]=m_comput[2]=0;
-        m_missing=-1.0918273645e+23;
+    m_missing=-1.0918273645e+23;
  	m_text=-1.4536271809e+15;
 	m_lfn="";
 	m_VO="";
@@ -78,6 +84,8 @@ CommandLine::CommandLine ( )
 	m_se="";
 	m_outPath="";
 	m_datasetList.clear();
+    m_fitshdunum=-1;
+
 
 }
 //---------------------------------------------------------------------
@@ -137,6 +145,13 @@ int CommandLine::parseOption (const std::vector<std::string>  arguments )
 			m_file="volume";
 		}
         
+        else if (arguments[i]=="--textcol")
+        {
+            std::stringstream ss2;
+            
+            ss2<<arguments[++i];
+            ss2>>m_textcol;
+        }
 		else if (arguments[i]=="--fformat")
 		{
       		  std::string ckInput=arguments[i+1];
@@ -156,7 +171,21 @@ int CommandLine::parseOption (const std::vector<std::string>  arguments )
 		    return -1;
       		  }	
 			m_binaryHeader=arguments[++i];
-		} 
+		}
+        else if (arguments[i]=="--fitshdunum")
+		{
+            std::string ckInput=arguments[i+1];
+            if(ckInput.find_first_of('-')==0)
+            {
+        	    std::cerr<<"Error on "<<arguments[i]<< " argument: "<<ckInput<<std::endl;
+                return -1;
+            }
+			std::stringstream ss1;
+            
+			ss1<<arguments[++i];
+			ss1>>m_fitshdunum ;
+		}
+
     
 		else  if (arguments[i]=="--bigendian")
 		{
@@ -357,10 +386,27 @@ int CommandLine::parseOption (const std::vector<std::string>  arguments )
         	    std::cerr<<"Error on "<<arguments[i]<< " argument: "<<ckInput<<std::endl;
 		    return -1;
       		  }	
-			m_se=arguments[++i];
-		}   
-           	else
-		   if(i<arguments.size()-1) std::cerr<<"Invalid parameter "<<arguments[i]<<std::endl;
+			m_se=arguments[++i];        
+        
+        }
+        
+        else  if (arguments[i]=="--history")
+        {
+            m_historyEnabled=true;
+        }
+        else if (arguments[i]=="--historyfile")
+		{
+           
+            m_historyEnabled=true;
+            std::string ckInput=arguments[i+1];
+            if(ckInput.find_first_of('-')==0)
+            {
+                std::cerr<<"Error on "<<arguments[i]<< " argument: "<<ckInput<<std::endl;
+                return -1;
+            }
+            m_historyFile=arguments[++i];
+            
+		}
  
 	}
 	m_currentPath=arguments[(arguments.size()-1)]; //!filename including path!!
@@ -480,7 +526,7 @@ int CommandLine::parseOption (const std::vector<std::string>  arguments )
 	if(m_file=="volume")
 		if((m_comput[0]<=0 || m_comput[1]<=0 || m_comput[2]<=0) && (m_type!="binary"))
 		{
-			if(m_type!="hdf5")
+			if(m_type!="hdf5" && m_type!="fitsimage")
 			{
 			  std::cerr<<"A volume must  have valid x y and z mesh point dimensions"<<std::endl;
 			  return -1;
@@ -488,7 +534,7 @@ int CommandLine::parseOption (const std::vector<std::string>  arguments )
 
 		}
   
-	if(m_type!="fitstable")
+	if(m_type!="fitstable" && m_type!="ramses" && m_type!="fitsimage")
 	{ 
 		std::ifstream inFile;
 		inFile.open(m_currentPath.c_str());
@@ -502,6 +548,9 @@ int CommandLine::parseOption (const std::vector<std::string>  arguments )
 		else
 			inFile.close();
 	}
+    
+    
+    
 	return 0;
 }
 
@@ -560,8 +609,9 @@ int CommandLine::loadFile ()
 			pSource = new FitsTableSource();
    
 		else if(m_type=="fitsimage")
+        {
 			pSource = new FitsImageSource();
-    
+        }
 		else if(m_type=="csv" )
 			pSource = new CSVSource();
 
@@ -597,6 +647,17 @@ int CommandLine::loadFile ()
 		}
 		else if(m_type=="rawpoints")
 			pSource = new RawPointsSource();
+        
+		else if(m_type=="muportal")
+			pSource = new MuPortalSource();
+		else if(m_type=="ramses"){
+		  pSource = new RamsesSource();
+
+		}
+        else if(m_type=="vialactea"){
+            pSource = new VialacteaSource();
+            
+        }
 		else
 		{ 
 			std::cerr<<"the format given '"<<m_type<<"' is incorrect, please try again  or --help for help"<<std::endl;
@@ -606,10 +667,15 @@ int CommandLine::loadFile ()
 					   m_size,m_comput,m_file.c_str(),m_endian.c_str(),
 					   m_dataType.c_str(),m_npoints,m_login.c_str(),
 					   m_binaryHeader.c_str(),m_missing,m_text,m_datasetList,
-					   m_hyperslab);
+					   m_hyperslab,m_fitshdunum, m_textcol);
 		if(pSource->readHeader()==0)
 			pSource->readData();
-    
+        if(m_historyEnabled)
+        {
+            pSource->writeHistory(m_historyFile.c_str(),m_type.c_str(), m_out.c_str(), m_file.c_str(), m_comput, m_size, m_login.c_str(), m_binaryHeader.c_str(), m_missing, m_text, m_endian.c_str(), m_dataType.c_str(), m_npoints, m_VO.c_str(), m_se.c_str(), m_outlfn.c_str(),m_currentPath.c_str());
+        }
+        
+        
 		delete pSource;
 		if(m_gLiteOut)
 		{
@@ -632,17 +698,13 @@ void CommandLine::showHelp ()
 {
   
 	std::cout<<std::endl;
-   	std::cout<<"VisIVOImporter Version 1.2 Jamuary 24th 2011 "<<std::endl<<std::endl;
+   	std::cout<<"VisIVOImporter Version 2.1.1 June 28th 2013 "<<std::endl<<std::endl;
   
-	std::cout<<" --fformat   [typefile]  (mandatory) Select file type: ascii, csv, votable, binary, fly, gadget, xml, rawpoints, rawgrids, fitstable, fitsimage, hdf5"<<std::endl<<std::endl;
+	std::cout<<" --fformat   [typefile]  (mandatory) Select file type: ascii, csv, votable, binary, fly, gadget, xml, rawpoints, rawgrids, fitstable, fitsimage, hdf5, muportal, ramses"<<std::endl<<std::endl;
 
 	std::cout<<"[pathfile] (mandatory) Absolute path file. Path must be the last command( /home/user/myfile.ascii)"<<std::endl<<std::endl;
 
-        std::cout<<"--out [filename]   (optional) Change default file name  and or directory ( --out /home/user/myfile.bin  "<<std::endl<<std::endl;
-
-	std::cout<<"--volume  (optional)  if you want a table for volume.Is mandatory if you want select cell size and/or computational cell size "<<std::endl<<std::endl; 
- 
-	std::cout<<"--out [filename]   (optional) Change default file name  and or directory ( --out /home/user/myfile.bin  "<<std::endl<<std::endl;
+	std::cout<<"--out [filename]   (optional) Change default file name  and or directory ( --out /home/user/myfile.bin )  "<<std::endl<<std::endl;
 
 	std::cout<<"--volume  (optional)  if you want a table for volume.Is mandatory if you want select cell size and/or computational cell size "<<std::endl<<std::endl; 
   
@@ -658,6 +720,12 @@ void CommandLine::showHelp ()
 
 	std::cout<<"--datasetlist  use this command only to select datasets in hdf5 file"<<std::endl<<std::endl; 
 
-	std::cout<<"--hyperslab  use this command only to select dataset hyperslab in hdf5 file"<<std::endl<<std::endl; 
+	std::cout<<"--hyperslab  use this command only to select dataset hyperslab in hdf5 file"<<std::endl<<std::endl;
+
+    std::cout<<"--history (optional) create an XML file which contains the history of operations performed (default create hist.xml file)"<<std::endl<<std::endl;
+    
+    std::cout<<"--historyfile [filename]   (optional) Change default history file name  and or directory "<<std::endl<<std::endl;
+    
+
   
 }

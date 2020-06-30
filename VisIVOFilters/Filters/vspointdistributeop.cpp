@@ -460,7 +460,7 @@ bool VSPointDistributeOp::execute()
     if(fieldNameSStream.str()==""||fieldNameSStream.str()=="unknown")
     {
         m_useConstant=true;
-        vector.push_back(-1);
+        fieldList.push_back(-1);
         if(isParameterPresent("constant"))
             m_constValue=getParameterAsFloat("constant");
     }else

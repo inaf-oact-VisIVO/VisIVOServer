@@ -26,7 +26,7 @@
 #include <vector>
 #include "kernel/colour.h"
 #include "cxxsupport/sort_utils.h"
-
+#include "cxxsupport/math_utils.h"
 
 template<typename T> class anythingMap
   {

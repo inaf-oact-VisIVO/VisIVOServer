@@ -98,3 +98,17 @@ fov=30
 # CUDA
 #use_host_as_thread =t
 #host_load=30
+
+############################
+# CUDA SETUP
+############################
+#number of GPUs to use per MPI task
+#gpu_number=0
+
+#number of cores per node (it is required if gpu_number > 1)
+#cores_number=8
+
+#particle_mem_factor=  # (default: 4)
+#gpu_info=true         # (default: true)
+
+

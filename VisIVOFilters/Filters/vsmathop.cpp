@@ -31,6 +31,9 @@
 #include "vsmathop.h"
 #include "fparser.h"
 #include "VisIVOFiltersConfigure.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string_regex.hpp>
+
 
 const unsigned int VSMathOp::MAX_NUMBER_TO_REDUCE_ROW = 10000;
 const unsigned int VSMathOp::MIN_NUMBER_OF_ROW = 100;
@@ -177,134 +180,212 @@ void VSMathOp::printHelp()
 bool VSMathOp::nameSub()
 //---------------------------------------------------------------------
 {
+    int newNameNumber=-1;
+    int found=0;
+	bool newName;
+    
+    std::string::size_type pos = m_mathExpression.find_last_not_of("\n \t");
+    if(pos != std::string::npos)
+        m_mathExpression = m_mathExpression.substr(0, pos+1);
+    
+    
+    std::string delimiters("()-!*/%+=<>&|");
+    std::vector<std::string> parts;
+    boost::split(parts, m_mathExpression, boost::is_any_of(delimiters));
+
+    
+    for(unsigned int z=0;z<parts.size();z++)
+    {
+//        std::cout<<"-"<<z<<"-"<<parts[z]<<"-"<<std::endl;
+     
+        if(parts[z]=="")
+        {
+           parts.erase(parts.begin()+z);
+      //      z--;
+        //    break;
+        }
+      
+      for(unsigned int i=0;i<m_tables[0]->getNumberOfColumns();i++)
+        {
+
+            newName=true;
+            if ( parts[z].compare(m_tables[0]->getColName(i)) == 0)
+            {
+                
+                //std::cout<<"-"<<z<<"-"<<parts[z]<<"-"<<m_tables[0]->getColName(i)<<std::endl;
+
+                std::stringstream colNewName;
+                if(newName)newNameNumber++;
+                colNewName<<"VoOMaTh"<<newNameNumber; //QUI inserirre un controllo sulla NON presenza di tale nome nella stringa originaria: genera una strinnga casuale e verifica
+                if(newName) m_colOldName.push_back(m_tables[0]->getColName(i));
+                if(newName) m_colName.push_back(colNewName.str());
+                newName=false;
+                
+
+                parts.erase(parts.begin()+z);
+                parts.insert(parts.begin()+z, colNewName.str());
+                //parts.pop_back();
+               // parts.push_back(colNewName.str());
+                
+                // Replace first 'cde' with 'XYZ'. Modify the input
+               // replace_first_copy( m_mathExpression.erase, str1, "cde", "XYZ" );
+                boost::replace_first(m_mathExpression, m_tables[0]->getColName(i), colNewName.str());
+              //  m_mathExpression.erase(found,m_tables[0]->getColName(i).size());
+               // m_mathExpression.insert(found,colNewName.str());
+                break;
+            }
+                
+        }
+    }
+   
+     
+    if(m_colName.size()==0)
+    {
+        std::cerr<<"vsmathop: Invalid expression is given"<<std::endl;
+        return false;
+    }   //String name replacement
+    
+    return true;
+}
+
+/*
+
+//---------------------------------------------------------------------
+bool VSMathOp::nameSub()
+//---------------------------------------------------------------------
+{
 	int newNameNumber=-1;
 	bool still;
-	 int found=0;
+    int found=0;
 	bool newName;
 	std::vector<int> positions;
-for(unsigned int i=0;i<m_tables[0]->getNumberOfColumns();i++)
-{
-	still=true;
-	newName=true;
-	while(still)
-	{
-		bool foundName=false,beforeChar=false,afterChar=false;
-		found=m_mathExpression.find(m_tables[0]->getColName(i));
-//		std::clog<<m_tables[0]->getColName(i)<<" "<<m_mathExpression<<std::endl;
-  		if (found!=std::string::npos) 
-		{
-			foundName=true;
-			if(found==0)
-				beforeChar=true;
-			else
-			{
-				if(m_mathExpression.compare(found-1,1," ") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"(") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"-") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"!") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"*") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"/") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"%") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,">") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"<") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"&") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"+") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"=") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"<") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,">") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"&") ==0)
-					beforeChar=true;
-				else if(m_mathExpression.compare(found-1,1,"|") ==0)
-					beforeChar=true;
+    for(unsigned int i=0;i<m_tables[0]->getNumberOfColumns();i++)
+    {
+        still=true;
+        newName=true;
+        while(still)
+        {
+            bool foundName=false,beforeChar=false,afterChar=false;
+            found=m_mathExpression.find(m_tables[0]->getColName(i));
+            std::cout<<"i: "<<i<<" col name: "<<m_tables[0]->getColName(i)<<" found: "<<found<<std::endl;
+            
+            //		std::clog<<m_tables[0]->getColName(i)<<" "<<m_mathExpression<<std::endl;
+            if (found!=std::string::npos)
+            {
+                foundName=true;
+                if(found==0)
+                    beforeChar=true;
+                else
+                {
+                    if(m_mathExpression.compare(found-1,1," ") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"(") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"-") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"!") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"*") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"/") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"%") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,">") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"<") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"&") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"+") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"=") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"<") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,">") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"&") ==0)
+                        beforeChar=true;
+                    else if(m_mathExpression.compare(found-1,1,"|") ==0)
+                        beforeChar=true;
+                    
+                }
+                //search for end string
+                {
+                    int lenString=m_tables[0]->getColName(i).size();
+                    if((found+lenString)==m_mathExpression.size())
+                        afterChar=true;
+                    else
+                    {
+                        if(m_mathExpression.compare(found+lenString,1," ") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,")") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"-") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"!") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"*") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"/") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"%") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,">") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"<") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"&") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"+") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"=") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"<") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,">") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"&") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"|") ==0)
+                            afterChar=true;
+                        else if(m_mathExpression.compare(found+lenString,1,"^") ==0)
+                            afterChar=true;
+                    }
+                }
+                if(foundName && beforeChar && afterChar)
+                {
+                    std::stringstream colNewName;
+                    if(newName)newNameNumber++;
+                    colNewName<<"VoOMaTh"<<newNameNumber; //QUI inserirre un controllo sulla NON presenza di tale nome nella stringa originaria: genera una strinnga casuale e verifica
+                    if(newName) m_colOldName.push_back(m_tables[0]->getColName(i));
+                    if(newName) m_colName.push_back(colNewName.str());
+                    newName=false;
+                    m_mathExpression.erase(found,m_tables[0]->getColName(i).size());
+                    m_mathExpression.insert(found,colNewName.str());
+                } else
+                {
+                    m_mathExpression.erase(found,m_tables[0]->getColName(i).size());
+                    positions.push_back(found);
+                }
+                
+            } else
+                still=false;
+        }
+        for(int j=0;j<positions.size();j++)
+            m_mathExpression.insert(positions[j],m_tables[0]->getColName(i));
+        positions.clear();
+    }
+    if(m_colName.size()==0)
+    {
+        std::cerr<<"vsmathop: Invalid expression is given"<<std::endl;
+        return false;	
+    }   //String name replacement
+    return true;
+}
+*/
 
-			}
-			//search for end string
-			{
-			  int lenString=m_tables[0]->getColName(i).size();
-			  if((found+lenString)==m_mathExpression.size())
-					afterChar=true;
-			  else
-			  {
-				if(m_mathExpression.compare(found+lenString,1," ") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,")") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"-") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"!") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"*") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"/") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"%") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,">") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"<") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"&") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"+") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"=") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"<") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,">") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"&") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"|") ==0)
-					afterChar=true;
-				else if(m_mathExpression.compare(found+lenString,1,"^") ==0)
-					afterChar=true;
-			  }
-			}
-		  if(foundName && beforeChar && afterChar)
-		  {
-			std::stringstream colNewName;
-			if(newName)newNameNumber++;
-			colNewName<<"VoOMaTh"<<newNameNumber; //QUI inserirre un controllo sulla NON presenza di tale nome nella stringa originaria: genera una strinnga casuale e verifica
-			if(newName) m_colOldName.push_back(m_tables[0]->getColName(i));
-			if(newName) m_colName.push_back(colNewName.str());
-			newName=false;
-			m_mathExpression.erase(found,m_tables[0]->getColName(i).size());
-			m_mathExpression.insert(found,colNewName.str());
-		  } else
-		  {
-			m_mathExpression.erase(found,m_tables[0]->getColName(i).size());
-			positions.push_back(found);
-		  }
-		  
- 		} else
-			still=false;
-	}
-	for(int j=0;j<positions.size();j++)
-		m_mathExpression.insert(positions[j],m_tables[0]->getColName(i));
-	positions.clear();
-}
-if(m_colName.size()==0)
-{
-	std::cerr<<"vsmathop: Invalid expression is given"<<std::endl;
-	return false;	
-}   //String name replacement
-return true;
-}
 //---------------------------------------------------------------------
 bool VSMathOp::execute()
 //---------------------------------------------------------------------
@@ -346,7 +427,8 @@ if(!compute)
 				mathExpressionSS<<inputString<<" " ;
 		}
 		fileInput.close();
-		m_mathExpression=mathExpressionSS.str(); 
+		m_mathExpression=mathExpressionSS.str();
+        
 	}
 // 	bool append=true; // ** QUI strano ma non funziona!
 // 	if(getParameterAsString("append").empty() || getParameterAsString("append")=="unknown" ) append=false;

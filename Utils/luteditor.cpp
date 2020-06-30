@@ -2124,7 +2124,8 @@ void lutDefault(VisIVOServerOptions *opt,vtkLookupTable *lut)
 	opt->extPalA.push_back(255/255.0);
     } else
 	lut->SetTableValue(i, c.m_red/255.0, c.m_green/255.0, c.m_blue/255.0, 1);
-  }
+  }    
+    
 };
 //---------------------------------------------------------------------
 void lutMinMax(VisIVOServerOptions *opt,vtkLookupTable *lut)

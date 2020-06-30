@@ -642,6 +642,23 @@ for(int idPar=0; idPar<NPAR; idPar++)
 	args.push_back(env->splotchpar);
 	break;	
       }
+    case VV_SET_CLIPRANGE:
+      {
+	std::stringstream sstmp;
+	sstmp << env->cliprange[0]<<" ";
+	sstmp << env->cliprange[1]<<" ";
+	std::string stmp;
+	sstmp>>stmp;
+	args.push_back("--cliprange");
+	args.push_back(stmp.c_str());
+	break;
+      }
+    case VV_SET_CLIPLARGE:
+      {
+	args.push_back("--cliplarge");
+	break;
+      }
+
        default:
      {
 	break;

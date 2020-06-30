@@ -209,6 +209,8 @@ void Pipe::setCamera (SplotchCamera *splCamera)
 //---------------------------------------------------------------------
 {
 
+    
+    
 	m_camera =m_pRenderer->GetActiveCamera();
 	
 
@@ -229,6 +231,9 @@ void Pipe::setCamera (SplotchCamera *splCamera)
 	          m_visOpt.cameraFocalPointPrev[2]!=INVALID_CAM)
 	      m_camera->SetFocalPoint(m_visOpt.cameraFocalPointPrev[0],m_visOpt.cameraFocalPointPrev[1],m_visOpt.cameraFocalPointPrev[2]);
 
+    
+    
+    
 	if(m_visOpt.setCameraRoll)
 	  if(m_visOpt.cameraRoll!=INVALID_CAM) 
 	      m_camera->SetRoll(m_visOpt.cameraRoll);
@@ -328,6 +333,8 @@ void Pipe::setCamera (SplotchCamera *splCamera)
 	m_visOpt.cameraPosPrev[0]=gettmp[0];
 	m_visOpt.cameraPosPrev[1]=gettmp[1];
 	m_visOpt.cameraPosPrev[2]=gettmp[2];
+    
+    
 	
 	gettmp= m_camera->GetFocalPoint();
 	m_visOpt.cameraFocalPointPrev[0]=gettmp[0];
@@ -336,12 +343,15 @@ void Pipe::setCamera (SplotchCamera *splCamera)
 
 	m_visOpt.cameraRollPrev[0]=m_camera->GetRoll();
 
+
+    
+    
 	// m_camera->SetPosition(32+1*10,32+5*10,32+70);
 //  m_camera->SetViewUp(1,0,0);
 // m_camera->SetViewAngle(160);
 // vtkIndent indent;
 // std::ofstream planeof("cam.txt");
-// m_camera->PrintSelf(planeof,indent);
+//m_camera->PrintSelf(planeof,indent);
 // planeof.close();
 
 		if(splCamera!=NULL)
@@ -354,15 +364,26 @@ void Pipe::setCamera (SplotchCamera *splCamera)
 		splCamera->position[0]=a;
 		splCamera->position[1]=b;
 		splCamera->position[2]=c;
+            
 		m_camera->GetFocalPoint(a,b,c);
 		splCamera->lookat[0]=a;
 		splCamera->lookat[1]=b;
 		splCamera->lookat[2]=c;
-		splCamera->roll=m_camera->GetRoll();
-/*		splCamera->sky[0]=a;
-		splCamera->sky[1]=b;
-		splCamera->sky[2]=c;*/
-		for(int i=0;i<3;i++)
+        
+        
+		//splCamera->roll=m_camera->GetRoll()+45;
+            
+          //  std::cout<<"roll: "<<splCamera->roll<<std::endl;
+
+            m_camera->GetViewUp(a,b,c);
+            
+           // m_camera->SetParallelScale(400);
+            
+            splCamera->sky[0]=a;
+            splCamera->sky[1]=b;
+            splCamera->sky[2]=c;
+
+            for(int i=0;i<3;i++)
 		  if(splCamera->lookat[i]==splCamera->position[i]) splCamera->position[i]=splCamera->position[i]*1.01;
 		splCamera->fov=m_camera->GetViewAngle();
 		m_camera->GetClippingRange(a,b);
@@ -395,7 +416,7 @@ void Pipe::setBoundingBox ( vtkDataObject *data )
 	if(m_visOpt.showBox)
 		outlineProperty->SetOpacity ( 0.999 );
 	else
-		outlineProperty->SetOpacity ( 0.0 );
+        outlineProperty->SetOpacity ( 0.0 );
 	outlineProperty->SetRepresentationToWireframe();
 	outlineProperty->SetInterpolationToFlat();
 

@@ -28,6 +28,12 @@
 #include <map>
 #include "parametersparser.h"
 #include "startFilter.h"
+#ifdef VSMPI
+#pragma message "MPI-PARALLEL compilation"
+#include "mpi.h"
+#else
+#pragma message "SERIAL compilation"
+#endif
 
 extern "C"
 {
@@ -91,10 +97,30 @@ int VF_Filter(VisIVOFilter *env)
 std::string filename;
 std::map<std::string, std::string> appParameters;
 std::map<std::string, std::string>::iterator iter;
+int rank=0, size=1;
 // FILLING appParameters
 std::string key;
 std::string value;
+#ifdef VSMPI
+    MPI_Init (&argc, &argv);
+    MPI_Comm_size (MPI_COMM_WORLD, &size);
+    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+    // NO MPI ALLOWED at the moment
+    if(rank>0) rank=-1;
+    size=1;
+	int *ranks;
+	ranks= new int[size];
+    for(int i=0;i<size;i++) ranks[i]=i;
 
+    // create a new communicator
+    MPI_Group origGroup, newGroup;
+    MPI_Comm NEW_COMM;    
+    MPI_Comm_group(MPI_COMM_WORLD, &origGroup);
+    MPI_Group_incl(origGroup,size,ranks,&newGroup);
+    MPI_Comm_create(MPI_COMM_WORLD, newGroup, &NEW_COMM); 
+    // it is only the newGroup in NEW_COMM that will continue. 
+#endif
+    
 for(int idPar=0; idPar<NPAR; idPar++)
 {
   if(env->setatt[idPar]==1)
@@ -462,6 +488,31 @@ for(int idPar=0; idPar<NPAR; idPar++)
 	key="geometry"; value=env->MRbackground;
 	break;
       }
+      case VF_SET_DIMVOX:
+      {
+	key="dimvox"; value=env->dimvox;
+	break;
+      }
+      case VF_SET_TRACKPLANEDIST:
+      {
+	key="trackplanedist"; value=env->trackplanedist;
+	break;
+	  }
+	 case VF_SET_INNERDIST:
+      {
+	key="innerdist"; value=env->innerdist;
+	break;
+      }
+      case VF_SET_OUTPOINTS:
+      {
+	key="outpoints"; value=env->outpoints;
+	break;
+      }
+      case VF_SET_OUTVOL:
+      {
+	key="outvol"; value=env->outvol;
+	break;
+      }
 
     }//switch
 
@@ -470,8 +521,13 @@ for(int idPar=0; idPar<NPAR; idPar++)
   }// if
 }// for
 
-
-// CheckG appParameters
+// this part implements the multi processes with MPI. It is the map that contains the nfo for multiprocess    
+std::stringstream MpiRank, MpiSize;
+MpiRank<<rank;
+MpiSize<<size;
+appParameters.insert(make_pair("MpiRank",MpiRank.str()));
+appParameters.insert(make_pair("MpiSize",MpiSize.str()));
+///////    // CheckG appParameters
 
 startFilter startFilter(appParameters);
 return EXIT_SUCCESS;

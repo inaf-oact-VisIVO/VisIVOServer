@@ -23,6 +23,7 @@ rawgridsource.cpp
 rawpointssource.cpp
 muportalsource.cpp
 ramsessource.cpp
+vialacteasource.cpp
 
 )
 
@@ -54,6 +55,7 @@ rawgridsource.cpp
 rawpointssource.cpp
 muportalsource.cpp
 ramsessource.cpp
+vialacteasource.cpp
 
 
 )

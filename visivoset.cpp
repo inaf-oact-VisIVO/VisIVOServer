@@ -671,6 +671,13 @@ if(code==VV_SET_VECTORSCALE)
 	  env->setatt[VV_SET_VECTORSCALE-VV_PARAM]=0;
 	}
 }
+if(code==VV_SET_CLIPRANGE)
+{
+	std::stringstream sstmp(sValue);
+	sstmp>>env->cliprange[0];
+	sstmp>>env->cliprange[1];
+}
+
 //////////////////// SPLOTCH Section ///////////////
 
 
@@ -834,7 +841,8 @@ if(code==VI_SET_FFORMAT)
   if(sValue!="ascii" && sValue!="csv" && sValue!="binary" 
 	  && sValue!="fly" && sValue!="fitstable"  && sValue!="gadget"
 	  && sValue!="hdf5" && sValue!="rawpoints" && sValue!="rawgrids"
-	  && sValue!="xml" && sValue!="votable")
+	  && sValue!="xml" && sValue!="votable" && sValue!="muportal"
+	  && sValue !="ramses")
   {
     std::cerr<<"Invalid value VI_SET_FFORMAT "<<sValue<<std::endl;
     env->setatt[code]=0;
@@ -1305,6 +1313,17 @@ if(code==VF_SET_MRPOS)
   strcpy(env->MRpos,sValue.c_str());
 if(code==VF_SET_MRBACKGROUND)
   strcpy(env->MRbackground,sValue.c_str());
+if(code==VF_SET_DIMVOX)
+  strcpy(env->dimvox,sValue.c_str());
+if(code==VF_SET_TRACKPLANEDIST)
+  strcpy(env->trackplanedist,sValue.c_str());
+if(code==VF_SET_INNERDIST)
+  strcpy(env->innerdist,sValue.c_str());
+if(code==VF_SET_OUTPOINTS)
+  strcpy(env->outpoints,sValue.c_str());
+if(code==VF_SET_OUTVOL)
+  strcpy(env->outvol,sValue.c_str());
+
 
 return noError;
 

@@ -41,7 +41,6 @@
 #include "announce.h"
 #include "openmp_support.h"
 #include "mpi_support.h"
-#include "sse_utils.h"
 
 using namespace std;
 
@@ -69,16 +68,18 @@ void MPI_status()
   if (tasks>1)
     cout << "MPI active with " << tasks << " tasks." << endl;
   else
-    cout << "MPI active, but running with 1 task only. " << endl;
+    cout << "MPI active, but running with 1 task only." << endl;
 #endif
   }
 
-void SSE_status()
+void vec_status()
   {
   cout << "Vector math: ";
-#if(defined(PLANCK_HAVE_SSE)&&defined(PLANCK_HAVE_SSE2))
-  cout << "SSE, SSE2" << endl;
-#elif(defined(PLANCK_HAVE_SSE))
+#if(defined(__AVX__))
+  cout << "AVX" << endl;
+#elif(defined(__SSE2__))
+  cout << "SSE2" << endl;
+#elif(defined(__SSE__))
   cout << "SSE" << endl;
 #else
   cout << "not supported by this binary" << endl;
@@ -96,17 +97,32 @@ void announce (const string &name)
   cout << "+-";
   for (tsize m=0; m<name.length(); ++m) cout << "-";
   cout << "-+" << endl << endl;
-  SSE_status();
+  vec_status();
   openmp_status();
   MPI_status();
   cout << endl;
   }
 
+void module_startup (const string &name, bool argc_valid, const string &usage,
+  bool verbose)
+  {
+  if (verbose) announce (name);
+  if (argc_valid) return;
+  if (verbose) cerr << usage << endl;
+  planck_fail_quietly ("Incorrect usage");
+  }
+
 void module_startup (const string &name, int argc, const char **,
   int argc_expected, const string &argv_expected, bool verbose)
   {
-  if (verbose) announce (name);
-  if (argc==argc_expected) return;
-  if (verbose) cerr << "Usage: " << name << " " << argv_expected << endl;
-  planck_fail_quietly ("Incorrect usage");
+  module_startup (name,argc==argc_expected,
+    string("Usage: ")+name+" "+argv_expected, verbose);
+  }
+
+void module_startup (const std::string &name, int argc, const char ** /*argv*/,
+  bool verbose)
+  {
+  module_startup (name,argc>=2,
+    string("Usage:\n  ")+name+" <parameter file / init object>\nor:\n  "
+                        +name+" par1=val1 par2=val2 ...", verbose);
   }
