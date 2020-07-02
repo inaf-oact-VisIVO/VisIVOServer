@@ -288,21 +288,21 @@ else(VSAPILIB)
 
 
 ADD_EXECUTABLE(VisIVOImporter ${GUI_EXECUTABLE} ${SRCS_VisIVOImporter})
-#INSTALL_TARGETS(/bin VisIVOImporter)
+INSTALL_TARGETS(/bin VisIVOImporter)
 
-#ADD_EXECUTABLE(VisIVOFilters ${GUI_EXECUTABLE} ${SRCS_VisIVOFilters})
-#INSTALL_TARGETS(/bin VisIVOFilters)
+ADD_EXECUTABLE(VisIVOFilters ${GUI_EXECUTABLE} ${SRCS_VisIVOFilters})
+INSTALL_TARGETS(/bin VisIVOFilters)
 
 include_directories(/Developer/GPU\ Computing/CUDALibraries/common/inc/ ) 
 if(SPLCUDA)
 CUDA_ADD_EXECUTABLE(VisIVOViewer ${GUI_EXECUTABLE} ${SRCS_VisIVOViewer})
 else(SPLCUDA)
-#ADD_EXECUTABLE(VisIVOViewer ${GUI_EXECUTABLE} ${SRCS_VisIVOViewer})
+ADD_EXECUTABLE(VisIVOViewer ${GUI_EXECUTABLE} ${SRCS_VisIVOViewer})
 endif(SPLCUDA)
-#INSTALL_TARGETS(/bin VisIVOViewer)
+INSTALL_TARGETS(/bin VisIVOViewer)
 
-#ADD_EXECUTABLE(VisIVOUtils ${GUI_EXECUTABLE} ${SRCS_VisIVOUtils})
-#INSTALL_TARGETS(/bin VisIVOUtils)
+ADD_EXECUTABLE(VisIVOUtils ${GUI_EXECUTABLE} ${SRCS_VisIVOUtils})
+INSTALL_TARGETS(/bin VisIVOUtils)
 
 endif(VSAPILIB)
 #-----------------------------------------------------
